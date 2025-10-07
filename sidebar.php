@@ -184,8 +184,8 @@ display: inline-block;
 <div class="mobile-overlay" id="mobileOverlay"></div>
 <div class="sidebar" id="sidebar">
     <div class="logo">
-        <img src="image/mkce.png" alt="College Logo">
-        <img class='s_logo' src="image/mkce_s.png" alt="College Logo">
+        <img src="mkce.png" alt="College Logo">
+        <img class='s_logo' src="mkce_s.png" alt="College Logo">
     </div>
 
    <div class="menu">
