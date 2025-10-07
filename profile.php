@@ -1,10 +1,25 @@
 <?php
+$host = 'localhost';
+$dbname = 'hostel';
+$username = 'root'; // Default XAMPP username
+$password = ''; // Default XAMPP password
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
 session_start();
+
 try {
     require_once 'dbconnect.php';
 } catch (Exception $e) {
     die("Database configuration error: " . $e->getMessage());
 }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     try {
         $user_id = $_SESSION['user_id'];
@@ -91,12 +106,12 @@ try {
     // Get parent information
     if (!isset($demo_mode)) {
         $stmt = $pdo->prepare("
-        SELECT p.*, sp.relation_enum, sp.is_primary_contact
-        FROM student_parents sp
-        JOIN parents p ON sp.parent_id = p.parent_id
-        WHERE sp.student_roll_number = ?
-        ORDER BY sp.is_primary_contact DESC, sp.relation_enum
-    ");
+            SELECT p.*, sp.relation_enum, sp.is_primary_contact
+            FROM student_parents sp
+            JOIN parents p ON sp.parent_id = p.parent_id
+            WHERE sp.student_roll_number = ?
+            ORDER BY sp.is_primary_contact DESC, sp.relation_enum
+        ");
         $stmt->execute([$student_data['roll_number']]);
         $parent_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -111,6 +126,7 @@ try {
         }
         unset($parent);
     }
+
     // Get attendance
     if (!isset($demo_mode)) {
         $stmt = $pdo->prepare("
@@ -153,12 +169,11 @@ try {
         $outing_stats = $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-
-
 } catch (Exception $e) {
     $error = "Error loading profile data: " . $e->getMessage();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
