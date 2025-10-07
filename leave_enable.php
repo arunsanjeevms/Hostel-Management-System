@@ -414,7 +414,8 @@
                                     
                                     <div class="text-center">
                                         <?php if ($activeLeave): ?>
-                                            <!-- Show current active leave info and disable button -->
+
+                                            <!-- Show current active general leave info and disable button -->
                                             <div class="alert alert-success mb-3" role="alert">
                                                 <h5 class="alert-heading"><i class="fas fa-calendar-check me-2"></i>Active Leave Period</h5>
                                                 <p class="mb-2"><strong>Leave Name:</strong> <?php echo htmlspecialchars($activeLeave['leave_name']); ?></p>
@@ -431,10 +432,11 @@
                                                 <i class="fas fa-times-circle me-1"></i>Disable Leave
                                             </button>
                                         <?php else: ?>
-                                            <!-- Show enable button when no active leave -->
+
+                                            <!--General Leave activated ah illana-->
                                             <div class="alert alert-info mb-3" role="alert">
                                                 <i class="fas fa-info-circle me-2"></i>
-                                                No active leave period. Click the button below to enable general leave for students.
+                                                No active General leave period. Click the button below to enable general leave for students.
                                             </div>
                                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                                    id="enableLeaveBtn" data-bs-target="#leaveModal">
