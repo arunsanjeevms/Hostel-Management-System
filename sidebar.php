@@ -206,7 +206,7 @@ display: inline-block;
             <span>Leave Approval </span>
         </a>
 
-        <a href="#" class="menu-item">
+        <a href="leave_enable.php" class="menu-item">
         <i class="fa-solid fa-sliders" style="color: #9C27B0;"></i>
             <span>Leave Enable / Disable</span>
         </a>

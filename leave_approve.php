@@ -349,13 +349,13 @@
 
 
 
-                    <!-- Rejected Tab Content -->
+                   <!-- Processed Tab Content -->
                     <div class="tab-pane fade" id="processed-content" role="tabpanel"
                         aria-labelledby="processed-main-tab">
                         <div class="card shadow mb-4">
                             <div class="card-header py-3">
                                 <center>
-                                    <h6 class="m-0 font-weight-bold">Rejected Leave Applications</h6>
+                                    <h6 class="m-0 font-weight-bold">Processed Leave Applications</h6>
                                 </center>
                             </div>
                             <div class="card-body">
@@ -363,7 +363,7 @@
                                     <!-- Processed Table Content from table/approvedTable.php -->
                                 </div>
                             </div>
-                        </div>
+                        </div> 
 
                     </div>
                 </div>
