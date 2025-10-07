@@ -14,11 +14,6 @@ try {
 
 session_start();
 
-try {
-    require_once 'dbconnect.php';
-} catch (Exception $e) {
-    die("Database configuration error: " . $e->getMessage());
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     try {
