@@ -189,7 +189,7 @@ display: inline-block;
     </div>
 
    <div class="menu">
-    <a href="index.php" class="menu-item">
+    <a href="leave_apply.php" class="menu-item">
         <i class="fas fa-calendar-days"></i>
         <span>Leave Apply</span>
     </a>

@@ -1,112 +1,3 @@
-<?php
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-$db_host = 'localhost';
-$db_user = 'root';
-$db_pass = '';
-$db_name = 'hostel';
-
-try {
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-    $conn->set_charset('utf8mb4');
-} catch (mysqli_sql_exception $e) {
-    die("Database connection failed: " . htmlspecialchars($e->getMessage()));
-}
-
-$errors = [];
-
-// ========== APPLY LEAVE ==========
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_leave'])) {
-    $leave_type = trim($_POST['leave_type'] ?? '');
-    $from_date = trim($_POST['from_date'] ?? '');
-    $from_time = trim($_POST['from_time'] ?? '');
-    $to_date = trim($_POST['to_date'] ?? '');
-    $to_time = trim($_POST['to_time'] ?? '');
-    $reason = trim($_POST['reason'] ?? '');
-
-    $start_datetime = "$from_date $from_time";
-    $end_datetime = "$to_date $to_time";
-
-    if ($leave_type === '')
-        $errors[] = 'Leave Type is required.';
-    if ($from_date === '' || $to_date === '')
-        $errors[] = 'From and To date are required.';
-    if (strtotime($start_datetime) > strtotime($end_datetime))
-        $errors[] = 'Start date cannot be after end date.';
-
-    $proof_path = null;
-    if (!empty($_FILES['proof']['name'])) {
-        $targetDir = "uploads/";
-        if (!is_dir($targetDir))
-            mkdir($targetDir, 0777, true);
-        $filename = time() . "_" . basename($_FILES["proof"]["name"]);
-        $targetFile = $targetDir . $filename;
-        if (move_uploaded_file($_FILES["proof"]["tmp_name"], $targetFile)) {
-            $proof_path = $targetFile;
-        } else {
-            $errors[] = "Failed to upload proof file.";
-        }
-    }
-
-    if (empty($errors)) {
-        $stmt = $conn->prepare("INSERT INTO leave_applications (leave_type, from_date, to_date, reason, proof_path, final_status) VALUES (?, ?, ?, ?, ?, 'Pending')");
-        $stmt->bind_param("sssss", $leave_type, $start_datetime, $end_datetime, $reason, $proof_path);
-        $stmt->execute();
-        $stmt->close();
-
-        header("Location: " . $_SERVER['PHP_SELF'] . "?success=1");
-        exit();
-    }
-}
-
-// ========== EDIT LEAVE ==========
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_leave'])) {
-    $edit_leave_id = $_POST['edit_leave_id'] ?? '';
-    $edit_from_date = $_POST['edit_from_date'] ?? '';
-    $edit_from_time = $_POST['edit_from_time'] ?? '';
-    $edit_to_date = $_POST['edit_to_date'] ?? '';
-    $edit_to_time = $_POST['edit_to_time'] ?? '';
-    $edit_reason = $_POST['edit_reason'] ?? '';
-
-    $start_datetime = "$edit_from_date $edit_from_time";
-    $end_datetime = "$edit_to_date $edit_to_time";
-
-    if (strtotime($start_datetime) > strtotime($end_datetime))
-        $errors[] = 'Start date cannot be after end date.';
-
-    if (empty($errors)) {
-        $stmt = $conn->prepare("UPDATE leave_applications SET from_date=?, to_date=?, reason=? WHERE leave_id=?");
-        $stmt->bind_param("sssi", $start_datetime, $end_datetime, $edit_reason, $edit_leave_id);
-        $stmt->execute();
-        $stmt->close();
-
-        header("Location: " . $_SERVER['PHP_SELF'] . "?updated=1");
-        exit();
-    }
-}
-
-// ========== CANCEL LEAVE ==========
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_leave'])) {
-    $cancel_leave_id = $_POST['leave_id'] ?? '';
-    if ($cancel_leave_id) {
-        $stmt = $conn->prepare("UPDATE leave_applications SET final_status='Cancelled' WHERE leave_id=?");
-        $stmt->bind_param("i", $cancel_leave_id);
-        $stmt->execute();
-        $stmt->close();
-
-        header("Location: " . $_SERVER['PHP_SELF'] . "?deleted=1");
-        exit();
-    }
-}
-
-// ========== FETCH ALL LEAVES ==========
-$stmt = $conn->prepare("SELECT * FROM leave_applications ORDER BY applied_at DESC");
-$stmt->execute();
-$result = $stmt->get_result();
-$rows = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
-?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -378,276 +269,118 @@ $stmt->close();
         }
     </style>
 </head>
-<div class="container-fluid">
-        <div class="custom-tabs"></div>
+
 <body>
     
         <?php include 'sidebar.php'; ?>
-        <div class="content">
-
-            <?php include 'topbar.php'; ?>
-            <div class="container py-5">
-                <h2 class="mb-4 text-center">Leave Applications</h2>
-
-                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#leaveModal">Apply
-                    Leave</button>
-
-                <div class="table-responsive">
-                    <table id="leaveTable" class="table table-bordered table-striped">
-                        <thead class="table-success text-center">
-                            <tr>
-                                <th>ID</th>
-                                <th>Type</th>
-                                <th>From</th>
-                                <th>To</th>
-                                <th>Reason</th>
-                                <th>Status</th>
-                                <th>Applied At</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (empty($rows)): ?>
-                                <tr>
-                                    <td colspan="8" class="text-center">No records found</td>
-                                </tr>
-                            <?php else:
-                                foreach ($rows as $r): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($r['leave_id']); ?></td>
-                                        <td><?= htmlspecialchars($r['leave_type']); ?></td>
-                                        <td><?= date('M d, Y h:i A', strtotime($r['from_date'])); ?></td>
-                                        <td><?= date('M d, Y h:i A', strtotime($r['to_date'])); ?></td>
-                                        <td><?= htmlspecialchars($r['reason']); ?></td>
-                                        <td>
-                                            <?php
-                                            $status = $r['final_status'];
-                                            $badge = match ($status) {
-                                                'Pending' => 'warning',
-                                                'Approved' => 'success',
-                                                'Rejected' => 'danger',
-                                                'Cancelled' => 'secondary',
-                                                default => 'info'
-                                            };
-                                            ?>
-                                            <span class="badge bg-<?= $badge ?>"><?= $status ?></span>
-                                        </td>
-                                        <td><?= date('M d, Y h:i A', strtotime($r['applied_at'])); ?></td>
-                                        <td>
-                                            <?php if ($r['final_status'] === 'Pending'): ?>
-                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                                                    data-bs-target="#editModal<?= $r['leave_id']; ?>">Edit</button>
-
-                                                <form method="post" class="d-inline cancel-form">
-                                                    <input type="hidden" name="leave_id" value="<?= $r['leave_id']; ?>">
-                                                    <input type="hidden" name="cancel_leave" value="1">
-                                                    <button type="button" class="btn btn-danger btn-sm cancel-btn">Cancel</button>
-                                                </form>
-
-                                                <!-- Edit Modal -->
-                                                <div class="modal fade" id="editModal<?= $r['leave_id']; ?>" tabindex="-1">
-                                                    <div class="modal-dialog modal-dialog-centered">
-                                                        <div class="modal-content">
-                                                            <form method="post">
-                                                                <input type="hidden" name="edit_leave_id"
-                                                                    value="<?= $r['leave_id']; ?>">
-                                                                <div class="modal-header bg-primary text-white">
-                                                                    <h5 class="modal-title">Edit Leave</h5>
-                                                                    <button type="button" class="btn-close btn-close-white"
-                                                                        data-bs-dismiss="modal"></button>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <div class="row mb-3">
-                                                                        <div class="col">
-                                                                            <label>From Date</label>
-                                                                            <input type="date" name="edit_from_date"
-                                                                                class="form-control"
-                                                                                value="<?= date('Y-m-d', strtotime($r['from_date'])); ?>"
-                                                                                required>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            <label>From Time</label>
-                                                                            <input type="time" name="edit_from_time"
-                                                                                class="form-control"
-                                                                                value="<?= date('H:i', strtotime($r['from_date'])); ?>"
-                                                                                required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row mb-3">
-                                                                        <div class="col">
-                                                                            <label>To Date</label>
-                                                                            <input type="date" name="edit_to_date"
-                                                                                class="form-control"
-                                                                                value="<?= date('Y-m-d', strtotime($r['to_date'])); ?>"
-                                                                                required>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            <label>To Time</label>
-                                                                            <input type="time" name="edit_to_time"
-                                                                                class="form-control"
-                                                                                value="<?= date('H:i', strtotime($r['to_date'])); ?>"
-                                                                                required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="mb-3">
-                                                                        <label>Reason</label>
-                                                                        <textarea name="edit_reason" class="form-control" rows="3"
-                                                                            required><?= htmlspecialchars($r['reason']); ?></textarea>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="submit" name="update_leave"
-                                                                        class="btn btn-primary">Update</button>
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                            <?php else: ?>
-                                                <span class="text-muted">-</span>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-           <!-- Apply Leave Modal -->
-<div class="modal fade" id="leaveModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <form method="post" enctype="multipart/form-data" id="applyLeaveForm">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Apply Leave</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label>Leave Type</label>
-                        <select name="leave_type" id="leaveType" class="form-select" required>
-                            <option value="">-- Select --</option>
-                            <option value="General">General</option>
-                            <option value="Leave">Leave</option>
-                            <option value="Emergency">Emergency</option>
-                            <option value="OD">OD</option>
-                        </select>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label>From Date</label>
-                            <input type="date" name="from_date" id="fromDate" class="form-control" required>
-                        </div>
-                        <div class="col">
-                            <label>From Time</label>
-                            <input type="time" name="from_time" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col">
-                            <label>To Date</label>
-                            <input type="date" name="to_date" id="toDate" class="form-control" required>
-                        </div>
-                        <div class="col">
-                            <label>To Time</label>
-                            <input type="time" name="to_time" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Reason</label>
-                        <textarea name="reason" class="form-control" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label>Proof File (optional)</label>
-                        <input type="file" name="proof" class="form-control">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" name="apply_leave" class="btn btn-success">Submit</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </form>
-        </div>
+        
+        <?php include 'topbar.php'; ?>
+        <?php include 'leave_apply.php'; ?>
+        <!-- Footer -->
+        <?php include 'footer.php'; ?>
     </div>
-</div>
+    <script>
+        const loaderContainer = document.getElementById('loaderContainer');
 
-<script>
-    function setMinDates(leaveTypeSelect, fromDateInput, toDateInput) {
-        const today = new Date();
-        const dd = String(today.getDate()).padStart(2, '0');
-        const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-        const yyyy = today.getFullYear();
-
-        let minDate = '';
-
-        if (leaveTypeSelect.value === "General" || leaveTypeSelect.value === "Leave") {
-            // Cannot select past or current date → start from tomorrow
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            minDate = tomorrow.toISOString().split('T')[0];
-        } else if (leaveTypeSelect.value === "Emergency" || leaveTypeSelect.value === "OD") {
-            // Cannot select past date → start from today
-            minDate = today.toISOString().split('T')[0];
-        } else {
-            minDate = today.toISOString().split('T')[0];
+        function showLoader() {
+            loaderContainer.classList.add('show');
         }
 
-        fromDateInput.min = minDate;
-        toDateInput.min = minDate;
-    }
+        function hideLoader() {
+            loaderContainer.classList.remove('show');
+        }
 
-    // Apply Leave Modal
-    const leaveType = document.getElementById('leaveType');
-    const fromDate = document.getElementById('fromDate');
-    const toDate = document.getElementById('toDate');
+        //    automatic loader
+        document.addEventListener('DOMContentLoaded', function() {
+            const loaderContainer = document.getElementById('loaderContainer');
+            const contentWrapper = document.getElementById('contentWrapper');
+            let loadingTimeout;
 
-    leaveType.addEventListener('change', () => {
-        setMinDates(leaveType, fromDate, toDate);
-    });
+            function hideLoader() {
+                loaderContainer.classList.add('hide');
+                contentWrapper.classList.add('show');
+            }
 
-    // Set initial value when modal opens
-    $('#leaveModal').on('shown.bs.modal', function () {
-        setMinDates(leaveType, fromDate, toDate);
-    });
-</script>
+            function showError() {
+                console.error('Page load took too long or encountered an error');
+                // You can add custom error handling here
+            }
 
+            // Set a maximum loading time (10 seconds)
+            loadingTimeout = setTimeout(showError, 10000);
 
-            <script>
-                $(document).ready(function () {
-                    $('#leaveTable').DataTable({ responsive: true });
+            // Hide loader when everything is loaded
+            window.onload = function() {
+                clearTimeout(loadingTimeout);
 
-                    $('.cancel-btn').on('click', function () {
-                        const form = $(this).closest('form');
-                        Swal.fire({
-                            title: 'Are you sure?',
-                            text: 'Do you want to cancel this leave?',
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#3085d6',
-                            confirmButtonText: 'Yes, cancel it!'
-                        }).then((result) => {
-                            if (result.isConfirmed) form.submit();
-                        });
-                    });
+                // Add a small delay to ensure smooth transition
+                setTimeout(hideLoader, 500);
+            };
 
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if (urlParams.has('success')) {
-                        Swal.fire({ icon: 'success', title: 'Success', text: 'Leave applied successfully!', timer: 2000, showConfirmButton: false });
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    } else if (urlParams.has('updated')) {
-                        Swal.fire({ icon: 'info', title: 'Updated', text: 'Leave updated successfully!', timer: 2000, showConfirmButton: false });
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    } else if (urlParams.has('deleted')) {
-                        Swal.fire({ icon: 'error', title: 'Cancelled', text: 'Leave cancelled successfully!', timer: 2000, showConfirmButton: false });
-                        window.history.replaceState({}, document.title, window.location.pathname);
-                    }
-                });
-            </script>
+            // Error handling
+            window.onerror = function(msg, url, lineNo, columnNo, error) {
+                clearTimeout(loadingTimeout);
+                showError();
+                return false;
+            };
+        });
+
+        // Toggle Sidebar
+        const hamburger = document.getElementById('hamburger');
+        const sidebar = document.getElementById('sidebar');
+        const body = document.body;
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        function toggleSidebar() {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.toggle('mobile-show');
+                mobileOverlay.classList.toggle('show');
+                body.classList.toggle('sidebar-open');
+            } else {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+        hamburger.addEventListener('click', toggleSidebar);
+        mobileOverlay.addEventListener('click', toggleSidebar);
+        // Toggle User Menu
+        const userMenu = document.getElementById('userMenu');
+        const dropdownMenu = userMenu.querySelector('.dropdown-menu');
+
+        userMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            dropdownMenu.classList.remove('show');
+        });
+
+        // Toggle Submenu
+        const menuItems = document.querySelectorAll('.has-submenu');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const submenu = item.nextElementSibling;
+                item.classList.toggle('active');
+                submenu.classList.toggle('active');
+            });
+        });
+
+        // Handle responsive behavior
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('collapsed');
+                sidebar.classList.remove('mobile-show');
+                mobileOverlay.classList.remove('show');
+                body.classList.remove('sidebar-open');
+            } else {
+                sidebar.style.transform = '';
+                mobileOverlay.classList.remove('show');
+                body.classList.remove('sidebar-open');
+            }
+        });
+    </script>
+
 </body>
 
 </html>
