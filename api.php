@@ -552,7 +552,7 @@ function createSpecialToken($conn) {
     $from_time = $_POST['from_time'] ?? '';
     $to_date = $_POST['to_date'] ?? '';
     $to_time = $_POST['to_time'] ?? '';
-    $token_date = $POST['token_date'] ?? '';
+    $token_date = $_POST['token_date'] ?? '';
     $menu_items = $_POST['menu_items'] ?? '';
     $fee = floatval($_POST['fee'] ?? 0.00);
 

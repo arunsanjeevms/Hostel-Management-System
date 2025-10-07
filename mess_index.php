@@ -287,6 +287,7 @@
                                         <th>From Time</th>
                                         <th>To Date</th>
                                         <th>To Time</th>
+                                        <th>Token Date</th>
                                         <th>Items</th>
                                         <th>Fee</th>
                                     </tr>
@@ -498,6 +499,10 @@
                     <div class="mb-3">
                         <label for="tokentoTime" class="form-label">To Time</label>
                         <input type="time" class="form-control" id="tokentoTime" name="time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tokenDate" class="form-label">Token Date</label>
+                        <input type="date" class="form-control" id="tokenDate" name="date" required>
                     </div>
                     <!-- FIXED: Dedicated Menu Items field for Special Token -->
                     <div class="mb-3">
@@ -883,6 +888,7 @@
                     <td>${token.from_time || 'N/A'}</td>
                     <td>${token.to_date || 'N/A'}</td>
                     <td>${token.to_time || 'N/A'}</td>
+                    <td>${token.token_date || 'N/A'}</td>
                     <td>${token.menu_items || 'N/A'}</td>
                     <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td>
                 </tr>
@@ -902,6 +908,7 @@
         const fromTime = $('#tokenfromTime').val();
         const toDate = $('#tokentoDate').val();
         const toTime = $('#tokentoTime').val();
+        const tokensDate = $('#tokenDate').val();
         const menuItems = $('#specialMenuItems').val();  // FIXED: Use dedicated field
         const fee = $('#specialtokenFee').val();
         
@@ -910,6 +917,7 @@
         console.log("- From Time:", fromTime);
         console.log("- To Date:", toDate);
         console.log("- To Time:", toTime);
+        console.log("- Token Date:",tokensDate)
         console.log("- Menu Items:", menuItems);
         console.log("- Fee:", fee);
         
@@ -919,6 +927,7 @@
             from_time: fromTime,
             to_date: toDate,
             to_time: toTime,
+            token_date: tokensDate,
             menu_items: menuItems,
             fee: fee
         };
@@ -929,6 +938,7 @@
         if (!data.from_time) missing.push('From Time');
         if (!data.to_date) missing.push('To Date');
         if (!data.to_time) missing.push('To Time');
+        if (!data.token_date) missing.push('Token Date');
         if (!data.menu_items) missing.push('Menu Items');
         if (!data.fee) missing.push('Fee');
         
@@ -955,6 +965,7 @@
                     from_time: data.from_time,
                     to_date: data.to_date,
                     to_time: data.to_time,
+                    token_date: data.token_date,
                     menu_items: data.menu_items,
                     fee: data.fee
                 };
@@ -1114,6 +1125,7 @@
         $('#tokenfromTime').val('');
         $('#tokentoDate').val('');
         $('#tokentoTime').val('');
+        $ ('#tokenDate').val('');
         $('#specialMenuItems').val('');  // FIXED: Clear correct field
         $('#specialtokenFee').val('');
     }
