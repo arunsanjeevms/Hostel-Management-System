@@ -417,7 +417,7 @@
 
                                             <!-- Show current active general leave info and disable button -->
                                             <div class="alert alert-success mb-3" role="alert">
-                                                <h5 class="alert-heading"><i class="fas fa-calendar-check me-2"></i>Active Leave Period</h5>
+                                                <h5 class="alert-heading"><i class="fas fa-calendar-check me-2"></i>Active General Leave</h5>
                                                 <p class="mb-2"><strong>Leave Name:</strong> <?php echo htmlspecialchars($activeLeave['leave_name']); ?></p>
                                                 <p class="mb-2"><strong>From:</strong> <?php echo date('d-m-Y h:i A', strtotime($activeLeave['from_date'])); ?></p>
                                                 <p class="mb-2"><strong>To:</strong> <?php echo date('d-m-Y h:i A', strtotime($activeLeave['to_date'])); ?></p>
@@ -436,7 +436,7 @@
                                             <!--General Leave activated ah illana-->
                                             <div class="alert alert-info mb-3" role="alert">
                                                 <i class="fas fa-info-circle me-2"></i>
-                                                No active General leave period. Click the button below to enable general leave for students.
+                                                No active General General Leave. Click the button below to enable general leave for students.
                                             </div>
                                             <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                                    id="enableLeaveBtn" data-bs-target="#leaveModal">
@@ -539,7 +539,7 @@
                             <i class="fas fa-times me-1"></i> Cancel
                         </button>
                         <button type="submit" class="btn btn-success">
-                            <i class="fas fa-check me-1"></i> Enable Leave Period
+                            <i class="fas fa-check me-1"></i> Enable General Leave
                         </button>
                     </div>
                 </form>
@@ -671,7 +671,7 @@
         const leaveId = $(this).data('leave-id');
         
         Swal.fire({
-            title: 'Disable Leave Period?',
+            title: 'Disable General Leave?',
             text: 'This will prevent students from applying for leave. Are you sure?',
             icon: 'warning',
             showCancelButton: true,
@@ -693,7 +693,7 @@
                         if (data.success) {
                             Swal.fire({
                                 title: 'Success!',
-                                text: 'Leave period has been disabled successfully.',
+                                text: 'General Leave has been disabled successfully.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then(() => {
@@ -702,7 +702,7 @@
                         } else {
                             Swal.fire({
                                 title: 'Error!',
-                                text: data.message || 'Failed to disable leave period.',
+                                text: data.message || 'Failed to disable General Leave.',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
@@ -791,7 +791,7 @@
                         if (data.success) {
                             Swal.fire({
                                 title: 'Success!',
-                                text: 'Leave period has been enabled successfully.',
+                                text: 'General Leave has been enabled successfully.',
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then(() => {
@@ -801,7 +801,7 @@
                         } else {
                             Swal.fire({
                                 title: 'Error!',
-                                text: data.message || 'Failed to enable leave period.',
+                                text: data.message || 'Failed to enable General Leave.',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
