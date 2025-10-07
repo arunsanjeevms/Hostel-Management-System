@@ -418,8 +418,8 @@
                                             <div class="alert alert-success mb-3" role="alert">
                                                 <h5 class="alert-heading"><i class="fas fa-calendar-check me-2"></i>Active Leave Period</h5>
                                                 <p class="mb-2"><strong>Leave Name:</strong> <?php echo htmlspecialchars($activeLeave['leave_name']); ?></p>
-                                                <p class="mb-2"><strong>From:</strong> <?php echo date('d-m-Y h:i A', strtotime($activeLeave['from_datetime'])); ?></p>
-                                                <p class="mb-2"><strong>To:</strong> <?php echo date('d-m-Y h:i A', strtotime($activeLeave['to_datetime'])); ?></p>
+                                                <p class="mb-2"><strong>From:</strong> <?php echo date('d-m-Y h:i A', strtotime($activeLeave['from_date'])); ?></p>
+                                                <p class="mb-2"><strong>To:</strong> <?php echo date('d-m-Y h:i A', strtotime($activeLeave['to_date'])); ?></p>
                                                 <?php if (!empty($activeLeave['instructions'])): ?>
                                                     <p class="mb-0"><strong>Instructions:</strong> <?php echo htmlspecialchars($activeLeave['instructions']); ?></p>
                                                 <?php endif; ?>
@@ -500,7 +500,7 @@
                                 <label for="fromDateTime" class="form-label">
                                     From Date & Time 
                                 </label>
-                                <input type="datetime-local" class="form-control" id="fromDateTime" name="from_datetime"
+                                <input type="datetime-local" class="form-control" id="fromDateTime" name="from_date"
                                     required>
 
                             </div>
@@ -509,7 +509,7 @@
                                 <label for="toDateTime" class="form-label">
                                     To Date & Time 
                                 </label>
-                                <input type="datetime-local" class="form-control" id="toDateTime" name="to_datetime"
+                                <input type="datetime-local" class="form-control" id="toDateTime" name="to_date"
                                     required>
 
                             </div>
@@ -779,8 +779,8 @@
                     type: 'POST',
                     data: {
                         leave_name: leaveName,
-                        from_datetime: fromDateTime,
-                        to_datetime: toDateTime,
+                        from_date: fromDateTime,
+                        to_date: toDateTime,
                         instructions: instructions,
                         action: 'enable'
                     },
