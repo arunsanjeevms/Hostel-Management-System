@@ -275,7 +275,6 @@
         
         <?php include 'sidebar.php'; ?>
         <?php include 'topbar.php'; ?>
-        <?php include 'leave_apply.php'; ?>
         <!-- Footer -->
         <?php include 'footer.php'; ?>
     </div>
