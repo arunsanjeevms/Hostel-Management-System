@@ -257,7 +257,7 @@
 
                         <div class="table-responsive">
                             <table class="table table-striped" id="messMenuTable">
-                                <thead id="thead">
+                                <thead >
                                     <tr>
                                         <th>Date</th>
                                         <th>Meal Type</th>
@@ -281,7 +281,7 @@
                         </button>
                         <div class="table-responsive">
                             <table class="table table-striped" id="specialtokenEnableTable">
-                                <thead id="thead">
+                                <thead >
                                     <tr>
                                         <th>From Date</th>
                                         <th>From Time</th>
@@ -305,7 +305,7 @@
                     <div class="tab-pane fade" id="tokens" role="tabpanel">
                         <div class="table-responsive">
                             <table class="table table-striped" id="messTokensTable">
-                                <thead id="thead">
+                                <thead>
                                     <tr>
                                         <th>Student Name</th>
                                         <th>Roll Number</th>
