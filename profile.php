@@ -80,7 +80,7 @@ try {
     // Get student basic info
     $stmt = $pdo->prepare("
         SELECT s.*, r.room_number, r.room_type, r.capacity, r.occupied, 
-               h.hostel_name, h.hostel_code, h.address as hostel_address
+               h.hostel_name, h.hostel_code, h.address,r.created_at
         FROM students s 
         LEFT JOIN rooms r ON s.room_id = r.room_id 
         LEFT JOIN hostels h ON r.hostel_id = h.hostel_id 
@@ -770,18 +770,39 @@ try {
                 display: flex !important;
             }
 
-            .profile-card,
-            .details-card {
-                box-shadow: none !important;
-                border: 2px solid #000 !important;
-                background: white !important;
+            .profile-department,
+            .primary-badge-small,
+            .primary-badge {
+                color: #000;
             }
 
-            .header {
+            .parent-card {
                 background: white !important;
-                box-shadow: none !important;
-                border: 2px solid #000 !important;
+                color: black !important;
+                border: 1px solid #000 !important;
             }
+
+            .parent-card .info-label {
+                color: black !important;
+            }
+
+            .parent-card .info-value {
+                color: black !important;
+            }
+        }
+
+        .profile-card,
+        .details-card {
+            box-shadow: none !important;
+            border: 2px solid #000 !important;
+            background: white !important;
+        }
+
+        .header {
+            background: white !important;
+            box-shadow: none !important;
+            border: 2px solid #000 !important;
+        }
         }
     </style>
 </head>
@@ -819,7 +840,8 @@ try {
                         <?php endif; ?>
                     </div>
                     <div class="profile-name"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></div>
-                    <div class="profile-roll"><?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?></div>
+                    <div class="profile-roll"><?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?>
+                    </div>
                     <div class="profile-department">
                         <?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?>
                     </div>
@@ -902,7 +924,7 @@ try {
                             <i class="fas fa-edit"></i> Edit
                         </button>
                     </div>
-
+<br>
                     <div class="info-grid">
                         <!-- Personal Info -->
                         <div class="info-section">
@@ -912,7 +934,8 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Full Name:</div>
                                 <div class="info-value">
-                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></span>
+                                    <span
+                                        class="view-mode"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></span>
                                     <input type="text" name="name"
                                         value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>"
                                         class="edit-mode"
@@ -920,9 +943,9 @@ try {
                                 </div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">Roll Number:</div>
+                                <div class="info-label">Date of Birth</div>
                                 <div class="info-value">
-                                    <?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?>
+                                    <?php echo htmlspecialchars($student_data['DOB'] ?? 'N/A'); ?>
                                 </div>
                             </div>
                             <div class="info-item">
@@ -934,7 +957,8 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Email:</div>
                                 <div class="info-value">
-                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['email'] ?? 'N/A'); ?></span>
+                                    <span
+                                        class="view-mode"><?php echo htmlspecialchars($student_data['email'] ?? 'N/A'); ?></span>
                                     <input type="email" name="email"
                                         value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>"
                                         class="edit-mode"
@@ -944,7 +968,8 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Phone:</div>
                                 <div class="info-value">
-                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['student_phone'] ?? 'N/A'); ?></span>
+                                    <span
+                                        class="view-mode"><?php echo htmlspecialchars($student_data['student_phone'] ?? 'N/A'); ?></span>
                                     <input type="text" name="student_phone"
                                         value="<?php echo htmlspecialchars($student_data['student_phone'] ?? ''); ?>"
                                         class="edit-mode"
@@ -959,9 +984,16 @@ try {
                                 <i class="fas fa-graduation-cap"></i> Academic Details
                             </div>
                             <div class="info-item">
+                                <div class="info-label">Roll Number:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
                                 <div class="info-label">Department:</div>
                                 <div class="info-value">
-                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?></span>
+                                    <span
+                                        class="view-mode"><?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?></span>
                                     <input type="text" name="department"
                                         value="<?php echo htmlspecialchars($student_data['department'] ?? ''); ?>"
                                         class="edit-mode"
@@ -971,7 +1003,8 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Academic Year:</div>
                                 <div class="info-value">
-                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['academic_year'] ?? 'N/A'); ?></span>
+                                    <span
+                                        class="view-mode"><?php echo htmlspecialchars($student_data['academic_year'] ?? 'N/A'); ?></span>
                                     <input type="text" name="academic_year"
                                         value="<?php echo htmlspecialchars($student_data['academic_year'] ?? ''); ?>"
                                         class="edit-mode"
@@ -979,13 +1012,15 @@ try {
                                 </div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">Block:</div>
+                                <div class="info-label">Year of Study</div>
                                 <div class="info-value">
-                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['block'] ?? 'N/A'); ?></span>
-                                    <input type="text" name="block"
-                                        value="<?php echo htmlspecialchars($student_data['block'] ?? ''); ?>"
-                                        class="edit-mode"
-                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                    <?php echo htmlspecialchars($student_data['Year_of_study'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Batch</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['batch'] ?? 'N/A'); ?>
                                 </div>
                             </div>
                         </div>
@@ -1008,6 +1043,29 @@ try {
                                 </div>
                             </div>
                             <div class="info-item">
+                                <div class="info-label">Hostel Address:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['address'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Admission Date</div>
+                                <div class="info-value">
+                                    <?php
+                                    echo isset($student_data['created_at'])
+                                        ? date('Y-m-d', strtotime($student_data['created_at']))
+                                        : 'N/A';
+                                    ?>
+
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Block</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['block'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
                                 <div class="info-label">Room Number:</div>
                                 <div class="info-value">
                                     <?php echo htmlspecialchars($student_data['room_number'] ?? 'N/A'); ?>
@@ -1020,10 +1078,20 @@ try {
                                 </div>
                             </div>
                             <div class="info-item">
+                                <div class="info-label">Room Status: </div>
+                                <div class="info-value">
+                                    <?php
+                                    echo isset($student_data['occupied']) && $student_data['occupied'] == 1 ? 'Occupied' : 'Not Occupied';
+                                    ?>
+
+                                </div>
+                            </div>
+
+                            <div class="info-item">
                                 <div class="info-label">Room Capacity:</div>
                                 <div class="info-value">
                                     <?php echo htmlspecialchars($student_data['capacity'] ?? 'N/A'); ?>
-                                    (<?php echo htmlspecialchars($student_data['occupied'] ?? '0'); ?> occupied)
+
                                 </div>
                             </div>
                         </div>
@@ -1046,8 +1114,7 @@ try {
                                                     <?php endif; ?>
                                                 </span>
                                                 <div class="edit-mode" style="display: none;">
-                                                    <input type="text"
-                                                        name="parent_name[<?php echo $parent['parent_id']; ?>]"
+                                                    <input type="text" name="parent_name[<?php echo $parent['parent_id']; ?>]"
                                                         value="<?php echo htmlspecialchars($parent['name']); ?>"
                                                         style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px; font-size: 14px;">
                                                     <?php if ($parent['is_primary_contact']): ?>
@@ -1065,7 +1132,8 @@ try {
                                         <div class="info-item">
                                             <div class="info-label">Phone:</div>
                                             <div class="info-value">
-                                                <span class="view-mode"><?php echo htmlspecialchars($parent['phone'] ?? 'N/A'); ?></span>
+                                                <span
+                                                    class="view-mode"><?php echo htmlspecialchars($parent['phone'] ?? 'N/A'); ?></span>
                                                 <input type="text" name="parent_phone[<?php echo $parent['parent_id']; ?>]"
                                                     value="<?php echo htmlspecialchars($parent['phone'] ?? ''); ?>"
                                                     class="edit-mode"
@@ -1075,7 +1143,8 @@ try {
                                         <div class="info-item">
                                             <div class="info-label">Email:</div>
                                             <div class="info-value">
-                                                <span class="view-mode"><?php echo htmlspecialchars($parent['email'] ?? 'N/A'); ?></span>
+                                                <span
+                                                    class="view-mode"><?php echo htmlspecialchars($parent['email'] ?? 'N/A'); ?></span>
                                                 <input type="email" name="parent_email[<?php echo $parent['parent_id']; ?>]"
                                                     value="<?php echo htmlspecialchars($parent['email'] ?? ''); ?>"
                                                     class="edit-mode"
@@ -1086,7 +1155,8 @@ try {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <div class="info-item">
-                                    <div class="info-value" style="color: var(--text-light);">No parent/guardian information available</div>
+                                    <div class="info-value" style="color: var(--text-light);">No parent/guardian information
+                                        available</div>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -1214,4 +1284,5 @@ try {
         });
     </script>
 </body>
+
 </html>

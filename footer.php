@@ -5,7 +5,7 @@
             bottom: 0;
             left: var(--sidebar-width);
             right: 0;
-            height: var(--footer-height);
+            height: 45px;
             background: linear-gradient(45deg, #4e73df, #1cc88a);
             color: white;
             display: flex;
