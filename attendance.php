@@ -1,5 +1,5 @@
 <?php
-session_start(); 
+session_start(); // MUST be first
 
 $host = "localhost";
 $user = "root";
@@ -188,6 +188,11 @@ if ($conn->connect_error) {
             /* For vertical alignment */
         }
 
+
+
+
+
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .sidebar {
@@ -344,7 +349,7 @@ if ($conn->connect_error) {
 
 <body>
     <!-- Sidebar -->
-    <?php include 'sidebar.php'; ?>
+    <?php include 'index.php'; ?>
 
     <!-- Main Content -->
     <div class="content">
@@ -352,9 +357,6 @@ if ($conn->connect_error) {
         <div class="loader-container" id="loaderContainer">
             <div class="loader"></div>
         </div>
-
-        <!-- Topbar -->
-        <?php include 'topbar.php'; ?>
 
 
 
@@ -557,8 +559,6 @@ if ($conn->connect_error) {
         </div>
     </div>
 
-    <!-- Footer -->
-    <?php include 'footer.php'; ?>
     </div>
 </body>
 
