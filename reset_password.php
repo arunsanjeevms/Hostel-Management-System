@@ -1,28 +1,50 @@
 <?php
+date_default_timezone_set('Asia/Kolkata');
 include 'db_connect.php';
-if (!isset($_GET['token'])) { echo "No token"; exit; }
-$token = $_GET['token'];
-$stmt = $conn->prepare("SELECT email, expires_at FROM password_resets WHERE token = ? LIMIT 1");
-$stmt->bind_param("s", $token);
-$stmt->execute(); $res = $stmt->get_result();
-if ($res->num_rows !== 1) { echo "Invalid token"; exit; }
-$row = $res->fetch_assoc();
-if (strtotime($row['expires_at']) < time()) { echo "Token expired"; exit; }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $new = $_POST['new_password'];
-    $hash = password_hash($new, PASSWORD_DEFAULT);
-    $stmt2 = $conn->prepare("UPDATE faculty SET password = ? WHERE email = ?");
-    $stmt2->bind_param("ss", $hash, $row['email']);
-    $stmt2->execute();
-    // remove token
-    $stmt3 = $conn->prepare("DELETE FROM password_resets WHERE token = ?");
-    $stmt3->bind_param("s",$token); $stmt3->execute();
-    echo "<script>alert('Password updated'); window.location='faculty_login.php';</script>";
+if (isset($_GET['token'])) {
+    $token = trim(urldecode($_GET['token'])); // ⚡ Trim & decode
+
+    // 1️⃣ Check token & expiry in DB
+    $stmt = $conn->prepare("SELECT faculty_id FROM faculty WHERE reset_token = ? AND reset_expires > NOW()");
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        // 2️⃣ If form submitted, update password
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $new_password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+
+            $update = $conn->prepare("UPDATE faculty SET password=?, reset_token=NULL, reset_expires=NULL WHERE reset_token=?");
+            $update->bind_param("ss", $new_password, $token);
+            $update->execute();
+
+            echo "<script>alert('✅ Password reset successfully!'); window.location='faculty_login.php';</script>";
+            exit;
+        }
+    } else {
+        echo "<script>alert('⛔ Invalid or expired token!'); window.location='faculty_login.php';</script>";
+        exit;
+    }
+} else {
+    echo "<script>alert('⛔ No token provided!'); window.location='faculty_login.php';</script>";
     exit;
 }
 ?>
-<form method="post">
-  <input name="new_password" type="password" required placeholder="New password">
-  <button>Update password</button>
-</form>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reset Password</title>
+</head>
+<body>
+  <h2>Reset Your Password</h2>
+  <form method="post">
+    <label>New Password:</label>
+    <input type="password" name="password" required>
+    <button type="submit">Reset Password</button>
+  </form>
+</body>
+</html>
