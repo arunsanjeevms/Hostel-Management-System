@@ -494,8 +494,4 @@ $rows = $stmt->fetchAll();
         </script>
     </body>
 
-<<<<<<< HEAD
     </html>
-=======
-    </html>
->>>>>>> c67f5c22213cd193d5212587b4bab1c1173408eb
