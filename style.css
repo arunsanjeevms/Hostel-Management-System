@@ -68,17 +68,17 @@ body {
 
 /* Add Bus Tab Styling */
 #breakfast,#thead {
-background: linear-gradient(135deg, #5604a7, #b485e3);
+background: linear-gradient(135deg, #5604a7, #9f53ea);
     color: #fff;
 }
 
 #family-tab,#breakfast,#thead:not(.active) {
-background: linear-gradient(135deg, #5604a7, #b485e3);
+background: linear-gradient(135deg, #5604a7, #9f53ea);
     color: #fff;
 }
 
 #family-tab,#breakfast,#thead:hover:not(.active) {
-background: linear-gradient(135deg, #5604a7, #b485e3);
+background: linear-gradient(135deg, #5604a7, #9f53ea);
     color: #fff;
 }
 
