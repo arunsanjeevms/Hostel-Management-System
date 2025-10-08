@@ -18,7 +18,7 @@
     <tbody>
         <?php
          // Fetch only rows where status is not in pending
-         $sql = "SELECT * FROM absent WHERE status NOT IN ('Pending')";
+         $sql = "SELECT * FROM absent WHERE status NOT IN ('Pending', 'IVR Approved','IVR Rejected') ORDER BY sno DESC";
         $result = mysqli_query($conn, $sql);
         $sno=1;
         while($row=mysqli_fetch_assoc($result)){
@@ -48,46 +48,19 @@
                 echo "<td class='text-center align-middle text-muted'>No Proof Uploaded </td>";
             }
 
-        if($row['status'] == 'Pending') {
-            echo "<td class='text-center align-middle'>
-
-                <button class='btn btn-warning btn-sm edit_leave' 
-                    data-id='".$row['sno']."'
-                    data-type='".$row['type']."'
-                    data-date='".$row['date']."'
-                    data-reason='".$row['reason']."'>
-                    <i class='fa-solid fa-pencil'></i> Edit
-                </button>
-                
-                <button class='btn btn-danger btn-sm del_leave' data-id='".$row['sno']."' >
-                    <i class='fa-solid fa-trash'></i> Delete
-                </button>
-            </td>";
-            
-            echo "</tr>";
-        }
-        
-        else{
-
-            if($row['status'] == 'Approved') {
+            // Display status buttons for processed leaves
+            if($row['status'] == 'Approved for IVR') {
                 echo "<td class='text-center align-middle'>
                     <button class='btn btn-success btn-sm' disabled>".$row['status']."</button>
                 </td>";
             }
-            else{
+            else {
                 echo "<td class='text-center align-middle'>
-                <button type='button' style='background-color:#f1a460' class='btn btn btn-sm reasonView' data-reason='".$row['status']."'><i class='fa-solid fa-question'></i> Rejected</button>
-
-            </td>";
-
+                    <button type='button' style='background-color:#f1a460' class='btn btn btn-sm reasonView' data-reason='".$row['status']."'><i class='fa-solid fa-question'></i> Rejected</button>
+                </td>";
             }
 
-
-
-        echo "</tr>";
-
-
-        }   
+            echo "</tr>";   
     
     }
 

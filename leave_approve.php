@@ -319,6 +319,9 @@
                         </a>
                     </li>
 
+
+
+
                     <li class="nav-item" role="presentation">
                         <a class="nav-link" data-bs-toggle="tab" id="processed-main-tab" href="#processed-content"
                             role="tab" aria-selected="false">
@@ -326,7 +329,28 @@
                                     class="fas fa-circle-xmark tab-icon"></i> Processed</span>
                         </a>
                     </li>
+
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" data-bs-toggle="tab" id="ivr-main-tab" href="#ivr-content"
+                            role="tab" aria-selected="true">
+                            <span class="hidden-xs-down" style="font-size: 0.9em;">
+                                <i class="fas fa-phone-volume tab-icon"></i>
+                                IVR Pending </span>
+                        </a>
+                    </li>
+
+                    
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link" data-bs-toggle="tab" id="ivrprocessed-main-tab" href="#ivrprocessed-content"
+                            role="tab" aria-selected="true">
+                            <span class="hidden-xs-down" style="font-size: 0.9em;">
+                                <i class="fas fa-phone-volume tab-icon"></i>
+                                IVR Completed </span>
+                        </a>
+                    </li>
+
                 </ul>
+                
 
 
                 <div class="tab-content mt-3">

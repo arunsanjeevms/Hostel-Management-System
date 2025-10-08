@@ -301,7 +301,7 @@
                 </ol>
             </nav>
         </div>
-<div class="container-fluid">
+        <div class="container-fluid">
             <div class="custom-tabs">
                 <ul class="nav nav-tabs" role="tablist">
                     <!-- Center the main tabs -->
@@ -309,24 +309,26 @@
                         <a class="nav-link active" data-bs-toggle="tab" id="family-main-tab" href="#academics-content"
                             role="tab" aria-selected="true">
                             <span class="hidden-xs-down" style="font-size: 0.9em;"><i class="fa-solid fa-house"></i>
-                                Room details </span>      
+                                Room details </span>
                         </a>
-                    </li></ul><br>
-<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal" style="margin-left: 800px !important;">Add Room</button>
-  <br><br>
-  <table id="dataTable" class="table table-striped table-bordered">
-    <thead class="gradient-header" background: linear-gradient(135deg, #4e73df, #1cc88a);>
-      <tr>
-        <th>Room ID</th>
-        <th>Hostel ID</th>
-        <th>Room Number</th>
-        <th>Capacity</th>
-        <th>Occupied</th>
-        <th>Room Type</th>
-      </tr>
-    </thead>
-    <tbody>
-    <?php
+                    </li>
+                </ul><br>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRoomModal"
+                    style="margin-left: 800px !important;">Add Room</button>
+                <br><br>
+                <table id="dataTable" class="table table-striped table-bordered">
+                    <thead class="gradient-header" background: linear-gradient(135deg, #4e73df, #1cc88a);>
+                        <tr>
+                            <th>Room ID</th>
+                            <th>Hostel ID</th>
+                            <th>Room Number</th>
+                            <th>Capacity</th>
+                            <th>Occupied</th>
+                            <th>Room Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
     $res = mysqli_query($conn, "SELECT room_id, hostel_id, room_number, capacity, occupied, room_type FROM rooms ORDER BY room_id ASC");
     while ($r = mysqli_fetch_assoc($res)) {
         echo "<tr>
@@ -339,111 +341,127 @@
               </tr>";
     }
     ?>
-    </tbody>
-  </table>
-</div>
-<br><br>
-<!-- Add Room Modal -->
-<div class="modal fade" id="addRoomModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="addRoomForm" class="modal-content" autocomplete="off">
-      <div class="modal-header">
-        <h5 class="modal-title">Add New Room</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="hostel_id" class="form-label">Select Hostel</label>
-          <select id="hostel_id" name="hostel_id" class="form-select" required>
-            <option value="">-- Select --</option>
-            <option value="1">Vedha Boys Hostel</option>
-            <option value="2">ML Girls Hostel</option>
-            <option value="3">Other Hostel</option>
-          </select>
+                    </tbody>
+                </table>
+            </div>
+            <br><br>
+            <!-- Add Room Modal -->
+            <div class="modal fade" id="addRoomModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form id="addRoomForm" class="modal-content" autocomplete="off">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Add New Room</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="hostel_id" class="form-label">Select Hostel</label>
+                                <select id="hostel_id" name="hostel_id" class="form-select" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="1">Vedha Boys Hostel</option>
+                                    <option value="2">ML Girls Hostel</option>
+                                    <option value="3">Other Hostel</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="room_number" class="form-label">Room Number</label>
+                                <input id="room_number" name="room_number" type="text" class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="capacity" class="form-label">Capacity</label>
+                                <input id="capacity" name="capacity" type="number" min="1" value="3"
+                                    class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="occupied" class="form-label">Occupied</label>
+                                <input id="occupied" name="occupied" type="number" min="0" value="0"
+                                    class="form-control" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="room_type" class="form-label">Room Type</label>
+                                <select id="room_type" name="room_type" class="form-select" required>
+                                    <option value="Non-AC">Non-AC</option>
+                                    <option value="AC">AC</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button id="submitAddRoom" type="submit" class="btn btn-success">Add Room</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
         </div>
-        <div class="mb-3">
-          <label for="room_number" class="form-label">Room Number</label>
-          <input id="room_number" name="room_number" type="text" class="form-control" required />
-        </div>
-        <div class="mb-3">
-          <label for="capacity" class="form-label">Capacity</label>
-          <input id="capacity" name="capacity" type="number" min="1" value="3" class="form-control" required />
-        </div>
-        <div class="mb-3">
-  <label for="occupied" class="form-label">Occupied</label>
-  <input id="occupied" name="occupied" type="number" min="0" value="0" class="form-control" required />
-</div>
-        <div class="mb-3">
-          <label for="room_type" class="form-label">Room Type</label>
-          <select id="room_type" name="room_type" class="form-select" required>
-            <option value="Non-AC">Non-AC</option>
-            <option value="AC">AC</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button id="submitAddRoom" type="submit" class="btn btn-success">Add Room</button>
-      </div>
-    </form>
-  </div>
-  
-</div></div></div>
+    </div>
 
 
-<?php include 'footer.php'; ?>
-<script>
-$(function () {
-  var table = $('#dataTable').DataTable({ pageLength: 10, lengthChange: false });
+    <?php include 'footer.php'; ?>
+    <script>
+    $(function() {
+        var table = $('#dataTable').DataTable({
+            pageLength: 10,
+            lengthChange: false
+        });
 
-  $('#addRoomForm').on('submit', function (e) {
-    e.preventDefault();
+        $('#addRoomForm').on('submit', function(e) {
+            e.preventDefault();
 
-    var hostel_id = $('#hostel_id').val();
-    var room_number = $('#room_number').val().trim();
-    var capacity = $('#capacity').val();
-    var occupied = $('#occupied').val();
-    var room_type = $('#room_type').val();
+            var hostel_id = $('#hostel_id').val();
+            var room_number = $('#room_number').val().trim();
+            var capacity = $('#capacity').val();
+            var occupied = $('#occupied').val();
+            var room_type = $('#room_type').val();
 
-    if (!hostel_id || !room_number || !capacity || !occupied || !room_type) {
-      Swal.fire('Validation', 'Please complete all required fields.', 'warning');
-      return;
-    }
+            if (!hostel_id || !room_number || !capacity || !occupied || !room_type) {
+                Swal.fire('Validation', 'Please complete all required fields.', 'warning');
+                return;
+            }
 
-    $('#submitAddRoom').prop('disabled', true);
+            $('#submitAddRoom').prop('disabled', true);
 
-    $.ajax({
-      url: 'addRoom.php',
-      method: 'POST',
-      data: { hostel_id, room_number, capacity,occupied, room_type },
-      dataType: 'json',
-      success: function(res) {
-        if (res.success) {
-          var room = res.data;
-          table.row.add([
-            room.room_id,
-            room.hostel_id,
-            room.room_number,
-            room.capacity,
-            room.occupied,
-            room.room_type
-          ]).draw(false);
+            $.ajax({
+                url: 'addRoom.php',
+                method: 'POST',
+                data: {
+                    hostel_id,
+                    room_number,
+                    capacity,
+                    occupied,
+                    room_type
+                },
+                dataType: 'json',
+                success: function(res) {
+                    if (res.success) {
+                        var room = res.data;
+                        table.row.add([
+                            room.room_id,
+                            room.hostel_id,
+                            room.room_number,
+                            room.capacity,
+                            room.occupied,
+                            room.room_type
+                        ]).draw(false);
 
-          $('#addRoomModal').modal('hide');
-          $('#addRoomForm')[0].reset();
-          Swal.fire('Success', 'Room added!', 'success');
-        } else {
-          Swal.fire('Error', res.error || 'Server error', 'error');
-        }
-      },
-      error: function(xhr, status, err) {
-        console.error(xhr.responseText);
-        Swal.fire('Error', 'AJAX error — check console', 'error');
-      },
-      complete: function() { $('#submitAddRoom').prop('disabled', false); }
+                        $('#addRoomModal').modal('hide');
+                        $('#addRoomForm')[0].reset();
+                        Swal.fire('Success', 'Room added!', 'success');
+                    } else {
+                        Swal.fire('Error', res.error || 'Server error', 'error');
+                    }
+                },
+                error: function(xhr, status, err) {
+                    console.error(xhr.responseText);
+                    Swal.fire('Error', 'AJAX error — check console', 'error');
+                },
+                complete: function() {
+                    $('#submitAddRoom').prop('disabled', false);
+                }
+            });
+        });
     });
-  });
-});
-</script>
+    </script>
 </body>
+
 </html>

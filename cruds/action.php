@@ -11,9 +11,9 @@ switch($action){
         $id = $_POST['id'] ?? '';
 
         if($id){
-            $update_sql = "UPDATE absent SET status='Approved' WHERE sno='$id'";
+            $update_sql = "UPDATE absent SET status='Approved for IVR' WHERE sno='$id'";
             if(mysqli_query($conn, $update_sql)){
-                echo json_encode(['status' => 'success', 'message' => 'Leave approved successfully.']);
+                echo json_encode(['status' => 'success', 'message' => 'Leave Approved for IVR successfully.']);
             } else {
                 echo json_encode(['status' => 'error', 'message' => 'Database error: '.mysqli_error($conn)]);
             }

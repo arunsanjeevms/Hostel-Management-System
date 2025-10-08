@@ -208,7 +208,7 @@ display: inline-block;
 
         <a href="leave_enable.php" class="menu-item">
         <i class="fa-solid fa-sliders" style="color: #9C27B0;"></i>
-            <span>Leave Enable / Disable</span>
+            <span>General Leave Management</span>
         </a>
 
         <a href="#" class="menu-item">
@@ -216,7 +216,7 @@ display: inline-block;
             <span>Mess Menu </span>
         </a>
 
-        <a href="#" class="menu-item">
+        <a href="room.php" class="menu-item">
         <i class="fa-solid fa-hotel" style="color: #E91E63"></i>
             <span>Room Details </span>
         </a>

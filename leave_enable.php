@@ -702,7 +702,7 @@
                         } else {
                             Swal.fire({
                                 title: 'Error!',
-                                text: data.message || 'Failed to disable General Leave.',
+                                text: data.messagXe || 'Failed to disable General Leave.',
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             });
