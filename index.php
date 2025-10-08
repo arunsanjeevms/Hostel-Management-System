@@ -341,6 +341,38 @@ $result = $stmt->get_result();
   }
 }
 
+
+
+/* Clean professional table style */
+.table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.table thead th {
+  background-color: #4e73df !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f1f5ff;
+  transition: background-color 0.3s ease;
+}
+
+.btn-success, .btn-danger {
+  width: 85px;
+  font-size: 0.85rem;
+  border: none;
+}
+
+.btn-success:hover { background-color: #198754; }
+.btn-danger:hover { background-color: #c82333; }
+
+
+
     </style>
 </head>
 
@@ -380,51 +412,68 @@ $leaves = $stmt->get_result();
       <div>Welcome, <?= htmlspecialchars($faculty_name) ?> &nbsp; <a href="logout.php" class="btn btn-sm btn-light">Logout</a></div>
     </div>
     <div class="card-body">
-      <div class="table-responsive">
-      <table class="table table-striped table-bordered align-middle">
-        <thead class="table-dark text-center">
-          <tr>
-            <th>Roll</th><th>Name</th><th>Type</th><th>From</th><th>To</th><th>Reason</th><th>Status</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php while ($row = $leaves->fetch_assoc()): ?>
-            <tr>
-              <td class="text-center"><?= htmlspecialchars($row['roll_number']) ?></td>
-              <td><?= htmlspecialchars($row['student_name']) ?></td>
-              <td class="text-center"><?= htmlspecialchars($row['leave_type']) ?></td>
-              <td class="text-center"><?= htmlspecialchars($row['from_date']) ?></td>
-              <td class="text-center"><?= htmlspecialchars($row['to_date']) ?></td>
-              <td><?= htmlspecialchars($row['reason']) ?></td>
-              <td class="text-center">
-                <?php
-                  $st = $row['faculty_status'];
-                  if ($st === 'Pending') echo '<span class="badge bg-warning">Pending</span>';
-                  elseif ($st === 'Approved') echo '<span class="badge bg-success">Approved</span>';
-                  elseif ($st === 'Rejected') echo '<span class="badge bg-danger">Rejected</span>';
-                  else echo '<span class="badge bg-secondary">'.htmlspecialchars($st).'</span>';
-                ?>
-              </td>
-              <td class="text-center">
-                <?php if ($row['faculty_status'] === 'Pending'): ?>
-                  <form method="post" action="faculty_action.php" style="display:inline;">
-                    <input type="hidden" name="leave_id" value="<?= (int)$row['leave_id'] ?>">
-                    <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-                  </form>
-                  <form method="post" action="faculty_action.php" style="display:inline;">
-                    <input type="hidden" name="leave_id" value="<?= (int)$row['leave_id'] ?>">
-                    <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-                  </form>
-                <?php else: ?>
-                  <span class="text-muted">—</span>
-                <?php endif; ?>
-              </td>
-            </tr>
-          <?php endwhile; ?>
-        </tbody>
-      </table>
-      </div>
-    </div>
+  <div class="table-responsive">
+    <table id="facultyTable" class="table table-bordered table-hover align-middle">
+      <thead class="table-primary text-center">
+        <tr>
+          <th>S.No</th>
+          <th>Reg No</th>
+          <th>Name</th>
+          <th>Leave Type</th>
+          <th>Applied Date</th>
+          <th>From</th>
+          <th>To</th>
+          <th>Reason</th>
+          <th>Proof</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php 
+          $i = 1;
+          while ($row = $leaves->fetch_assoc()): 
+        ?>
+        <tr>
+          <td class="text-center"><?= $i++ ?></td>
+          <td><?= htmlspecialchars($row['roll_number']) ?></td>
+          <td><?= htmlspecialchars($row['student_name']) ?></td>
+          <td><?= htmlspecialchars($row['leave_type']) ?></td>
+          <td><?= date('d-m-Y h:i A', strtotime($row['applied_at'])) ?></td>
+          <td><?= date('d-m-Y h:i A', strtotime($row['from_date'])) ?></td>
+          <td><?= date('d-m-Y h:i A', strtotime($row['to_date'])) ?></td>
+          <td><?= htmlspecialchars($row['reason']) ?></td>
+          <td class="text-center">
+            <?php if (!empty($row['proof'])): ?>
+              <a href="uploads/<?= htmlspecialchars($row['proof']) ?>" target="_blank" class="btn btn-outline-primary btn-sm">View</a>
+            <?php else: ?>
+              <span class="text-muted">No Proof</span>
+            <?php endif; ?>
+          </td>
+          <td class="text-center">
+            <?php if ($row['faculty_status'] === 'Pending'): ?>
+              <form method="post" action="faculty_action.php" style="display:inline;">
+                <input type="hidden" name="leave_id" value="<?= (int)$row['leave_id'] ?>">
+                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
+              </form>
+              <form method="post" action="faculty_action.php" style="display:inline;">
+                <input type="hidden" name="leave_id" value="<?= (int)$row['leave_id'] ?>">
+                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
+              </form>
+            <?php else: ?>
+              <?php 
+                $statusColor = ($row['faculty_status'] === 'Approved') ? 'success' :
+                               (($row['faculty_status'] === 'Rejected') ? 'danger' : 'secondary');
+              ?>
+              <span class="badge bg-<?= $statusColor ?>"><?= htmlspecialchars($row['faculty_status']) ?></span>
+            <?php endif; ?>
+          </td>
+        </tr>
+        <?php endwhile; ?>
+      </tbody>
+    </table>
+  </div>
+</div>
+
   </div>
 </div>
 </div>
