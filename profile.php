@@ -1,33 +1,28 @@
 <?php
-$host = 'localhost';
-$dbname = 'hostel';
-$username = 'root'; // Default XAMPP username
-$password = ''; // Default XAMPP password
-
+session_start();
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+    require_once 'dbconnect.php';
+} catch (Exception $e) {
+    die("Database configuration error: " . $e->getMessage());
 }
 
-session_start();
+if (!isset($_SESSION['user_id'])) {
+    $demo_mode = true;
+    $_SESSION['user_id'] = 1;
+    $_SESSION['username'] = '';
+    $_SESSION['role'] = '';
+}
 
+$user_id = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     try {
-        $user_id = $_SESSION['user_id'];
-
-        // Get student roll number first
         $stmt = $pdo->prepare("SELECT roll_number FROM students WHERE user_id = ?");
         $stmt->execute([$user_id]);
         $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($student) {
             $roll_number = $student['roll_number'];
-
-            // Update student basic information
             $stmt = $pdo->prepare("
                 UPDATE students SET 
                     name = ?, email = ?, student_phone = ?, 
@@ -37,16 +32,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             ");
 
             $stmt->execute([
-                $_POST['name'],
-                $_POST['email'],
-                $_POST['student_phone'],
-                $_POST['department'],
-                $_POST['academic_year'],
-                $_POST['block'],
+                $_POST['name'] ?? '',
+                $_POST['email'] ?? '',
+                $_POST['student_phone'] ?? '',
+                $_POST['department'] ?? '',
+                $_POST['academic_year'] ?? '',
+                $_POST['block'] ?? '',
                 $roll_number
             ]);
 
-            // Update parent information if provided
             if (isset($_POST['parent_name']) && is_array($_POST['parent_name'])) {
                 foreach ($_POST['parent_name'] as $parent_id => $parent_name) {
                     if (isset($_POST['parent_phone'][$parent_id])) {
@@ -59,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 
                         $stmt->execute([
                             $parent_name,
-                            $_POST['parent_phone'][$parent_id],
+                            $_POST['parent_phone'][$parent_id] ?? '',
                             $_POST['parent_email'][$parent_id] ?? '',
                             $roll_number,
                             $parent_id
@@ -76,17 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         $error = "Error updating profile: " . $e->getMessage();
     }
 }
-
-// Getting student data 
-$user_id = $_SESSION['user_id'];
 $student_data = [];
 $parent_data = [];
-$attendance_stats = [];
-$leave_stats = [];
-$outing_stats = [];
+$attendance_stats = ['attendance_percentage' => 0, 'total_days' => 0, 'present_days' => 0];
+$leave_stats = ['active_leaves' => 0];
+$outing_stats = ['monthly_outings' => 0];
 
 try {
-    // Getting student basic info
+    // Get student basic info
     $stmt = $pdo->prepare("
         SELECT s.*, r.room_number, r.room_type, r.capacity, r.occupied, 
                h.hostel_name, h.hostel_code, h.address as hostel_address
@@ -97,9 +88,8 @@ try {
     ");
     $stmt->execute([$user_id]);
     $student_data = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Get parent information
-    if (!isset($demo_mode)) {
+    // Get parent info
+    if ($student_data && !isset($demo_mode)) {
         $stmt = $pdo->prepare("
             SELECT p.*, sp.relation_enum, sp.is_primary_contact
             FROM student_parents sp
@@ -109,8 +99,6 @@ try {
         ");
         $stmt->execute([$student_data['roll_number']]);
         $parent_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Process parent photos
         foreach ($parent_data as &$parent) {
             if (!empty($parent['photo'])) {
                 $base64 = base64_encode($parent['photo']);
@@ -120,10 +108,31 @@ try {
             }
         }
         unset($parent);
+        //for error handling
+    } else if (isset($demo_mode)) {
+        $parent_data = [
+            [
+                'parent_id' => 1,
+                'name' => '',
+                'relation_enum' => '',
+                'is_primary_contact' => 1,
+                'phone' => '',
+                'email' => '',
+                'photo_data' => null
+            ],
+            [
+                'parent_id' => 2,
+                'name' => '',
+                'relation_enum' => '',
+                'is_primary_contact' => 0,
+                'phone' => '',
+                'email' => '',
+                'photo_data' => null
+            ]
+        ];
     }
 
-    // Get attendance
-    if (!isset($demo_mode)) {
+    if ($student_data && !isset($demo_mode)) {
         $stmt = $pdo->prepare("
             SELECT 
                 COUNT(*) as total_days,
@@ -134,11 +143,12 @@ try {
             AND date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         ");
         $stmt->execute([$student_data['roll_number']]);
-        $attendance_stats = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+        $attendance_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($attendance_result) {
+            $attendance_stats = $attendance_result;
+        }
 
-    // Get active leave count 
-    if (!isset($demo_mode)) {
+        // Getting  leave count and outing
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as active_leaves 
             FROM leave_applications 
@@ -148,11 +158,10 @@ try {
             AND to_date >= CURDATE()
         ");
         $stmt->execute([$student_data['roll_number']]);
-        $leave_stats = $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Get outing count for current month 
-    if (!isset($demo_mode)) {
+        $leave_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($leave_result) {
+            $leave_stats = $leave_result;
+        }
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as monthly_outings 
             FROM outings 
@@ -161,14 +170,20 @@ try {
             AND YEAR(date) = YEAR(CURDATE())
         ");
         $stmt->execute([$student_data['roll_number']]);
-        $outing_stats = $stmt->fetch(PDO::FETCH_ASSOC);
+        $outing_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($outing_result) {
+            $outing_stats = $outing_result;
+        }
+    } else if (isset($demo_mode)) {
+        $attendance_stats = ['attendance_percentage' => '', 'present_days' => '', 'total_days' => ''];
+        $leave_stats = ['active_leaves' => ''];
+        $outing_stats = ['monthly_outings' => ''];
     }
 
 } catch (Exception $e) {
     $error = "Error loading profile data: " . $e->getMessage();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -203,7 +218,7 @@ try {
         }
 
         body {
-            background: linear-gradient(135deg, #d7dcf3ff 0%, #f9f9faff 100%);
+            background: linear-gradient(135deg, #c7cff6ff 0%, #f9f9faff 100%);
             color: var(--text-dark);
             min-height: 100vh;
             display: flex;
@@ -233,13 +248,6 @@ try {
             box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
         }
 
-
-        @media (max-width: 768px) {
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
-
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
@@ -252,6 +260,26 @@ try {
             margin-left: var(--sidebar-collapsed-width);
         }
 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: var(--text-dark);
+            font-size: 28px;
+            font-weight: 600;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
         .user-info {
             display: flex;
@@ -273,13 +301,14 @@ try {
             box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
         }
 
+        /* Profile Container */
         .profile-container {
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 25px;
         }
 
-
+        /* Profile Card */
         .profile-card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -410,6 +439,7 @@ try {
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
 
+        /* Details Card */
         .details-card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
@@ -465,28 +495,23 @@ try {
             background: white;
             padding: 20px;
             border-radius: 15px;
-
         }
 
+        /* Different border colors for info sections */
         .info-grid .info-section:nth-child(1) {
             border-left: 4px solid #3498db !important;
-
-
         }
 
         .info-grid .info-section:nth-child(2) {
             border-left: 4px solid #2ecc71 !important;
-
         }
 
         .info-grid .info-section:nth-child(3) {
             border-left: 4px solid #e74c3c !important;
-
         }
 
         .info-grid .info-section:nth-child(4) {
             border-left: 4px solid #f39c12 !important;
-
         }
 
         .info-grid .info-section:nth-child(1):hover {
@@ -504,7 +529,6 @@ try {
         .info-grid .info-section:nth-child(4):hover {
             box-shadow: 0 4px 20px rgba(243, 156, 18, 0.2) !important;
         }
-
 
         .section-title {
             font-size: 18px;
@@ -571,34 +595,7 @@ try {
             margin-left: 10px;
         }
 
-        @media (max-width: 1200px) {
-            .profile-container {
-                grid-template-columns: 1fr;
-            }
-
-            .profile-card {
-                max-width: 500px;
-                margin: 0 auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 0;
-                width: 100%;
-                padding: 15px;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .profile-stats {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
-
+        /* Error and Success Messages */
         .error-message {
             background: var(--danger);
             color: white;
@@ -701,58 +698,42 @@ try {
             box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
         }
 
-        .parent-photos-section .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
-        }
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .profile-container {
+                grid-template-columns: 1fr;
+            }
 
-        .parent-photos-section .section-title i {
-            color: var(--primary);
-            font-size: 20px;
+            .profile-card {
+                max-width: 500px;
+                margin: 0 auto;
+            }
         }
 
         @media (max-width: 768px) {
-            .parent-photos-container {
-                gap: 30px;
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
                 flex-direction: column;
+                gap: 15px;
+                text-align: center;
             }
 
-            .parent-photo-item {
-                width: auto;
+            .profile-stats {
+                flex-direction: column;
+                gap: 15px;
             }
 
-            .parent-image {
-                width: 140px;
-                height: 140px;
-                font-size: 35px;
-            }
-
-            .parent-name {
-                font-size: 15px;
-            }
-
-            .parent-relation {
-                font-size: 13px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .parent-photos-container {
-                gap: 25px;
-            }
-
-            .parent-image {
-                width: 130px;
-                height: 130px;
-                font-size: 30px;
+            .action-buttons {
+                flex-direction: column;
             }
         }
 
@@ -796,388 +777,379 @@ try {
                 background: white !important;
             }
 
-
+            .header {
+                background: white !important;
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+            }
         }
     </style>
 </head>
 
 <body>
+    <?php include 'topbar.php'; ?>
+    <?php include 'sidebar.php'; ?>
 
-    <body>
-        <?php include 'topbar.php'; ?>
-        <?php include 'sidebar.php'; ?>
-        <div class="main-content" id="mainContent" style="margin-top: <?php echo isset($demo_mode) ? '50px' : '0'; ?>;">
+    <div class="main-content" id="mainContent" style="margin-top: <?php echo isset($demo_mode) ? '50px' : '0'; ?>;">
+        <?php if (isset($error)): ?>
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
 
-            <?php if (isset($error)): ?>
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?>
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="success-message">
+                <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success'];
+                unset($_SESSION['success']); ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="" id="profileForm">
+            <input type="hidden" name="update_profile" value="1">
+
+            <div class="profile-container">
+                <!-- Profile Card -->
+                <div class="profile-card">
+                    <div class="profile-image">
+                        <?php if ($student_data && !empty($student_data['photo'])): ?>
+                            <img src="data:image/jpeg;base64,<?php echo base64_encode($student_data['photo']); ?>"
+                                alt="Student Photo">
+                        <?php else: ?>
+                            <i class="fas fa-user"></i>
+                        <?php endif; ?>
+                    </div>
+                    <div class="profile-name"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></div>
+                    <div class="profile-roll"><?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?></div>
+                    <div class="profile-department">
+                        <?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?>
+                    </div>
+
+                    <?php if (!empty($parent_data)): ?>
+                        <div class="parent-photos-section">
+                            <div class="section-title"
+                                style="margin: 20px 0 15px 0; font-size: 16px; justify-content: center;">
+                                <i class="fas fa-users"></i> Parents
+                            </div>
+                            <div class="parent-photos-container">
+                                <?php foreach ($parent_data as $parent): ?>
+                                    <div class="parent-photo-item">
+                                        <div class="parent-image">
+                                            <?php if (isset($parent['photo_data']) && $parent['photo_data']): ?>
+                                                <img src="<?php echo $parent['photo_data']; ?>"
+                                                    alt="<?php echo htmlspecialchars($parent['name']); ?>">
+                                            <?php else: ?>
+                                                <i class="fas fa-user"></i>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="parent-info">
+                                            <div class="parent-name"><?php echo htmlspecialchars($parent['name']); ?></div>
+                                            <div class="parent-relation">
+                                                <?php echo htmlspecialchars($parent['relation_enum']); ?>
+                                            </div>
+                                            <?php if ($parent['is_primary_contact']): ?>
+                                                <div class="primary-badge-small">Primary</div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="profile-stats">
+                        <div class="stat">
+                            <div class="stat-value attendance">
+                                <?php echo $attendance_stats['attendance_percentage'] ?? '0'; ?>%
+                            </div>
+                            <div class="stat-label">Attendance</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value leaves">
+                                <?php echo $leave_stats['active_leaves'] ?? '0'; ?>
+                            </div>
+                            <div class="stat-label">Active Leaves</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value outings">
+                                <?php echo $outing_stats['monthly_outings'] ?? '0'; ?>
+                            </div>
+                            <div class="stat-label">Monthly Outings</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-primary" onclick="toggleEditMode()" id="editBtn">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                        <button type="submit" class="btn btn-success" id="saveBtn" style="display: none;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="window.print()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="cancelEdit()" id="cancelBtn"
+                            style="display: none;">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
                 </div>
-            <?php endif; ?>
 
-            <?php if (isset($_SESSION['success'])): ?>
-                <div class="success-message">
-                    <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success'];
-                    unset($_SESSION['success']); ?>
-                </div>
-            <?php endif; ?>
+                <!-- Details Card -->
+                <div class="details-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-id-card"></i> Student Information</div>
+                        <button type="button" class="edit-btn" onclick="toggleEditMode()" id="editHeaderBtn">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
 
-            <form method="POST" action="" id="profileForm">
-                <input type="hidden" name="update_profile" value="1">
+                    <div class="info-grid">
+                        <!-- Personal Info -->
+                        <div class="info-section">
+                            <div class="section-title">
+                                <i class="fas fa-user-circle"></i> Personal Details
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Full Name:</div>
+                                <div class="info-value">
+                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></span>
+                                    <input type="text" name="name"
+                                        value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>"
+                                        class="edit-mode"
+                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Roll Number:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Gender:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['gender'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Email:</div>
+                                <div class="info-value">
+                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['email'] ?? 'N/A'); ?></span>
+                                    <input type="email" name="email"
+                                        value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>"
+                                        class="edit-mode"
+                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Phone:</div>
+                                <div class="info-value">
+                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['student_phone'] ?? 'N/A'); ?></span>
+                                    <input type="text" name="student_phone"
+                                        value="<?php echo htmlspecialchars($student_data['student_phone'] ?? ''); ?>"
+                                        class="edit-mode"
+                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="profile-container">
-                    <!-- Profile Card -->
-                    <div class="profile-card">
-                        <div class="profile-image">
-                            <?php if ($student_data && !empty($student_data['photo'])): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($student_data['photo']); ?>"
-                                    alt="Student Photo">
+                        <!-- Academic Info-->
+                        <div class="info-section">
+                            <div class="section-title">
+                                <i class="fas fa-graduation-cap"></i> Academic Details
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Department:</div>
+                                <div class="info-value">
+                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?></span>
+                                    <input type="text" name="department"
+                                        value="<?php echo htmlspecialchars($student_data['department'] ?? ''); ?>"
+                                        class="edit-mode"
+                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Academic Year:</div>
+                                <div class="info-value">
+                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['academic_year'] ?? 'N/A'); ?></span>
+                                    <input type="text" name="academic_year"
+                                        value="<?php echo htmlspecialchars($student_data['academic_year'] ?? ''); ?>"
+                                        class="edit-mode"
+                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Block:</div>
+                                <div class="info-value">
+                                    <span class="view-mode"><?php echo htmlspecialchars($student_data['block'] ?? 'N/A'); ?></span>
+                                    <input type="text" name="block"
+                                        value="<?php echo htmlspecialchars($student_data['block'] ?? ''); ?>"
+                                        class="edit-mode"
+                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hostel Info-->
+                        <div class="info-section">
+                            <div class="section-title">
+                                <i class="fas fa-bed"></i> Hostel Details
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Hostel Name:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['hostel_name'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Hostel Code:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['hostel_code'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Room Number:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['room_number'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Room Type:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['room_type'] ?? 'N/A'); ?>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Room Capacity:</div>
+                                <div class="info-value">
+                                    <?php echo htmlspecialchars($student_data['capacity'] ?? 'N/A'); ?>
+                                    (<?php echo htmlspecialchars($student_data['occupied'] ?? '0'); ?> occupied)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Parent/Guardian Info -->
+                        <div class="info-section">
+                            <div class="section-title">
+                                <i class="fas fa-users"></i> Parent/Guardian Details
+                            </div>
+                            <?php if (!empty($parent_data)): ?>
+                                <?php foreach ($parent_data as $parent): ?>
+                                    <div class="parent-card">
+                                        <div class="info-item">
+                                            <div class="info-label">Name:</div>
+                                            <div class="info-value">
+                                                <span class="view-mode">
+                                                    <?php echo htmlspecialchars($parent['name']); ?>
+                                                    <?php if ($parent['is_primary_contact']): ?>
+                                                        <span class="primary-badge">Primary Contact</span>
+                                                    <?php endif; ?>
+                                                </span>
+                                                <div class="edit-mode" style="display: none;">
+                                                    <input type="text"
+                                                        name="parent_name[<?php echo $parent['parent_id']; ?>]"
+                                                        value="<?php echo htmlspecialchars($parent['name']); ?>"
+                                                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px; font-size: 14px;">
+                                                    <?php if ($parent['is_primary_contact']): ?>
+                                                        <span class="primary-badge">Primary Contact</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="info-item">
+                                            <div class="info-label">Relation:</div>
+                                            <div class="info-value">
+                                                <?php echo htmlspecialchars($parent['relation_enum']); ?>
+                                            </div>
+                                        </div>
+                                        <div class="info-item">
+                                            <div class="info-label">Phone:</div>
+                                            <div class="info-value">
+                                                <span class="view-mode"><?php echo htmlspecialchars($parent['phone'] ?? 'N/A'); ?></span>
+                                                <input type="text" name="parent_phone[<?php echo $parent['parent_id']; ?>]"
+                                                    value="<?php echo htmlspecialchars($parent['phone'] ?? ''); ?>"
+                                                    class="edit-mode"
+                                                    style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                            </div>
+                                        </div>
+                                        <div class="info-item">
+                                            <div class="info-label">Email:</div>
+                                            <div class="info-value">
+                                                <span class="view-mode"><?php echo htmlspecialchars($parent['email'] ?? 'N/A'); ?></span>
+                                                <input type="email" name="parent_email[<?php echo $parent['parent_id']; ?>]"
+                                                    value="<?php echo htmlspecialchars($parent['email'] ?? ''); ?>"
+                                                    class="edit-mode"
+                                                    style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
                             <?php else: ?>
-                                <i class="fas fa-user"></i>
+                                <div class="info-item">
+                                    <div class="info-value" style="color: var(--text-light);">No parent/guardian information available</div>
+                                </div>
                             <?php endif; ?>
                         </div>
-                        <div class="profile-name"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></div>
-                        <div class="profile-roll"><?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?>
-                        </div>
-                        <div class="profile-department">
-                            <?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?>
-                        </div>
-
-                        <?php if (!empty($parent_data)): ?>
-                            <div class="parent-photos-section">
-                                <div class="section-title"
-                                    style="margin: 20px 0 15px 0; font-size: 16px; justify-content: center;">
-                                    <i class="fas fa-users"></i> Parents
-                                </div>
-                                <div class="parent-photos-container">
-                                    <?php foreach ($parent_data as $parent): ?>
-                                        <div class="parent-photo-item">
-                                            <div class="parent-image">
-                                                <?php if (isset($parent['photo_data']) && $parent['photo_data']): ?>
-                                                    <img src="<?php echo $parent['photo_data']; ?>"
-                                                        alt="<?php echo htmlspecialchars($parent['name']); ?>">
-                                                <?php else: ?>
-                                                    <i class="fas fa-user"></i>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div class="parent-info">
-                                                <div class="parent-name"><?php echo htmlspecialchars($parent['name']); ?></div>
-                                                <div class="parent-relation">
-                                                    <?php echo htmlspecialchars($parent['relation_enum']); ?>
-                                                </div>
-                                                <?php if ($parent['is_primary_contact']): ?>
-                                                    <div class="primary-badge-small">Primary</div>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
-                        <div class="profile-stats">
-                            <div class="stat">
-                                <div class="stat-value attendance">
-                                    <?php echo $attendance_stats['attendance_percentage'] ?? '0'; ?>%
-                                </div>
-                                <div class="stat-label">Attendance</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value leaves">
-                                    <?php echo $leave_stats['active_leaves'] ?? '0'; ?>
-                                </div>
-                                <div class="stat-label">Active Leaves</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-value outings">
-                                    <?php echo $outing_stats['monthly_outings'] ?? '0'; ?>
-                                </div>
-                                <div class="stat-label">Monthly Outings</div>
-                            </div>
-                        </div>
-
-                        <div class="action-buttons">
-                            <button type="button" class="btn btn-primary" onclick="toggleEditMode()" id="editBtn">
-                                <i class="fas fa-edit"></i> Edit Profile
-                            </button>
-                            <button type="submit" class="btn btn-success" id="saveBtn" style="display: none;">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <button type="button" class="btn btn-secondary" onclick="window.print()">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                            <button type="button" class="btn btn-danger" onclick="cancelEdit()" id="cancelBtn"
-                                style="display: none;">
-                                <i class="fas fa-times"></i> Cancel
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Details Card -->
-                    <div class="details-card">
-                        <div class="card-header">
-                            <div class="card-title"><i class="fas fa-id-card"></i> Student Information</div>
-                            <button type="button" class="edit-btn" onclick="toggleEditMode()" id="editHeaderBtn">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                        </div>
-
-
-                        <div class="info-grid">
-                            <!-- Personal Info -->
-                            <div class="info-section">
-                                <div class="section-title">
-                                    <i class="fas fa-user-circle"></i> Personal Details
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Full Name:</div>
-                                    <div class="info-value">
-                                        <span
-                                            class="view-mode"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></span>
-                                        <input type="text" name="name"
-                                            value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>"
-                                            class="edit-mode"
-                                            style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Roll Number:</div>
-                                    <div class="info-value">
-                                        <?php echo htmlspecialchars($student_data['roll_number'] ?? 'N/A'); ?>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Gender:</div>
-                                    <div class="info-value">
-                                        <?php echo htmlspecialchars($student_data['gender'] ?? 'N/A'); ?>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Email:</div>
-                                    <div class="info-value">
-                                        <span
-                                            class="view-mode"><?php echo htmlspecialchars($student_data['email'] ?? 'N/A'); ?></span>
-                                        <input type="email" name="email"
-                                            value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>"
-                                            class="edit-mode"
-                                            style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Phone:</div>
-                                    <div class="info-value">
-                                        <span
-                                            class="view-mode"><?php echo htmlspecialchars($student_data['student_phone'] ?? 'N/A'); ?></span>
-                                        <input type="text" name="student_phone"
-                                            value="<?php echo htmlspecialchars($student_data['student_phone'] ?? ''); ?>"
-                                            class="edit-mode"
-                                            style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Academic Info-->
-                            <div class="info-section">
-                                <div class="section-title">
-                                    <i class="fas fa-graduation-cap"></i> Academic Details
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Department:</div>
-                                    <div class="info-value">
-                                        <span
-                                            class="view-mode"><?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?></span>
-                                        <input type="text" name="department"
-                                            value="<?php echo htmlspecialchars($student_data['department'] ?? ''); ?>"
-                                            class="edit-mode"
-                                            style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Academic Year:</div>
-                                    <div class="info-value">
-                                        <span
-                                            class="view-mode"><?php echo htmlspecialchars($student_data['academic_year'] ?? 'N/A'); ?></span>
-                                        <input type="text" name="academic_year"
-                                            value="<?php echo htmlspecialchars($student_data['academic_year'] ?? ''); ?>"
-                                            class="edit-mode"
-                                            style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Block:</div>
-                                    <div class="info-value">
-                                        <span
-                                            class="view-mode"><?php echo htmlspecialchars($student_data['block'] ?? 'N/A'); ?></span>
-                                        <input type="text" name="block"
-                                            value="<?php echo htmlspecialchars($student_data['block'] ?? ''); ?>"
-                                            class="edit-mode"
-                                            style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Hostel Info-->
-                            <div class="info-section">
-                                <div class="section-title">
-                                    <i class="fas fa-bed"></i> Hostel Details
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Hostel Name:</div>
-                                    <div class="info-value">
-                                        <?php echo htmlspecialchars($student_data['hostel_name'] ?? 'N/A'); ?>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Hostel Code:</div>
-                                    <div class="info-value">
-                                        <?php echo htmlspecialchars($student_data['hostel_code'] ?? 'N/A'); ?>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Room Number:</div>
-                                    <div class="info-value">
-                                        <?php echo htmlspecialchars($student_data['room_number'] ?? 'N/A'); ?>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Room Type:</div>
-                                    <div class="info-value">
-                                        <?php echo htmlspecialchars($student_data['room_type'] ?? 'N/A'); ?>
-                                    </div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Room Capacity:</div>
-                                    <div class="info-value">
-                                        <?php echo htmlspecialchars($student_data['capacity'] ?? 'N/A'); ?>
-                                        (<?php echo htmlspecialchars($student_data['occupied'] ?? '0'); ?> occupied)
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Parent/Guardian Info -->
-                            <div class="info-section">
-                                <div class="section-title">
-                                    <i class="fas fa-users"></i> Parent/Guardian Details
-                                </div>
-                                <?php if (!empty($parent_data)): ?>
-                                    <?php foreach ($parent_data as $parent): ?>
-                                        <div class="parent-card">
-                                            <div class="info-item">
-                                                <div class="info-label">Name:</div>
-                                                <div class="info-value">
-                                                    <span class="view-mode">
-                                                        <?php echo htmlspecialchars($parent['name']); ?>
-                                                        <?php if ($parent['is_primary_contact']): ?>
-                                                            <span class="primary-badge">Primary Contact</span>
-                                                        <?php endif; ?>
-                                                    </span>
-                                                    <div class="edit-mode" style="display: none;">
-                                                        <input type="text"
-                                                            name="parent_name[<?php echo $parent['parent_id']; ?>]"
-                                                            value="<?php echo htmlspecialchars($parent['name']); ?>"
-                                                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px; font-size: 14px;">
-                                                        <?php if ($parent['is_primary_contact']): ?>
-                                                            <span class="primary-badge">Primary Contact</span>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="info-item">
-                                                <div class="info-label">Relation:</div>
-                                                <div class="info-value">
-                                                    <?php echo htmlspecialchars($parent['relation_enum']); ?>
-                                                </div>
-                                            </div>
-                                            <div class="info-item">
-                                                <div class="info-label">Phone:</div>
-                                                <div class="info-value">
-                                                    <span
-                                                        class="view-mode"><?php echo htmlspecialchars($parent['phone'] ?? 'N/A'); ?></span>
-                                                    <input type="text" name="parent_phone[<?php echo $parent['parent_id']; ?>]"
-                                                        value="<?php echo htmlspecialchars($parent['phone'] ?? ''); ?>"
-                                                        class="edit-mode"
-                                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                                </div>
-                                            </div>
-                                            <div class="info-item">
-                                                <div class="info-label">Email:</div>
-                                                <div class="info-value">
-                                                    <span
-                                                        class="view-mode"><?php echo htmlspecialchars($parent['email'] ?? 'N/A'); ?></span>
-                                                    <input type="email" name="parent_email[<?php echo $parent['parent_id']; ?>]"
-                                                        value="<?php echo htmlspecialchars($parent['email'] ?? ''); ?>"
-                                                        class="edit-mode"
-                                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <div class="info-item">
-                                        <div class="info-value" style="color: var(--text-light);">No parent/guardian
-                                            information available</div>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
+    </div>
 
-        <script>
-            // to toggle edit mode
-            function toggleEditMode() {
-                const isEditMode = document.getElementById('saveBtn').style.display !== 'none'
-                if (!isEditMode) {
-                    document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
-                    document.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'block');
-                    document.getElementById('editBtn').style.display = 'none';
-                    document.getElementById('saveBtn').style.display = 'flex';
-                    document.getElementById('cancelBtn').style.display = 'flex';
-                    document.getElementById('editHeaderBtn').style.display = 'none';
-                    document.querySelector('.edit-btn').innerHTML = '<i class="fas fa-save"></i> Save';
-                    document.querySelector('.edit-btn').setAttribute('onclick', 'document.getElementById(\'profileForm\').submit()');
-                }
+    <script>
+        //  to toggle edit mode
+        function toggleEditMode() {
+            const isEditMode = document.getElementById('saveBtn').style.display !== 'none';
+            if (!isEditMode) {
+                document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'block');
+                document.getElementById('editBtn').style.display = 'none';
+                document.getElementById('saveBtn').style.display = 'flex';
+                document.getElementById('cancelBtn').style.display = 'flex';
+                document.getElementById('editHeaderBtn').style.display = 'none';
+                document.querySelector('.edit-btn').innerHTML = '<i class="fas fa-save"></i> Save';
+                document.querySelector('.edit-btn').setAttribute('onclick', 'document.getElementById(\'profileForm\').submit()');
             }
+        }
 
-            // to cancel edit mode
-            function cancelEdit() {
-                document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'inline');
-                document.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
-                document.getElementById('editBtn').style.display = 'flex';
-                document.getElementById('saveBtn').style.display = 'none';
-                document.getElementById('cancelBtn').style.display = 'none';
-                document.getElementById('editHeaderBtn').style.display = 'flex';
-                document.querySelector('.edit-btn').innerHTML = '<i class="fas fa-edit"></i> Edit';
-                document.querySelector('.edit-btn').setAttribute('onclick', 'toggleEditMode()');
+        //  to cancel edit mode
+        function cancelEdit() {
+            document.querySelectorAll('.view-mode').forEach(el => el.style.display = 'inline');
+            document.querySelectorAll('.edit-mode').forEach(el => el.style.display = 'none');
+            document.getElementById('editBtn').style.display = 'flex';
+            document.getElementById('saveBtn').style.display = 'none';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('editHeaderBtn').style.display = 'flex';
+            document.querySelector('.edit-btn').innerHTML = '<i class="fas fa-edit"></i> Edit';
+            document.querySelector('.edit-btn').setAttribute('onclick', 'toggleEditMode()');
+        }
 
-                window.location.reload();
-            }
+        // Form validating
+        document.getElementById('profileForm').addEventListener('submit', function (e) {
+            let isValid = true;
+            const inputs = this.querySelectorAll('input[required]');
 
-
-            document.getElementById('profileForm').addEventListener('submit', function (e) {
-                let isValid = true;
-                const inputs = this.querySelectorAll('input[required]');
-
-                inputs.forEach(input => {
-                    if (!input.value.trim()) {
-                        isValid = false;
-                        input.style.borderColor = 'var(--danger)';
-                    } else {
-                        input.style.borderColor = '';
-                    }
-                });
-
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Please fill in all required fields.');
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.style.borderColor = 'var(--danger)';
+                } else {
+                    input.style.borderColor = '';
                 }
-            })
-            document.addEventListener("DOMContentLoaded", function () {
-                const hamburger = document.createElement('div');
-                hamburger.id = 'hamburger';
-                hamburger.innerHTML = '<i class="fas fa-bars"></i>';
-                hamburger.style.cssText = `
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+            }
+        });
+
+        // Mobile sidebar func
+        document.addEventListener("DOMContentLoaded", function () {
+            const hamburger = document.createElement('div');
+            hamburger.id = 'hamburger';
+            hamburger.innerHTML = '<i class="fas fa-bars"></i>';
+            hamburger.style.cssText = `
                 position: fixed;
                 top: 20px;
                 left: 20px;
@@ -1193,12 +1165,12 @@ try {
                 cursor: pointer;
                 font-size: 20px;
             `;
-                document.body.appendChild(hamburger);
+            document.body.appendChild(hamburger);
 
-                const sidebar = document.getElementById('sidebar');
-                const mobileOverlay = document.createElement('div');
-                mobileOverlay.id = 'mobileOverlay';
-                mobileOverlay.style.cssText = `
+            const sidebar = document.getElementById('sidebar');
+            const mobileOverlay = document.createElement('div');
+            mobileOverlay.id = 'mobileOverlay';
+            mobileOverlay.style.cssText = `
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -1208,39 +1180,38 @@ try {
                 z-index: 999;
                 display: none;
             `;
-                document.body.appendChild(mobileOverlay);
+            document.body.appendChild(mobileOverlay);
 
-                function handleSidebarToggle() {
-                    if (window.innerWidth <= 768) {
-                        sidebar.classList.toggle('mobile-show');
-                        mobileOverlay.style.display = sidebar.classList.contains('mobile-show') ? 'block' : 'none';
-                        document.body.style.overflow = sidebar.classList.contains('mobile-show') ? 'hidden' : '';
-                    } else {
-                        sidebar.classList.toggle('collapsed');
-                        document.body.classList.toggle('sidebar-collapsed');
-                    }
+            function handleSidebarToggle() {
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.toggle('mobile-show');
+                    mobileOverlay.style.display = sidebar.classList.contains('mobile-show') ? 'block' : 'none';
+                    document.body.style.overflow = sidebar.classList.contains('mobile-show') ? 'hidden' : '';
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    document.body.classList.toggle('sidebar-collapsed');
+                }
+            }
+
+            hamburger.addEventListener('click', handleSidebarToggle);
+            mobileOverlay.addEventListener('click', handleSidebarToggle);
+
+            function handleResize() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('mobile-show');
+                    mobileOverlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                } else {
+                    sidebar.classList.remove('collapsed');
+                    document.body.classList.remove('sidebar-collapsed');
                 }
 
-                hamburger.addEventListener('click', handleSidebarToggle);
-                mobileOverlay.addEventListener('click', handleSidebarToggle);
+                hamburger.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+            }
 
-                function handleResize() {
-                    if (window.innerWidth > 768) {
-                        sidebar.classList.remove('mobile-show');
-                        mobileOverlay.style.display = 'none';
-                        document.body.style.overflow = '';
-                    } else {
-                        sidebar.classList.remove('collapsed');
-                        document.body.classList.remove('sidebar-collapsed');
-                    }
-
-                    hamburger.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-                }
-
-                window.addEventListener('resize', handleResize);
-                handleResize();
-            });
-        </script>
-    </body>
-
+            window.addEventListener('resize', handleResize);
+            handleResize();
+        });
+    </script>
+</body>
 </html>
