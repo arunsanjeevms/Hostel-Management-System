@@ -344,7 +344,7 @@
         <div class="loader-container" id="loaderContainer">
             <div class="loader"></div>
         </div>
-<p>vanganna vanakanganna</p>
+
         <!-- Topbar -->
         <?php include 'topbar.php'; ?>
         <!-- Breadcrumb -->
