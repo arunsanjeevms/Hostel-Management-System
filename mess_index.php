@@ -155,7 +155,7 @@
         }
 
         .table thead th {
-            background: var(--primary-color);
+            background: linear-gradient(135deg, #094dfaff, #1f04ebff);
             color: white;
             font-weight: 600;
             border: none;
@@ -169,7 +169,7 @@
         }
 
         .table tbody tr:hover {
-            background-color: #f8f9fc;
+            background: linear-gradient(135deg, #094dfaff, #302585ff);
         }
 
         .btn-group-sm .btn {
@@ -474,55 +474,55 @@
         </div>
     </div>
     <!--Special Token-->
-<!-- Special Token Modal - FIXED -->
-<div class="modal fade" id="specialtokenModal" tabindex="-1" aria-labelledby="specialtokenModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="specialtokenModalLabel">Special Token</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="tokenenableForm" method="post">
-                    <div class="mb-3">
-                        <label for="tokenfromDate" class="form-label">From Date</label>
-                        <input type="date" class="form-control" id="tokenfromDate" name="date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tokenfromTime" class="form-label">From Time</label>
-                        <input type="time" class="form-control" id="tokenfromTime" name="time" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tokentoDate" class="form-label">To Date</label>
-                        <input type="date" class="form-control" id="tokentoDate" name="date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tokentoTime" class="form-label">To Time</label>
-                        <input type="time" class="form-control" id="tokentoTime" name="time" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tokenDate" class="form-label">Token Date</label>
-                        <input type="date" class="form-control" id="tokenDate" name="date" required>
-                    </div>
-                    <!-- FIXED: Dedicated Menu Items field for Special Token -->
-                    <div class="mb-3">
-                        <label for="specialMenuItems" class="form-label">Menu Items *</label>
-                        <textarea class="form-control" id="specialMenuItems" name="items" rows="3" 
-                                  placeholder="Enter special menu items (e.g., Special lunch, Biryani, Dessert)" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="specialtokenFee" class="form-label">Fee</label>
-                        <input type="number" step="0.01" class="form-control" id="specialtokenFee" name="fee" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Enable token</button>
+    <!-- Special Token Modal - FIXED -->
+    <div class="modal fade" id="specialtokenModal" tabindex="-1" aria-labelledby="specialtokenModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="specialtokenModalLabel">Special Token</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="tokenenableForm" method="post">
+                        <div class="mb-3">
+                            <label for="tokenfromDate" class="form-label">From Date</label>
+                            <input type="date" class="form-control" id="tokenfromDate" name="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tokenfromTime" class="form-label">From Time</label>
+                            <input type="time" class="form-control" id="tokenfromTime" name="time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tokentoDate" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="tokentoDate" name="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tokentoTime" class="form-label">To Time</label>
+                            <input type="time" class="form-control" id="tokentoTime" name="time" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tokenDate" class="form-label">Token Date</label>
+                            <input type="date" class="form-control" id="tokenDate" name="date" required>
+                        </div>
+                        <!-- FIXED: Dedicated Menu Items field for Special Token -->
+                        <div class="mb-3">
+                            <label for="specialMenuItems" class="form-label">Menu Items *</label>
+                            <textarea class="form-control" id="specialMenuItems" name="items" rows="3"
+                                placeholder="Enter special menu items (e.g., Special lunch, Biryani, Dessert)" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="specialtokenFee" class="form-label">Fee</label>
+                            <input type="number" step="0.01" class="form-control" id="specialtokenFee" name="fee" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Enable token</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
     <!-- Edit Menu Modal -->
@@ -594,74 +594,76 @@
 
 
 
-   <script>
-    let allMenus = [];
-    let allTokens = [];
-    let allSpecialTokens = [];
+    <script>
+        let allMenus = [];
+        let allTokens = [];
+        let allSpecialTokens = [];
 
-    $(document).ready(function() {
-        console.log("=== SIMPLE MESS MANAGEMENT SYSTEM ===");
-        setupSystem();
-    });
-
-    function setupSystem() {
-        console.log("Setting up system...");
-        setupModalHandlers();
-        loadAllData();
-    }
-
-    function loadAllData() {
-        console.log("Loading all data...");
-        loadMenus();
-        loadTokens();
-        loadSpecialTokens();
-    }
-
-    // ========== MENU FUNCTIONS ==========
-
-    function loadMenus() {
-        console.log("Loading menus...");
-        $.ajax({
-            url: 'api.php',
-            type: 'POST',
-            data: { action: 'read_menus' },
-            dataType: 'json'
-        }).done(function(response) {
-            console.log("✅ Menu Response:", response);
-            if (response && response.success && Array.isArray(response.data)) {
-                allMenus = response.data;
-                console.log(`✅ Loaded ${allMenus.length} menus`);
-            } else {
-                console.log("No menu data or error");
-                allMenus = [];
-            }
-            displayMenus();
-        }).fail(function(xhr, status, error) {
-            console.log("❌ Menu loading failed:", error);
-            allMenus = [];
-            displayMenus();
+        $(document).ready(function() {
+            console.log("=== SIMPLE MESS MANAGEMENT SYSTEM ===");
+            setupSystem();
         });
-    }
 
-    function displayMenus() {
-        console.log(`Displaying ${allMenus.length} menus`);
-        const tableBody = $('#messMenuTable tbody');
-        
-        if (tableBody.length === 0) {
-            console.log("❌ Menu table not found");
-            return;
+        function setupSystem() {
+            console.log("Setting up system...");
+            setupModalHandlers();
+            loadAllData();
         }
-        
-        tableBody.empty();
-        
-        if (allMenus.length === 0) {
-            tableBody.append('<tr><td colspan="6" class="text-center">No menu items found</td></tr>');
-            return;
+
+        function loadAllData() {
+            console.log("Loading all data...");
+            loadMenus();
+            loadTokens();
+            loadSpecialTokens();
         }
-        
-        allMenus.forEach(function(menu) {
-            const badge = getMealTypeBadge(menu.meal_type);
-            const row = `
+
+        // ========== MENU FUNCTIONS ==========
+
+        function loadMenus() {
+            console.log("Loading menus...");
+            $.ajax({
+                url: 'api.php',
+                type: 'POST',
+                data: {
+                    action: 'read_menus'
+                },
+                dataType: 'json'
+            }).done(function(response) {
+                console.log("✅ Menu Response:", response);
+                if (response && response.success && Array.isArray(response.data)) {
+                    allMenus = response.data;
+                    console.log(`✅ Loaded ${allMenus.length} menus`);
+                } else {
+                    console.log("No menu data or error");
+                    allMenus = [];
+                }
+                displayMenus();
+            }).fail(function(xhr, status, error) {
+                console.log("❌ Menu loading failed:", error);
+                allMenus = [];
+                displayMenus();
+            });
+        }
+
+        function displayMenus() {
+            console.log(`Displaying ${allMenus.length} menus`);
+            const tableBody = $('#messMenuTable tbody');
+
+            if (tableBody.length === 0) {
+                console.log("❌ Menu table not found");
+                return;
+            }
+
+            tableBody.empty();
+
+            if (allMenus.length === 0) {
+                tableBody.append('<tr><td colspan="6" class="text-center">No menu items found</td></tr>');
+                return;
+            }
+
+            allMenus.forEach(function(menu) {
+                const badge = getMealTypeBadge(menu.meal_type);
+                const row = `
                 <tr data-menu-id="${menu.menu_id}">
                     <td>${menu.date || 'N/A'}</td>
                     <td><span class="badge ${badge}">${menu.meal_type || 'N/A'}</span></td>
@@ -680,209 +682,211 @@
                     </td>
                 </tr>
             `;
-            tableBody.append(row);
-        });
-        
-        console.log("✅ Menu table updated");
-    }
+                tableBody.append(row);
+            });
 
-    function saveMenuForm(mealType) {
-        console.log(`Saving ${mealType} menu...`);
-        
-        const prefix = mealType.toLowerCase();
-        const data = {
-            action: 'create_menu',
-            date: $(`#${prefix}Date`).val(),
-            meal_type: mealType,
-            items: $(`#${prefix}Items`).val(),
-            category: $(`#${prefix}Category`).val(),
-            fee: $(`#${prefix}Fee`).val()
-        };
-        
-        console.log("Form data:", data);
-        
-        // Validation
-        if (!data.date || !data.items || !data.fee) {
-            showMessage('error', 'Please fill Date, Items, and Fee');
-            return;
+            console.log("✅ Menu table updated");
         }
 
-        $.post('api.php', data, function(response) {
-            console.log("Save response:", response);
-            
-            if (response && response.success) {
-                showMessage('success', response.message || 'Menu saved');
-                $(`#${prefix}Modal`).modal('hide');
-                clearForm(mealType);
-                
-                // INSTANT UPDATE - Add new item to table
-                const newMenu = {
-                    menu_id: response.id,
-                    date: data.date,
-                    meal_type: data.meal_type,
-                    items: data.items,
-                    category: data.category,
-                    fee: data.fee
-                };
-                
-                allMenus.unshift(newMenu);
-                displayMenus();
-                console.log("✅ Table updated instantly");
-                
-            } else {
-                showMessage('error', response.message || 'Save failed');
+        function saveMenuForm(mealType) {
+            console.log(`Saving ${mealType} menu...`);
+
+            const prefix = mealType.toLowerCase();
+            const data = {
+                action: 'create_menu',
+                date: $(`#${prefix}Date`).val(),
+                meal_type: mealType,
+                items: $(`#${prefix}Items`).val(),
+                category: $(`#${prefix}Category`).val(),
+                fee: $(`#${prefix}Fee`).val()
+            };
+
+            console.log("Form data:", data);
+
+            // Validation
+            if (!data.date || !data.items || !data.fee) {
+                showMessage('error', 'Please fill Date, Items, and Fee');
+                return;
             }
-        }, 'json').fail(function() {
-            showMessage('error', 'Connection failed');
-        });
-    }
 
-    function editMenu(menuId) {
-        console.log("Edit menu:", menuId);
-        
-        const menu = allMenus.find(m => m.menu_id == menuId);
-        if (!menu) {
-            showMessage('error', 'Menu not found');
-            return;
-        }
-        
-        console.log("Found menu:", menu);
-        
-        // Populate edit form
-        $('#editMenuId').val(menu.menu_id);
-        $('#editMenuDate').val(menu.date);
-        $('#editMenuMealType').val(menu.meal_type);
-        $('#editMenuItems').val(menu.items);
-        $('#editMenuCategory').val(menu.category || '');
-        $('#editMenuFee').val(menu.fee);
-        
-        // Show edit modal
-        $('#editMenuModal').modal('show');
-    }
+            $.post('api.php', data, function(response) {
+                console.log("Save response:", response);
 
-    function updateMenu() {
-        console.log("Updating menu...");
-        
-        const data = {
-            action: 'update_menu',
-            menu_id: $('#editMenuId').val(),
-            date: $('#editMenuDate').val(),
-            meal_type: $('#editMenuMealType').val(),
-            items: $('#editMenuItems').val(),
-            category: $('#editMenuCategory').val(),
-            fee: $('#editMenuFee').val()
-        };
-        
-        console.log("Update data:", data);
-        
-        // Validation
-        if (!data.menu_id || !data.date || !data.meal_type || !data.items || !data.fee) {
-            showMessage('error', 'Please fill all required fields');
-            return;
-        }
+                if (response && response.success) {
+                    showMessage('success', response.message || 'Menu saved');
+                    $(`#${prefix}Modal`).modal('hide');
+                    clearForm(mealType);
 
-        $.post('api.php', data, function(response) {
-            console.log("Update response:", response);
-            
-            if (response && response.success) {
-                showMessage('success', response.message || 'Menu updated');
-                $('#editMenuModal').modal('hide');
-                
-                // INSTANT UPDATE - Update item in array
-                const menuIndex = allMenus.findIndex(m => m.menu_id == data.menu_id);
-                if (menuIndex !== -1) {
-                    allMenus[menuIndex] = {
-                        menu_id: data.menu_id,
+                    // INSTANT UPDATE - Add new item to table
+                    const newMenu = {
+                        menu_id: response.id,
                         date: data.date,
                         meal_type: data.meal_type,
                         items: data.items,
                         category: data.category,
                         fee: data.fee
                     };
+
+                    allMenus.unshift(newMenu);
+                    displayMenus();
+                    console.log("✅ Table updated instantly");
+
+                } else {
+                    showMessage('error', response.message || 'Save failed');
                 }
-                
-                displayMenus();
-                console.log("✅ Menu updated instantly in table");
-                
-            } else {
-                showMessage('error', response.message || 'Update failed');
-            }
-        }, 'json').fail(function() {
-            showMessage('error', 'Update connection failed');
-        });
-    }
-
-    function deleteMenu(menuId) {
-        console.log("Delete menu:", menuId);
-        
-        if (!confirm('Are you sure you want to delete this menu item?')) {
-            return;
+            }, 'json').fail(function() {
+                showMessage('error', 'Connection failed');
+            });
         }
 
-        $.post('api.php', {
-            action: 'delete_menu',
-            menu_id: menuId
-        }, function(response) {
-            console.log("Delete response:", response);
-            
-            if (response && response.success) {
-                showMessage('success', response.message || 'Menu deleted');
-                
-                // INSTANT UPDATE - Remove from array
-                allMenus = allMenus.filter(m => m.menu_id != menuId);
-                displayMenus();
-                console.log("✅ Menu deleted instantly from table");
-                
-            } else {
-                showMessage('error', response.message || 'Delete failed');
+        function editMenu(menuId) {
+            console.log("Edit menu:", menuId);
+
+            const menu = allMenus.find(m => m.menu_id == menuId);
+            if (!menu) {
+                showMessage('error', 'Menu not found');
+                return;
             }
-        }, 'json').fail(function() {
-            showMessage('error', 'Delete connection failed');
-        });
-    }
 
-    // ========== SPECIAL TOKEN FUNCTIONS ==========
+            console.log("Found menu:", menu);
 
-    function loadSpecialTokens() {
-        console.log("Loading special tokens...");
-        
-        $.post('api.php', { action: 'read_special_tokens' }, function(response) {
-            console.log("Special token response:", response);
-            
-            if (response && response.success && Array.isArray(response.data)) {
-                allSpecialTokens = response.data;
-            } else {
+            // Populate edit form
+            $('#editMenuId').val(menu.menu_id);
+            $('#editMenuDate').val(menu.date);
+            $('#editMenuMealType').val(menu.meal_type);
+            $('#editMenuItems').val(menu.items);
+            $('#editMenuCategory').val(menu.category || '');
+            $('#editMenuFee').val(menu.fee);
+
+            // Show edit modal
+            $('#editMenuModal').modal('show');
+        }
+
+        function updateMenu() {
+            console.log("Updating menu...");
+
+            const data = {
+                action: 'update_menu',
+                menu_id: $('#editMenuId').val(),
+                date: $('#editMenuDate').val(),
+                meal_type: $('#editMenuMealType').val(),
+                items: $('#editMenuItems').val(),
+                category: $('#editMenuCategory').val(),
+                fee: $('#editMenuFee').val()
+            };
+
+            console.log("Update data:", data);
+
+            // Validation
+            if (!data.menu_id || !data.date || !data.meal_type || !data.items || !data.fee) {
+                showMessage('error', 'Please fill all required fields');
+                return;
+            }
+
+            $.post('api.php', data, function(response) {
+                console.log("Update response:", response);
+
+                if (response && response.success) {
+                    showMessage('success', response.message || 'Menu updated');
+                    $('#editMenuModal').modal('hide');
+
+                    // INSTANT UPDATE - Update item in array
+                    const menuIndex = allMenus.findIndex(m => m.menu_id == data.menu_id);
+                    if (menuIndex !== -1) {
+                        allMenus[menuIndex] = {
+                            menu_id: data.menu_id,
+                            date: data.date,
+                            meal_type: data.meal_type,
+                            items: data.items,
+                            category: data.category,
+                            fee: data.fee
+                        };
+                    }
+
+                    displayMenus();
+                    console.log("✅ Menu updated instantly in table");
+
+                } else {
+                    showMessage('error', response.message || 'Update failed');
+                }
+            }, 'json').fail(function() {
+                showMessage('error', 'Update connection failed');
+            });
+        }
+
+        function deleteMenu(menuId) {
+            console.log("Delete menu:", menuId);
+
+            if (!confirm('Are you sure you want to delete this menu item?')) {
+                return;
+            }
+
+            $.post('api.php', {
+                action: 'delete_menu',
+                menu_id: menuId
+            }, function(response) {
+                console.log("Delete response:", response);
+
+                if (response && response.success) {
+                    showMessage('success', response.message || 'Menu deleted');
+
+                    // INSTANT UPDATE - Remove from array
+                    allMenus = allMenus.filter(m => m.menu_id != menuId);
+                    displayMenus();
+                    console.log("✅ Menu deleted instantly from table");
+
+                } else {
+                    showMessage('error', response.message || 'Delete failed');
+                }
+            }, 'json').fail(function() {
+                showMessage('error', 'Delete connection failed');
+            });
+        }
+
+        // ========== SPECIAL TOKEN FUNCTIONS ==========
+
+        function loadSpecialTokens() {
+            console.log("Loading special tokens...");
+
+            $.post('api.php', {
+                action: 'read_special_tokens'
+            }, function(response) {
+                console.log("Special token response:", response);
+
+                if (response && response.success && Array.isArray(response.data)) {
+                    allSpecialTokens = response.data;
+                } else {
+                    allSpecialTokens = [];
+                }
+
+                displaySpecialTokens();
+
+            }, 'json').fail(function() {
+                console.log("Special token loading failed");
                 allSpecialTokens = [];
-            }
-            
-            displaySpecialTokens();
-            
-        }, 'json').fail(function() {
-            console.log("Special token loading failed");
-            allSpecialTokens = [];
-            displaySpecialTokens();
-        });
-    }
+                displaySpecialTokens();
+            });
+        }
 
-    function displaySpecialTokens() {
-        console.log(`Displaying ${allSpecialTokens.length} special tokens`);
-        
-        const tableBody = $('#specialtokenEnableTable tbody');
-        
-        if (tableBody.length === 0) {
-            console.log("Special token table not found");
-            return;
-        }
-        
-        tableBody.empty();
-        
-        if (allSpecialTokens.length === 0) {
-            tableBody.append('<tr><td colspan="6" class="text-center">No special tokens found</td></tr>');
-            return;
-        }
-        
-        allSpecialTokens.forEach(function(token) {
-            const row = `
+        function displaySpecialTokens() {
+            console.log(`Displaying ${allSpecialTokens.length} special tokens`);
+
+            const tableBody = $('#specialtokenEnableTable tbody');
+
+            if (tableBody.length === 0) {
+                console.log("Special token table not found");
+                return;
+            }
+
+            tableBody.empty();
+
+            if (allSpecialTokens.length === 0) {
+                tableBody.append('<tr><td colspan="6" class="text-center">No special tokens found</td></tr>');
+                return;
+            }
+
+            allSpecialTokens.forEach(function(token) {
+                const row = `
                 <tr>
                     <td>${token.from_date || 'N/A'}</td>
                     <td>${token.from_time || 'N/A'}</td>
@@ -893,138 +897,140 @@
                     <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td>
                 </tr>
             `;
-            tableBody.append(row);
-        });
-        
-        console.log("✅ Special token table updated");
-    }
+                tableBody.append(row);
+            });
 
-    // FIXED: Save special token function
-    function saveSpecialToken() {
-        console.log("=== SAVING SPECIAL TOKEN ===");
-        
-        // FIXED: Get values from correct fields
-        const fromDate = $('#tokenfromDate').val();
-        const fromTime = $('#tokenfromTime').val();
-        const toDate = $('#tokentoDate').val();
-        const toTime = $('#tokentoTime').val();
-        const tokensDate = $('#tokenDate').val();
-        const menuItems = $('#specialMenuItems').val();  // FIXED: Use dedicated field
-        const fee = $('#specialtokenFee').val();
-        
-        console.log("Form field values:");
-        console.log("- From Date:", fromDate);
-        console.log("- From Time:", fromTime);
-        console.log("- To Date:", toDate);
-        console.log("- To Time:", toTime);
-        console.log("- Token Date:",tokensDate)
-        console.log("- Menu Items:", menuItems);
-        console.log("- Fee:", fee);
-        
-        const data = {
-            action: 'create_special_token',
-            from_date: fromDate,
-            from_time: fromTime,
-            to_date: toDate,
-            to_time: toTime,
-            token_date: tokensDate,
-            menu_items: menuItems,
-            fee: fee
-        };
-        
-        // Validation
-        const missing = [];
-        if (!data.from_date) missing.push('From Date');
-        if (!data.from_time) missing.push('From Time');
-        if (!data.to_date) missing.push('To Date');
-        if (!data.to_time) missing.push('To Time');
-        if (!data.token_date) missing.push('Token Date');
-        if (!data.menu_items) missing.push('Menu Items');
-        if (!data.fee) missing.push('Fee');
-        
-        if (missing.length > 0) {
-            console.log("❌ Missing fields:", missing);
-            showMessage('error', `Please fill: ${missing.join(', ')}`);
-            return;
+            console.log("✅ Special token table updated");
         }
 
-        console.log("✅ Validation passed. Sending data:", data);
+        // FIXED: Save special token function
+        function saveSpecialToken() {
+            console.log("=== SAVING SPECIAL TOKEN ===");
 
-        $.post('api.php', data, function(response) {
-            console.log("Special token response:", response);
-            
-            if (response && response.success) {
-                showMessage('success', response.message || 'Special token saved');
-                $('#specialtokenModal').modal('hide');
-                clearSpecialTokenForm();
-                
-                // INSTANT UPDATE - Add to table
-                const newToken = {
-                    menu_id: response.id,
-                    from_date: data.from_date,
-                    from_time: data.from_time,
-                    to_date: data.to_date,
-                    to_time: data.to_time,
-                    token_date: data.token_date,
-                    menu_items: data.menu_items,
-                    fee: data.fee
-                };
-                
-                allSpecialTokens.unshift(newToken);
-                displaySpecialTokens();
-                console.log("✅ Special token table updated instantly");
-                
-            } else {
-                showMessage('error', response.message || 'Save failed');
+            // FIXED: Get values from correct fields
+            const fromDate = $('#tokenfromDate').val();
+            const fromTime = $('#tokenfromTime').val();
+            const toDate = $('#tokentoDate').val();
+            const toTime = $('#tokentoTime').val();
+            const tokensDate = $('#tokenDate').val();
+            const menuItems = $('#specialMenuItems').val(); // FIXED: Use dedicated field
+            const fee = $('#specialtokenFee').val();
+
+            console.log("Form field values:");
+            console.log("- From Date:", fromDate);
+            console.log("- From Time:", fromTime);
+            console.log("- To Date:", toDate);
+            console.log("- To Time:", toTime);
+            console.log("- Token Date:", tokensDate)
+            console.log("- Menu Items:", menuItems);
+            console.log("- Fee:", fee);
+
+            const data = {
+                action: 'create_special_token',
+                from_date: fromDate,
+                from_time: fromTime,
+                to_date: toDate,
+                to_time: toTime,
+                token_date: tokensDate,
+                menu_items: menuItems,
+                fee: fee
+            };
+
+            // Validation
+            const missing = [];
+            if (!data.from_date) missing.push('From Date');
+            if (!data.from_time) missing.push('From Time');
+            if (!data.to_date) missing.push('To Date');
+            if (!data.to_time) missing.push('To Time');
+            if (!data.token_date) missing.push('Token Date');
+            if (!data.menu_items) missing.push('Menu Items');
+            if (!data.fee) missing.push('Fee');
+
+            if (missing.length > 0) {
+                console.log("❌ Missing fields:", missing);
+                showMessage('error', `Please fill: ${missing.join(', ')}`);
+                return;
             }
-        }, 'json').fail(function(xhr, status, error) {
-            console.log("❌ Special token save failed:", error);
-            showMessage('error', 'Connection failed');
-        });
-    }
 
-    // ========== TOKEN FUNCTIONS ==========
+            console.log("✅ Validation passed. Sending data:", data);
 
-    function loadTokens() {
-        console.log("Loading tokens...");
-        
-        $.post('api.php', { action: 'read_tokens' }, function(response) {
-            console.log("Token response:", response);
-            
-            if (response && response.success && Array.isArray(response.data)) {
-                allTokens = response.data;
-            } else {
+            $.post('api.php', data, function(response) {
+                console.log("Special token response:", response);
+
+                if (response && response.success) {
+                    showMessage('success', response.message || 'Special token saved');
+                    $('#specialtokenModal').modal('hide');
+                    clearSpecialTokenForm();
+
+                    // INSTANT UPDATE - Add to table
+                    const newToken = {
+                        menu_id: response.id,
+                        from_date: data.from_date,
+                        from_time: data.from_time,
+                        to_date: data.to_date,
+                        to_time: data.to_time,
+                        token_date: data.token_date,
+                        menu_items: data.menu_items,
+                        fee: data.fee
+                    };
+
+                    allSpecialTokens.unshift(newToken);
+                    displaySpecialTokens();
+                    console.log("✅ Special token table updated instantly");
+
+                } else {
+                    showMessage('error', response.message || 'Save failed');
+                }
+            }, 'json').fail(function(xhr, status, error) {
+                console.log("❌ Special token save failed:", error);
+                showMessage('error', 'Connection failed');
+            });
+        }
+
+        // ========== TOKEN FUNCTIONS ==========
+
+        function loadTokens() {
+            console.log("Loading tokens...");
+
+            $.post('api.php', {
+                action: 'read_tokens'
+            }, function(response) {
+                console.log("Token response:", response);
+
+                if (response && response.success && Array.isArray(response.data)) {
+                    allTokens = response.data;
+                } else {
+                    allTokens = [];
+                }
+
+                displayTokens();
+
+            }, 'json').fail(function() {
+                console.log("Token loading failed");
                 allTokens = [];
-            }
-            
-            displayTokens();
-            
-        }, 'json').fail(function() {
-            console.log("Token loading failed");
-            allTokens = [];
-            displayTokens();
-        });
-    }
+                displayTokens();
+            });
+        }
 
-    function displayTokens() {
-        console.log(`Displaying ${allTokens.length} tokens`);
-        
-        const tableBody = $('#messTokensTable tbody');
-        
-        if (tableBody.length === 0) {
-            console.log("Token table not found");
-            return;
-        }
-        
-        tableBody.empty();
-        
-        if (allTokens.length === 0) {
-            tableBody.append('<tr><td colspan="7" class="text-center">No tokens found</td></tr>');
-            return;
-        }
-        
-        allTokens.forEach(function(token) {
-            const row = `
+        function displayTokens() {
+            console.log(`Displaying ${allTokens.length} tokens`);
+
+            const tableBody = $('#messTokensTable tbody');
+
+            if (tableBody.length === 0) {
+                console.log("Token table not found");
+                return;
+            }
+
+            tableBody.empty();
+
+            if (allTokens.length === 0) {
+                tableBody.append('<tr><td colspan="7" class="text-center">No tokens found</td></tr>');
+                return;
+            }
+
+            allTokens.forEach(function(token) {
+                const row = `
                 <tr>
                     <td>Student ${token.student_roll_number || 'N/A'}</td>
                     <td>${token.student_roll_number || 'N/A'}</td>
@@ -1039,130 +1045,134 @@
                     </td>
                 </tr>
             `;
-            tableBody.append(row);
-        });
-        
-        console.log("✅ Token table updated");
-    }
-
-    function deleteToken(tokenId) {
-        console.log("Delete token:", tokenId);
-        
-        if (!confirm('Delete this token?')) {
-            return;
-        }
-
-        $.post('api.php', {
-            action: 'delete_token',
-            token_id: tokenId
-        }, function(response) {
-            if (response && response.success) {
-                showMessage('success', 'Token deleted');
-                allTokens = allTokens.filter(t => t.token_id != tokenId);
-                displayTokens();
-            } else {
-                showMessage('error', 'Delete failed');
-            }
-        }, 'json');
-    }
-
-    // ========== MODAL HANDLERS ==========
-
-    function setupModalHandlers() {
-        console.log("Setting up handlers...");
-        
-        // Breakfast
-        $(document).on('click', 'button[data-save-form="breakfastMenuForm"]', function() {
-            console.log("Breakfast save clicked");
-            saveMenuForm('Breakfast');
-        });
-
-        // Lunch
-        $(document).on('click', 'button[data-save-form="lunchMenuForm"]', function() {
-            console.log("Lunch save clicked");
-            saveMenuForm('Lunch');
-        });
-
-        // Snacks
-        $('#snacksModal .btn-primary').click(function() {
-            console.log("Snacks save clicked");
-            saveMenuForm('Snacks');
-        });
-
-        // Dinner
-        $('#dinnerModal .btn-primary').click(function() {
-            console.log("Dinner save clicked");
-            saveMenuForm('Dinner');
-        });
-
-        // Special Token
-        $('#specialtokenModal .btn-primary').click(function() {
-            console.log("Special token save clicked");
-            saveSpecialToken();
-        });
-
-        // Global functions
-        window.editMenu = editMenu;
-        window.updateMenu = updateMenu;
-        window.deleteMenu = deleteMenu;
-        window.deleteToken = deleteToken;
-        
-        console.log("✅ Handlers setup complete");
-    }
-
-    // ========== UTILITY FUNCTIONS ==========
-
-    function clearForm(mealType) {
-        const prefix = mealType.toLowerCase();
-        $(`#${prefix}Date`).val('');
-        $(`#${prefix}Items`).val('');
-        $(`#${prefix}Category`).val('');
-        $(`#${prefix}Fee`).val('');
-    }
-
-    function clearSpecialTokenForm() {
-        $('#tokenfromDate').val('');
-        $('#tokenfromTime').val('');
-        $('#tokentoDate').val('');
-        $('#tokentoTime').val('');
-        $ ('#tokenDate').val('');
-        $('#specialMenuItems').val('');  // FIXED: Clear correct field
-        $('#specialtokenFee').val('');
-    }
-
-    function getMealTypeBadge(mealType) {
-        switch(mealType) {
-            case 'Breakfast': return 'bg-warning text-dark';
-            case 'Lunch': return 'bg-success';
-            case 'Snacks': return 'bg-info text-dark';
-            case 'Dinner': return 'bg-primary';
-            default: return 'bg-secondary';
-        }
-    }
-
-    function showMessage(type, message) {
-        console.log(`${type.toUpperCase()}: ${message}`);
-        
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: type === 'success' ? 'success' : 'error',
-                title: type.charAt(0).toUpperCase() + type.slice(1),
-                text: message,
-                timer: type === 'success' ? 1500 : 0,
-                showConfirmButton: type !== 'success'
+                tableBody.append(row);
             });
-        } else {
-            alert(`${type.toUpperCase()}: ${message}`);
+
+            console.log("✅ Token table updated");
         }
-    }
 
-    // Manual refresh function (if needed)
-    window.refreshData = function() {
-        console.log("Manual refresh triggered");
-        loadAllData();
-    };
+        function deleteToken(tokenId) {
+            console.log("Delete token:", tokenId);
 
-</script>
+            if (!confirm('Delete this token?')) {
+                return;
+            }
+
+            $.post('api.php', {
+                action: 'delete_token',
+                token_id: tokenId
+            }, function(response) {
+                if (response && response.success) {
+                    showMessage('success', 'Token deleted');
+                    allTokens = allTokens.filter(t => t.token_id != tokenId);
+                    displayTokens();
+                } else {
+                    showMessage('error', 'Delete failed');
+                }
+            }, 'json');
+        }
+
+        // ========== MODAL HANDLERS ==========
+
+        function setupModalHandlers() {
+            console.log("Setting up handlers...");
+
+            // Breakfast
+            $(document).on('click', 'button[data-save-form="breakfastMenuForm"]', function() {
+                console.log("Breakfast save clicked");
+                saveMenuForm('Breakfast');
+            });
+
+            // Lunch
+            $(document).on('click', 'button[data-save-form="lunchMenuForm"]', function() {
+                console.log("Lunch save clicked");
+                saveMenuForm('Lunch');
+            });
+
+            // Snacks
+            $('#snacksModal .btn-primary').click(function() {
+                console.log("Snacks save clicked");
+                saveMenuForm('Snacks');
+            });
+
+            // Dinner
+            $('#dinnerModal .btn-primary').click(function() {
+                console.log("Dinner save clicked");
+                saveMenuForm('Dinner');
+            });
+
+            // Special Token
+            $('#specialtokenModal .btn-primary').click(function() {
+                console.log("Special token save clicked");
+                saveSpecialToken();
+            });
+
+            // Global functions
+            window.editMenu = editMenu;
+            window.updateMenu = updateMenu;
+            window.deleteMenu = deleteMenu;
+            window.deleteToken = deleteToken;
+
+            console.log("✅ Handlers setup complete");
+        }
+
+        // ========== UTILITY FUNCTIONS ==========
+
+        function clearForm(mealType) {
+            const prefix = mealType.toLowerCase();
+            $(`#${prefix}Date`).val('');
+            $(`#${prefix}Items`).val('');
+            $(`#${prefix}Category`).val('');
+            $(`#${prefix}Fee`).val('');
+        }
+
+        function clearSpecialTokenForm() {
+            $('#tokenfromDate').val('');
+            $('#tokenfromTime').val('');
+            $('#tokentoDate').val('');
+            $('#tokentoTime').val('');
+            $('#tokenDate').val('');
+            $('#specialMenuItems').val(''); // FIXED: Clear correct field
+            $('#specialtokenFee').val('');
+        }
+
+        function getMealTypeBadge(mealType) {
+            switch (mealType) {
+                case 'Breakfast':
+                    return 'bg-warning text-dark';
+                case 'Lunch':
+                    return 'bg-success';
+                case 'Snacks':
+                    return 'bg-info text-dark';
+                case 'Dinner':
+                    return 'bg-primary';
+                default:
+                    return 'bg-secondary';
+            }
+        }
+
+        function showMessage(type, message) {
+            console.log(`${type.toUpperCase()}: ${message}`);
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: type === 'success' ? 'success' : 'error',
+                    title: type.charAt(0).toUpperCase() + type.slice(1),
+                    text: message,
+                    timer: type === 'success' ? 1500 : 0,
+                    showConfirmButton: type !== 'success'
+                });
+            } else {
+                alert(`${type.toUpperCase()}: ${message}`);
+            }
+        }
+
+        // Manual refresh function (if needed)
+        window.refreshData = function() {
+            console.log("Manual refresh triggered");
+            loadAllData();
+        };
+    </script>
 
 
 </html>
