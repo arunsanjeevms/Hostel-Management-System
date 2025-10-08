@@ -191,11 +191,7 @@ display: inline-block;
     <div class="menu">
     
 
-<<<<<<< HEAD
-        <a href="#" class="menu-item">
-=======
         <a href="student_registration.php" class="menu-item">
->>>>>>> 2ae024f59e46468a072166f399153ce69aa00f21
         <i class="fa-solid fa-user" style="color: #FFC107;"></i>
             <span>Student Registration</span>
         </a>
@@ -205,33 +201,17 @@ display: inline-block;
             <span>Hostel Attendance </span>
         </a>
         
-<<<<<<< HEAD
-        <a href="#" class="menu-item">
-=======
         <a href="leave_approve.php" class="menu-item">
->>>>>>> 2ae024f59e46468a072166f399153ce69aa00f21
         <i class="fa-solid fa-ticket" style="color: #28EAA3;"></i>
             <span>Leave Approval </span>
         </a>
 
-<<<<<<< HEAD
-=======
-        <a href="leave_enable.php" class="menu-item">
-        <i class="fa-solid fa-sliders" style="color: #9C27B0;"></i>
-            <span>General Leave Management</span>
-        </a>
-
->>>>>>> 2ae024f59e46468a072166f399153ce69aa00f21
         <a href="#" class="menu-item">
         <i class="fa-solid fa-bowl-food" style="color: #BBBBBD;"></i>
             <span>Mess Menu </span>
         </a>
 
-<<<<<<< HEAD
         <a href="#" class="menu-item">
-=======
-        <a href="room.php" class="menu-item">
->>>>>>> 2ae024f59e46468a072166f399153ce69aa00f21
         <i class="fa-solid fa-hotel" style="color: #E91E63"></i>
             <span>Room Details </span>
         </a>
