@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 07, 2025 at 06:15 AM
+-- Generation Time: Oct 08, 2025 at 05:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -162,7 +162,10 @@ CREATE TABLE `mess_menu` (
 --
 
 INSERT INTO `mess_menu` (`menu_id`, `date`, `meal_type`, `items`, `category`, `fee`, `created_at`) VALUES
-(7, '2025-10-07', 'Breakfast', 'idly', 'Regular ', 15.00, '2025-10-07 03:55:15');
+(12, '2025-10-07', 'Breakfast', 'Dosa,pongal,chutney', 'Regular ', 0.00, '2025-10-07 06:14:32'),
+(13, '2025-10-07', 'Lunch', 'Rice,beet poriyal,Drumstick sambar', 'Regular ', 0.00, '2025-10-07 06:19:17'),
+(14, '2025-10-07', 'Snacks', 'masala bonda', 'Regular ', 0.00, '2025-10-07 06:20:17'),
+(15, '2025-10-07', 'Dinner', 'Chapati,paneer gravy', 'Regular ', 0.00, '2025-10-07 06:21:07');
 
 -- --------------------------------------------------------
 
@@ -272,10 +275,18 @@ CREATE TABLE `specialtokenenable` (
   `from_time` time NOT NULL,
   `to_date` date NOT NULL,
   `to_time` time NOT NULL,
+  `token_date` date DEFAULT NULL,
   `menu_items` text NOT NULL,
   `fee` decimal(10,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `specialtokenenable`
+--
+
+INSERT INTO `specialtokenenable` (`menu_id`, `from_date`, `from_time`, `to_date`, `to_time`, `token_date`, `menu_items`, `fee`, `created_at`) VALUES
+(2, '2025-10-07', '20:45:00', '2025-10-07', '22:45:00', '2025-10-07', 'Biriyani', 100.00, '2025-10-07 15:19:40');
 
 -- --------------------------------------------------------
 
@@ -578,7 +589,7 @@ ALTER TABLE `leave_approval_portals`
 -- AUTO_INCREMENT for table `mess_menu`
 --
 ALTER TABLE `mess_menu`
-  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `mess_supervisors`
@@ -620,7 +631,7 @@ ALTER TABLE `rooms`
 -- AUTO_INCREMENT for table `specialtokenenable`
 --
 ALTER TABLE `specialtokenenable`
-  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `students`
