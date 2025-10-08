@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2ae024f59e46468a072166f399153ce69aa00f21
 body {
     min-height: 100vh;
     margin: 0;
@@ -65,7 +69,11 @@ body {
     box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
+<<<<<<< HEAD
 /* Add Bus Tab Styling */
+=======
+/* Add Bus Tab Styling for pending */
+>>>>>>> 2ae024f59e46468a072166f399153ce69aa00f21
 #family-tab {
     background: linear-gradient(135deg, #FF6B6B, #FFE66D);
     color: #fff;
@@ -97,6 +105,112 @@ body {
     color: #fff;
 }
 
+<<<<<<< HEAD
+=======
+
+/* Add Bus Tab Styling for processed */
+#processed-tab {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: #fff;
+}
+
+#processed-tab:not(.active) {
+    background: #fff;
+    color: #FF6B6B;
+}
+
+#processed-tab:hover:not(.active) {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: #fff;
+}
+
+/* Processed Tab Styling (formerly family-main-tab) */
+#processed-main-tab {
+    background: linear-gradient(135deg,#51B150, #84C14B);
+    color: #fff;
+}
+
+#processed-main-tab:not(.active) {
+    background: #fff;
+    color: #11998e;
+}
+
+#processed-main-tab:hover:not(.active) {
+    background: linear-gradient(135deg, #51B150,#84C14B);
+    color: #fff;
+}
+
+
+/* Add Bus Tab Styling for IVR */
+#ivr-tab {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: #fff;
+}
+
+#ivr-tab:not(.active) {
+    background: #fff;
+    color: #FF6B6B;
+}
+
+#ivr-tab:hover:not(.active) {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: #fff;
+}
+
+/* Processed Tab Styling (formerly family-main-tab) */
+#ivr-main-tab {
+    background: linear-gradient(135deg, #bcb011, #fcfc94);
+    color: #fff;
+}
+
+#ivr-main-tab:not(.active) {
+    background: #fff;
+    color: #bcb011;
+}
+
+#ivr-main-tab:hover:not(.active) {
+    background: linear-gradient(135deg,#bcb011,#fcfc94);
+    color: #fff;
+}
+
+
+
+/* Add Bus Tab Styling for IVR */
+#ivrprocessed-tab {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: #fff;
+}
+
+#ivr-tab:not(.active) {
+    background: #fff;
+    color: #FF6B6B;
+}
+
+#ivrprocessed-tab:hover:not(.active) {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+    color: #fff;
+}
+
+/* Processed Tab Styling (formerly family-main-tab) */
+#ivrprocessed-main-tab {
+    background: linear-gradient(135deg, #02572c,#7ef87c);
+    color: #fff;
+}
+
+#ivrprocessed-main-tab:not(.active) {
+    background: #fff;
+    color: #19803d;
+}
+
+#ivrprocessed-main-tab:hover:not(.active) {
+    background: linear-gradient(135deg, #02572c, #7ef87c);
+    color: #fff;
+}
+
+
+
+
+>>>>>>> 2ae024f59e46468a072166f399153ce69aa00f21
 .tab-icon {
     margin-right: 8px;
     font-size: 0.9em;
