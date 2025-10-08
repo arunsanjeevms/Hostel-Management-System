@@ -257,7 +257,7 @@
 
                         <div class="table-responsive">
                             <table class="table table-striped" id="messMenuTable">
-                                <thead >
+                                <thead>
                                     <tr>
                                         <th>Date</th>
                                         <th>Meal Type</th>
@@ -281,7 +281,7 @@
                         </button>
                         <div class="table-responsive">
                             <table class="table table-striped" id="specialtokenEnableTable">
-                                <thead >
+                                <thead>
                                     <tr>
                                         <th>From Date</th>
                                         <th>From Time</th>
@@ -290,6 +290,7 @@
                                         <th>Token Date</th>
                                         <th>Items</th>
                                         <th>Fee</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -588,6 +589,63 @@
             </div>
         </div>
     </div>
+<!-- Special token edit modal-->
+    <div class="modal fade" id="editSpecialTokenModal" tabindex="-1" aria-labelledby="editSpecialTokenLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editSpecialTokenLabel">Edit Special Token</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editSpecialTokenForm">
+                        <input type="hidden" id="editSpecialMenuId" />
+
+                        <div class="mb-3">
+                            <label for="editSpecialFromDate" class="form-label">From Date</label>
+                            <input type="date" id="editSpecialFromDate" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editSpecialFromTime" class="form-label">From Time</label>
+                            <input type="time" id="editSpecialFromTime" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editSpecialToDate" class="form-label">To Date</label>
+                            <input type="date" id="editSpecialToDate" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editSpecialToTime" class="form-label">To Time</label>
+                            <input type="time" id="editSpecialToTime" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editSpecialTokenDate" class="form-label">Token Date</label>
+                            <input type="date" id="editSpecialTokenDate" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editSpecialMenuItems" class="form-label">Menu Items</label>
+                            <textarea id="editSpecialMenuItems" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editSpecialFee" class="form-label">Fee (₹)</label>
+                            <input type="number" id="editSpecialFee" step="0.01" class="form-control" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="updateSpecialToken()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
     <!-- Footer -->
     <?php include 'footer.php'; ?>
@@ -845,6 +903,8 @@
 
         // ========== SPECIAL TOKEN FUNCTIONS ==========
 
+
+        // Load special tokens data from API and display in table
         function loadSpecialTokens() {
             console.log("Loading special tokens...");
 
@@ -868,9 +928,9 @@
             });
         }
 
+        // Display special tokens in the table with Token Date column and Actions (Edit/Delete)
         function displaySpecialTokens() {
             console.log(`Displaying ${allSpecialTokens.length} special tokens`);
-
             const tableBody = $('#specialtokenEnableTable tbody');
 
             if (tableBody.length === 0) {
@@ -881,39 +941,48 @@
             tableBody.empty();
 
             if (allSpecialTokens.length === 0) {
-                tableBody.append('<tr><td colspan="6" class="text-center">No special tokens found</td></tr>');
+                tableBody.append('<tr><td colspan="8" class="text-center">No special tokens found</td></tr>');
                 return;
             }
 
             allSpecialTokens.forEach(function(token) {
                 const row = `
-                <tr>
-                    <td>${token.from_date || 'N/A'}</td>
-                    <td>${token.from_time || 'N/A'}</td>
-                    <td>${token.to_date || 'N/A'}</td>
-                    <td>${token.to_time || 'N/A'}</td>
-                    <td>${token.token_date || 'N/A'}</td>
-                    <td>${token.menu_items || 'N/A'}</td>
-                    <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td>
-                </tr>
-            `;
+        <tr data-menu-id="${token.menu_id}">
+            <td>${token.from_date || 'N/A'}</td>
+            <td>${token.from_time || 'N/A'}</td>
+            <td>${token.to_date || 'N/A'}</td>
+            <td>${token.to_time || 'N/A'}</td>
+            <td>${token.token_date || 'N/A'}</td>
+            <td>${token.menu_items || 'N/A'}</td>
+            <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td>
+            <td>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-warning" onclick="editSpecialToken(${token.menu_id})" title="Edit">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteSpecialToken(${token.menu_id})" title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        `;
                 tableBody.append(row);
             });
 
             console.log("✅ Special token table updated");
         }
 
-        // FIXED: Save special token function
+        // Save new special token from modal form (including Token Date)
         function saveSpecialToken() {
             console.log("=== SAVING SPECIAL TOKEN ===");
 
-            // FIXED: Get values from correct fields
             const fromDate = $('#tokenfromDate').val();
             const fromTime = $('#tokenfromTime').val();
             const toDate = $('#tokentoDate').val();
             const toTime = $('#tokentoTime').val();
-            const tokensDate = $('#tokenDate').val();
-            const menuItems = $('#specialMenuItems').val(); // FIXED: Use dedicated field
+            const tokenDate = $('#tokenDate').val(); // Token Date field
+            const menuItems = $('#specialMenuItems').val();
             const fee = $('#specialtokenFee').val();
 
             console.log("Form field values:");
@@ -921,7 +990,7 @@
             console.log("- From Time:", fromTime);
             console.log("- To Date:", toDate);
             console.log("- To Time:", toTime);
-            console.log("- Token Date:", tokensDate)
+            console.log("- Token Date:", tokenDate);
             console.log("- Menu Items:", menuItems);
             console.log("- Fee:", fee);
 
@@ -931,7 +1000,7 @@
                 from_time: fromTime,
                 to_date: toDate,
                 to_time: toTime,
-                token_date: tokensDate,
+                token_date: tokenDate,
                 menu_items: menuItems,
                 fee: fee
             };
@@ -962,7 +1031,7 @@
                     $('#specialtokenModal').modal('hide');
                     clearSpecialTokenForm();
 
-                    // INSTANT UPDATE - Add to table
+                    // Instant update: prepend new record and refresh table
                     const newToken = {
                         menu_id: response.id,
                         from_date: data.from_date,
@@ -986,6 +1055,88 @@
                 showMessage('error', 'Connection failed');
             });
         }
+
+        function clearSpecialTokenForm() {
+            $('#tokenfromDate, #tokenfromTime, #tokentoDate, #tokentoTime, #tokenDate, #specialMenuItems, #specialtokenFee').val('');
+        }
+
+        // Edit special token modal pop-up with current data (including Token Date)
+        function editSpecialToken(menuId) {
+            const token = allSpecialTokens.find(t => t.menu_id == menuId);
+            if (!token) {
+                showMessage('error', 'Special Token not found');
+                return;
+            }
+
+            $('#editSpecialMenuId').val(token.menu_id);
+            $('#editSpecialFromDate').val(token.from_date);
+            $('#editSpecialFromTime').val(token.from_time);
+            $('#editSpecialToDate').val(token.to_date);
+            $('#editSpecialToTime').val(token.to_time);
+            $('#editSpecialTokenDate').val(token.token_date);
+            $('#editSpecialMenuItems').val(token.menu_items);
+            $('#editSpecialFee').val(token.fee);
+
+            $('#editSpecialTokenModal').modal('show');
+        }
+
+        // Update special token after editing (including Token Date)
+        function updateSpecialToken() {
+            const data = {
+                action: 'update_special_token',
+                menu_id: $('#editSpecialMenuId').val(),
+                from_date: $('#editSpecialFromDate').val(),
+                from_time: $('#editSpecialFromTime').val(),
+                to_date: $('#editSpecialToDate').val(),
+                to_time: $('#editSpecialToTime').val(),
+                token_date: $('#editSpecialTokenDate').val(),
+                menu_items: $('#editSpecialMenuItems').val(),
+                fee: $('#editSpecialFee').val()
+            };
+
+            // Optional: add validation before sending
+
+            $.post('api.php', data, function(response) {
+                if (response && response.success) {
+                    showMessage('success', response.message || 'Special token updated');
+                    $('#editSpecialTokenModal').modal('hide');
+                    loadSpecialTokens();
+                } else {
+                    showMessage('error', response.message || 'Update failed');
+                }
+            }, 'json').fail(function() {
+                showMessage('error', 'Connection failed');
+            });
+        }
+
+        // Delete special token by id
+        function deleteSpecialToken(menuId) {
+            if (!confirm('Are you sure you want to delete this special token?')) return;
+
+            $.post('api.php', {
+                action: 'delete_special_token',
+                menu_id: menuId
+            }, function(response) {
+                if (response && response.success) {
+                    showMessage('success', response.message || 'Special token deleted');
+                    loadSpecialTokens();
+                } else {
+                    showMessage('error', response.message || 'Delete failed');
+                }
+            }, 'json').fail(function() {
+                showMessage('error', 'Connection failed');
+            });
+        }
+
+        // Expose to global scope
+        window.loadSpecialTokens = loadSpecialTokens;
+        window.displaySpecialTokens = displaySpecialTokens;
+        window.saveSpecialToken = saveSpecialToken;
+        window.clearSpecialTokenForm = clearSpecialTokenForm;
+        window.editSpecialToken = editSpecialToken;
+        window.updateSpecialToken = updateSpecialToken;
+        window.deleteSpecialToken = deleteSpecialToken;
+
 
         // ========== TOKEN FUNCTIONS ==========
 
