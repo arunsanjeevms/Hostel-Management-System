@@ -1,3 +1,4 @@
+
 <?php
 date_default_timezone_set('Asia/Kolkata');
 
@@ -8,7 +9,7 @@ require 'PHPMailer-master/src/Exception.php';
 require 'PHPMailer-master/src/PHPMailer.php';
 require 'PHPMailer-master/src/SMTP.php';
 include 'db_connect.php';
-
+include 'config.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST["email"]);
 
@@ -37,12 +38,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'keerthihaasri09@gmail.com'; // Your Gmail
-            $mail->Password = 'hjda ccrp hqqe jehm';      // App password
+            $mail->Username = MAIL_USERNAME; // Your Gmail
+            $mail->Password = MAIL_PASSWORD;      // App password
             $mail->SMTPSecure = 'tls';
             $mail->Port = 587;
 
-            $mail->setFrom('keerthihaasri09@gmail.com', 'Hostel Management');
+            $mail->setFrom(MAIL_USERNAME, 'Hostel Management');
             $mail->addAddress($email);
 
             $mail->isHTML(true);
