@@ -776,6 +776,7 @@ try {
                 color: black !important;
             }
         }
+        
 
         .profile-card,
         .details-card {
