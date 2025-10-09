@@ -56,6 +56,17 @@ $result = $stmt->get_result();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+
+
+    <!-- ✅ DataTables CSS -->
+<link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+<!-- ✅ jQuery + DataTables JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
     <style>
         :root {
             --sidebar-width: 250px;
@@ -344,32 +355,115 @@ $result = $stmt->get_result();
 
 
 /* Clean professional table style */
+/* -------- POLISHED FACULTY TABLE DESIGN -------- */
+
+/* Card styling */
+.card {
+  width: 98%;
+  margin: 30px auto;
+  border: none;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+
+/* Header gradient (for "Leave Requests - ECE") */
+.card-header {
+  background: linear-gradient(135deg, #00b09b, #0066ff);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.05rem;
+  border-bottom: none;
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Welcome + logout alignment */
+.card-header a.btn-light {
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 5px 12px;
+}
+
+/* Table container */
 .table {
   background: white;
-  border-radius: 10px;
+  border-radius: 0 0 10px 10px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  width: 100%;
+  margin: 0;
 }
 
+/* Gradient header — smooth green-blue */
 .table thead th {
-  background-color: #4e73df !important;
-  color: white !important;
+  background: linear-gradient(135deg, #00b09b, #0066ff);
+  color: #fff;
   font-weight: 600;
-}
-
-.table-hover tbody tr:hover {
-  background-color: #f1f5ff;
-  transition: background-color 0.3s ease;
-}
-
-.btn-success, .btn-danger {
-  width: 85px;
-  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 12px;
   border: none;
 }
 
-.btn-success:hover { background-color: #198754; }
-.btn-danger:hover { background-color: #c82333; }
+/* Smooth hover effect */
+.table-hover tbody tr:hover {
+  background: linear-gradient(135deg, rgba(0, 176, 155, 0.05), rgba(0, 102, 255, 0.07));
+  transition: background-color 0.3s ease;
+}
+
+/* Buttons — same green-blue gradient */
+.btn-success {
+  background: linear-gradient(135deg, #00b09b, #0066ff);
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+}
+
+.btn-success:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 10px rgba(0, 102, 255, 0.3);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff4b1f, #ff9068);
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+}
+
+.btn-danger:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 10px rgba(255, 75, 43, 0.3);
+}
+
+/* Badges */
+.badge.bg-success {
+  background: linear-gradient(135deg, #00b09b, #6492d7ff);
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  color: #222;
+}
+
+.badge.bg-danger {
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+}
+
 
 
 
