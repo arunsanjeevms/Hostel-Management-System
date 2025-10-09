@@ -74,8 +74,6 @@ if ($conn->connect_error) {
                 $firstDayOfMonth = date("w", strtotime("$year-$month-01"));
                 $today = date('Y-m-d');
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -282,22 +280,16 @@ if ($conn->connect_error) {
                         }
                         ?>
                     </div>
-
                     <div class="legend">
                         <div><span style="background:#28a745;"></span> Present</div>
                         <div><span style="background:#dc3545;"></span> Absent</div>
                         <div><span style="background:#e9ecef;"></span> No Record</div>
                     </div>
                 </body>
-
                 </html>
-
-
             </div>
         </div>
     </div>
-
     </div>
 </body>
-
 </html>
