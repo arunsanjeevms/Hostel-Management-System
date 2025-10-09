@@ -170,7 +170,7 @@ $rows = $stmt->fetchAll();
     </style>
 </head>
 
-<<body>
+<body>
     <?php include 'index.php'; ?>
     <?php include 'sidebar.php'; ?>
     <div class="content">
