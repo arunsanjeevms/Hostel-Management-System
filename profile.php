@@ -794,8 +794,8 @@ try {
 </head>
 
 <body>
-    <?php include 'index.php'; ?>
-
+    <?php include 'topbar.php'; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="main-content" id="mainContent" style="margin-top: <?php echo isset($demo_mode) ? '50px' : '0'; ?>;">
         <?php if (isset($error)): ?>

@@ -184,7 +184,7 @@ $rows = $stmt->fetchAll();
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                    
+
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#leaveModal">
                             Apply Leave <i class="bi bi-plus-circle"></i>
                         </button>
@@ -200,6 +200,7 @@ $rows = $stmt->fetchAll();
                                     <th>To</th>
                                     <th>Reason</th>
                                     <th>Status</th>
+                                    <th>Proof</th>
                                     <th>Applied At</th>
                                     <th>Action</th>
                                 </tr>
@@ -209,15 +210,16 @@ $rows = $stmt->fetchAll();
                                     <tr>
                                         <td colspan="8" class="text-center text-muted">No leave records found</td>
                                     </tr>
-                                <?php else: foreach ($rows as $r): ?>
-                                    <tr>
-                                        <td><?= htmlspecialchars($r['leave_id']); ?></td>
-                                        <td><?= htmlspecialchars($r['leave_type']); ?></td>
-                                        <td><?= date('M d, Y h:i A', strtotime($r['from_date'])); ?></td>
-                                        <td><?= date('M d, Y h:i A', strtotime($r['to_date'])); ?></td>
-                                        <td><?= htmlspecialchars($r['reason']); ?></td>
-                                        <td class="text-center">
-                                            <?php
+                                <?php else:
+                                    foreach ($rows as $r): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($r['leave_id']); ?></td>
+                                            <td><?= htmlspecialchars($r['leave_type']); ?></td>
+                                            <td><?= date('M d, Y h:i A', strtotime($r['from_date'])); ?></td>
+                                            <td><?= date('M d, Y h:i A', strtotime($r['to_date'])); ?></td>
+                                            <td><?= htmlspecialchars($r['reason']); ?></td>
+                                            <td class="text-center">
+                                                <?php
                                                 $status = $r['final_status'];
                                                 $badge = match ($status) {
                                                     'Pending' => 'warning',
@@ -226,75 +228,131 @@ $rows = $stmt->fetchAll();
                                                     'Cancelled' => 'secondary',
                                                     default => 'info'
                                                 };
-                                            ?>
-                                            <span class="badge bg-<?= $badge ?> px-3 py-2"><?= $status ?></span>
-                                        </td>
-                                        <td><?= date('M d, Y h:i A', strtotime($r['applied_at'])); ?></td>
-                                        <td class="text-center">
-                                            <?php if ($r['final_status'] === 'Pending'): ?>
-                                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal<?= $r['leave_id']; ?>">Edit</button>
+                                                ?>
+                                                <span class="badge bg-<?= $badge ?> px-3 py-2"><?= $status ?></span>
+                                            </td>
+                                            <td class="text-center">
+                                                <?php if (!empty($r['proof_path'])): ?>
+                                                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                                        data-bs-target="#viewProofModal<?= $r['leave_id']; ?>">View</button>
 
-                                                <form method="post" class="d-inline cancel-form">
-                                                    <input type="hidden" name="leave_id" value="<?= $r['leave_id']; ?>">
-                                                    <input type="hidden" name="cancel_leave" value="1">
-                                                    <button type="button" class="btn btn-danger btn-sm cancel-btn">Cancel</button>
-                                                </form>
-
-                                                <!-- Edit Modal -->
-                                                <div class="modal fade" id="editModal<?= $r['leave_id']; ?>" tabindex="-1">
-                                                    <div class="modal-dialog modal-dialog-centered">
-                                                        <div class="modal-content">
-                                                            <form method="post">
-                                                                <input type="hidden" name="edit_leave_id" value="<?= $r['leave_id']; ?>">
-                                                                <div class="modal-header bg-primary text-white">
-                                                                    <h5 class="modal-title">Edit Leave</h5>
-                                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                    <!-- Proof View Modal -->
+                                                    <div class="modal fade" id="viewProofModal<?= $r['leave_id']; ?>" tabindex="-1"
+                                                        aria-hidden="true">
+                                                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header bg-info text-white">
+                                                                    <h5 class="modal-title">Proof Document</h5>
+                                                                    <button type="button" class="btn-close btn-close-white"
+                                                                        data-bs-dismiss="modal"></button>
                                                                 </div>
-                                                                <div class="modal-body">
-                                                                    <div class="row mb-3">
-                                                                        <div class="col">
-                                                                            <label>From Date</label>
-                                                                            <input type="date" name="edit_from_date" class="form-control"
-                                                                                value="<?= date('Y-m-d', strtotime($r['from_date'])); ?>" required>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            <label>From Time</label>
-                                                                            <input type="text" name="edit_from_time" class="form-control edit-from-time"
-                                                                                value="<?= date('h:i A', strtotime($r['from_date'])); ?>" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="row mb-3">
-                                                                        <div class="col">
-                                                                            <label>To Date</label>
-                                                                            <input type="date" name="edit_to_date" class="form-control"
-                                                                                value="<?= date('Y-m-d', strtotime($r['to_date'])); ?>" required>
-                                                                        </div>
-                                                                        <div class="col">
-                                                                            <label>To Time</label>
-                                                                            <input type="text" name="edit_to_time" class="form-control edit-to-time"
-                                                                                value="<?= date('h:i A', strtotime($r['to_date'])); ?>" required>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="mb-3">
-                                                                        <label>Reason</label>
-                                                                        <textarea name="edit_reason" class="form-control" rows="3" required><?= htmlspecialchars($r['reason']); ?></textarea>
-                                                                    </div>
+                                                                <div class="modal-body text-center">
+                                                                    <?php
+                                                                    $file = htmlspecialchars($r['proof_path']);
+                                                                    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                                                    ?>
+                                                                    <?php if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+                                                                        <img src="<?= $file; ?>" class="img-fluid rounded-3"
+                                                                            alt="Proof Image">
+                                                                    <?php elseif ($ext === 'pdf'): ?>
+                                                                        <iframe src="<?= $file; ?>" width="100%" height="500px"
+                                                                            style="border:none;"></iframe>
+                                                                    <?php else: ?>
+                                                                        <p class="text-muted">File type not viewable. <a
+                                                                                href="<?= $file; ?>" target="_blank">Download</a></p>
+                                                                    <?php endif; ?>
                                                                 </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="submit" name="update_leave" class="btn btn-primary">Update</button>
-                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                </div>
-                                                            </form>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
 
-                                            <?php else: ?>
-                                                <span class="text-muted">-</span>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; endif; ?>
+                                            </td>
+                                            <td><?= date('M d, Y h:i A', strtotime($r['applied_at'])); ?></td>
+                                            <td class="text-center">
+                                                <?php if ($r['final_status'] === 'Pending'): ?>
+                                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                                        data-bs-target="#editModal<?= $r['leave_id']; ?>">Edit</button>
+
+                                                    <form method="post" class="d-inline cancel-form">
+                                                        <input type="hidden" name="leave_id" value="<?= $r['leave_id']; ?>">
+                                                        <input type="hidden" name="cancel_leave" value="1">
+                                                        <button type="button"
+                                                            class="btn btn-danger btn-sm cancel-btn">Cancel</button>
+                                                    </form>
+
+                                                    <!-- Edit Modal -->
+                                                    <div class="modal fade" id="editModal<?= $r['leave_id']; ?>" tabindex="-1">
+                                                        <div class="modal-dialog modal-dialog-centered">
+                                                            <div class="modal-content">
+                                                                <form method="post">
+                                                                    <input type="hidden" name="edit_leave_id"
+                                                                        value="<?= $r['leave_id']; ?>">
+                                                                    <div class="modal-header bg-primary text-white">
+                                                                        <h5 class="modal-title">Edit Leave</h5>
+                                                                        <button type="button" class="btn-close btn-close-white"
+                                                                            data-bs-dismiss="modal"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="row mb-3">
+                                                                            <div class="col">
+                                                                                <label>From Date</label>
+                                                                                <input type="date" name="edit_from_date"
+                                                                                    class="form-control"
+                                                                                    value="<?= date('Y-m-d', strtotime($r['from_date'])); ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                            <div class="col">
+                                                                                <label>From Time</label>
+                                                                                <input type="text" name="edit_from_time"
+                                                                                    class="form-control edit-from-time"
+                                                                                    value="<?= date('h:i A', strtotime($r['from_date'])); ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row mb-3">
+                                                                            <div class="col">
+                                                                                <label>To Date</label>
+                                                                                <input type="date" name="edit_to_date"
+                                                                                    class="form-control"
+                                                                                    value="<?= date('Y-m-d', strtotime($r['to_date'])); ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                            <div class="col">
+                                                                                <label>To Time</label>
+                                                                                <input type="text" name="edit_to_time"
+                                                                                    class="form-control edit-to-time"
+                                                                                    value="<?= date('h:i A', strtotime($r['to_date'])); ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label>Reason</label>
+                                                                            <textarea name="edit_reason" class="form-control"
+                                                                                rows="3"
+                                                                                required><?= htmlspecialchars($r['reason']); ?></textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="submit" name="update_leave"
+                                                                            class="btn btn-primary">Update</button>
+                                                                        <button type="button" class="btn btn-secondary"
+                                                                            data-bs-dismiss="modal">Close</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -320,6 +378,7 @@ $rows = $stmt->fetchAll();
                                     <option value="Leave">Leave</option>
                                     <option value="Emergency">Emergency</option>
                                     <option value="OD">OD</option>
+                                    <option value="Outing">Outing</option>
                                 </select>
                             </div>
                             <div class="row mb-3">
@@ -422,5 +481,6 @@ $rows = $stmt->fetchAll();
             });
         </script>
     </div>
-</body>
+    </body>
+
 </html>
