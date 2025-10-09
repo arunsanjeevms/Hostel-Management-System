@@ -74,7 +74,7 @@ $student_data = [];
 $parent_data = [];
 $attendance_stats = ['attendance_percentage' => 0, 'total_days' => 0, 'present_days' => 0];
 $leave_stats = ['active_leaves' => 0];
-$outing_stats = ['monthly_outings' => 0];
+
 
 try {
     // Get student basic info
@@ -148,7 +148,7 @@ try {
             $attendance_stats = $attendance_result;
         }
 
-        // Getting  leave count and outing
+        // Getting  leave count 
         $stmt = $pdo->prepare("
             SELECT COUNT(*) as active_leaves 
             FROM leave_applications 
@@ -162,22 +162,11 @@ try {
         if ($leave_result) {
             $leave_stats = $leave_result;
         }
-        $stmt = $pdo->prepare("
-            SELECT COUNT(*) as monthly_outings 
-            FROM outings 
-            WHERE student_roll_number = ? 
-            AND MONTH(date) = MONTH(CURDATE()) 
-            AND YEAR(date) = YEAR(CURDATE())
-        ");
-        $stmt->execute([$student_data['roll_number']]);
-        $outing_result = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($outing_result) {
-            $outing_stats = $outing_result;
-        }
+       
     } else if (isset($demo_mode)) {
         $attendance_stats = ['attendance_percentage' => '', 'present_days' => '', 'total_days' => ''];
         $leave_stats = ['active_leaves' => ''];
-        $outing_stats = ['monthly_outings' => ''];
+        
     }
 
 } catch (Exception $e) {
@@ -393,9 +382,6 @@ try {
             color: var(--warning);
         }
 
-        .stat-value.outings {
-            color: var(--primary);
-        }
 
         .stat-label {
             font-size: 12px;
@@ -891,12 +877,7 @@ try {
                             </div>
                             <div class="stat-label">Active Leaves</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value outings">
-                                <?php echo $outing_stats['monthly_outings'] ?? '0'; ?>
-                            </div>
-                            <div class="stat-label">Monthly Outings</div>
-                        </div>
+                        
                     </div>
 
                     <div class="action-buttons">
@@ -992,12 +973,7 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Department:</div>
                                 <div class="info-value">
-                                    <span
-                                        class="view-mode"><?php echo htmlspecialchars($student_data['department'] ?? 'N/A'); ?></span>
-                                    <input type="text" name="department"
-                                        value="<?php echo htmlspecialchars($student_data['department'] ?? ''); ?>"
-                                        class="edit-mode"
-                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                   <?php echo htmlspecialchars($student_data['department'] ?? ''); ?>   
                                 </div>
                             </div>
                             <div class="info-item">
@@ -1014,7 +990,12 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Year of Study</div>
                                 <div class="info-value">
-                                    <?php echo htmlspecialchars($student_data['Year_of_study'] ?? 'N/A'); ?>
+                                     <span
+                                        class="view-mode"><?php echo htmlspecialchars($student_data['Year_of_study'] ?? 'N/A'); ?></span>
+                                    <input type="text" name="academic_year"
+                                        value="<?php echo htmlspecialchars($student_data['Year_of_study'] ?? ''); ?>"
+                                        class="edit-mode"
+                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
                                 </div>
                             </div>
                             <div class="info-item">
