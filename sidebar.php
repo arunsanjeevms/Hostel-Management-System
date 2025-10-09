@@ -190,8 +190,8 @@ display: inline-block;
 
     <div class="menu">
     <a href="#" class="menu-item">
-            <i class="fas fa-home text-primary"></i>
-            <span>Dashboard</span>
+            <i class="fas fa-calendar-days text-primary"></i>
+            <span>Leave Requests </span>
         </a>
 
       
