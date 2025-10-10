@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2025 at 05:30 AM
+-- Generation Time: Oct 10, 2025 at 12:39 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -191,9 +191,10 @@ CREATE TABLE `mess_tokens` (
   `token_id` int(11) NOT NULL,
   `student_roll_number` varchar(50) NOT NULL,
   `menu_id` int(11) NOT NULL,
-  `token_type` enum('Paid','Unpaid','Special') NOT NULL,
-  `from_date` date DEFAULT NULL,
-  `to_date` date DEFAULT NULL,
+  `meal_type` varchar(100) NOT NULL,
+  `menu` varchar(100) NOT NULL,
+  `token_type` enum('Regular','Special') NOT NULL,
+  `token_date` date DEFAULT NULL,
   `special_fee` decimal(8,2) DEFAULT 0.00,
   `supervisor_id` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -276,6 +277,7 @@ CREATE TABLE `specialtokenenable` (
   `to_date` date NOT NULL,
   `to_time` time NOT NULL,
   `token_date` date DEFAULT NULL,
+  `meal_type` text NOT NULL,
   `menu_items` text NOT NULL,
   `fee` decimal(10,2) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -285,8 +287,8 @@ CREATE TABLE `specialtokenenable` (
 -- Dumping data for table `specialtokenenable`
 --
 
-INSERT INTO `specialtokenenable` (`menu_id`, `from_date`, `from_time`, `to_date`, `to_time`, `token_date`, `menu_items`, `fee`, `created_at`) VALUES
-(2, '2025-10-07', '20:45:00', '2025-10-07', '22:45:00', '2025-10-07', 'Biriyani', 100.00, '2025-10-07 15:19:40');
+INSERT INTO `specialtokenenable` (`menu_id`, `from_date`, `from_time`, `to_date`, `to_time`, `token_date`, `meal_type`, `menu_items`, `fee`, `created_at`) VALUES
+(4, '2025-10-10', '12:16:00', '2025-10-10', '15:16:00', '2025-10-11', 'Dinner', 'Panner butter masala', 150.00, '2025-10-10 06:46:47');
 
 -- --------------------------------------------------------
 
@@ -631,7 +633,7 @@ ALTER TABLE `rooms`
 -- AUTO_INCREMENT for table `specialtokenenable`
 --
 ALTER TABLE `specialtokenenable`
-  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `menu_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `students`
