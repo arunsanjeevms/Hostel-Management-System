@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -271,12 +270,13 @@
 </head>
 
 <body>
-    
-        
-        <?php include 'sidebar.php'; ?>
-        <?php include 'topbar.php'; ?>
-        <!-- Footer -->
-        <?php include 'footer.php'; ?>
+
+
+    <?php include 'sidebar.php'; ?>
+    <?php include 'topbar.php'; ?>
+    <?php include 'leave_apply.php'; ?>
+    <!-- Footer -->
+    <?php include 'footer.php'; ?>
     </div>
     <script>
         const loaderContainer = document.getElementById('loaderContainer');
@@ -290,7 +290,7 @@
         }
 
         //    automatic loader
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const loaderContainer = document.getElementById('loaderContainer');
             const contentWrapper = document.getElementById('contentWrapper');
             let loadingTimeout;
@@ -309,7 +309,7 @@
             loadingTimeout = setTimeout(showError, 10000);
 
             // Hide loader when everything is loaded
-            window.onload = function() {
+            window.onload = function () {
                 clearTimeout(loadingTimeout);
 
                 // Add a small delay to ensure smooth transition
@@ -317,7 +317,7 @@
             };
 
             // Error handling
-            window.onerror = function(msg, url, lineNo, columnNo, error) {
+            window.onerror = function (msg, url, lineNo, columnNo, error) {
                 clearTimeout(loadingTimeout);
                 showError();
                 return false;
@@ -381,5 +381,3 @@
     </script>
 
 </body>
-
-</html>
