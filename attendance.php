@@ -393,7 +393,7 @@ td {
             <div class="loader"></div>
         </div>
 
-        <h2><center>  Attendance</center></h2>
+        <h2><center>Attendance</center></h2>
         <div class="nav-bar">
             <a href="?student_roll_number=<?php echo urlencode($student_roll_number); ?>&month=<?php echo $prev_month; ?>&year=<?php echo $prev_year; ?>">⟵ Previous</a>
             <div class="nav-title"><?php echo date("F Y", strtotime("$year-$month-01")); ?></div>
