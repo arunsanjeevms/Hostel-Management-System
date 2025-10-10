@@ -1,8 +1,10 @@
 <?php
-session_start();
+ob_start(); // start output buffering to prevent header warnings
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include 'db_connect.php';
 
-// ✅ Faculty authentication check
 if (!isset($_SESSION['faculty_id'])) {
     header("Location: faculty_login.php");
     exit();
@@ -10,33 +12,7 @@ if (!isset($_SESSION['faculty_id'])) {
 
 $faculty_name = $_SESSION['faculty_name'];
 $department = $_SESSION['faculty_department'];
-
-// ✅ Fetch only students from same department
-$sql = "SELECT 
-            s.name AS student_name, 
-            s.department, 
-            l.leave_type, 
-            l.from_date, 
-            l.to_date, 
-            l.reason, 
-            l.faculty_status AS status, 
-            l.leave_id AS id
-        FROM leave_applications l
-        JOIN students s ON l.student_roll_number = s.roll_number
-        WHERE s.department = ?
-        ORDER BY l.applied_at DESC";
-
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $department);
-$stmt->execute();
-$result = $stmt->get_result();
 ?>
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -56,17 +32,6 @@ $result = $stmt->get_result();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-
-
-
-    <!-- ✅ DataTables CSS -->
-<link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-
-<!-- ✅ jQuery + DataTables JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-
     <style>
         :root {
             --sidebar-width: 250px;
@@ -326,160 +291,46 @@ $result = $stmt->get_result();
         .breadcrumb-item a:hover {
             color: #224abe;
         }
-        /* ----------- FINAL CONTENT AREA FIX ----------- */
-.content {
-  position: relative;
-  margin-left: var(--sidebar-width); /* or margin-left: 250px; */
-  padding: 40px 30px;
-  background: #f8f9fc;
-  min-height: 100vh;
-  transition: margin-left 0.3s ease, padding 0.3s ease;
-  z-index: 0;
-}
-
-
-/* when sidebar is collapsed */
-.sidebar.collapsed + .content {
-  margin-left: var(--sidebar-collapsed-width);
-}
-
-
-/* small screens (mobile view) */
-@media (max-width: 992px) {
-  .content {
-    margin-left: 0 !important;
-    padding: 30px 20px;
-  }
-}
-
-
-
-/* Clean professional table style */
-/* -------- POLISHED FACULTY TABLE DESIGN -------- */
-
-/* Card styling */
-.card {
-  width: 98%;
-  margin: 30px auto;
-  border: none;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
-}
-
-/* Header gradient (for "Leave Requests - ECE") */
-.card-header {
-  background: linear-gradient(135deg, #00b09b, #0066ff);
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.05rem;
-  border-bottom: none;
-  padding: 15px 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Welcome + logout alignment */
-.card-header a.btn-light {
-  font-weight: 500;
-  border-radius: 6px;
-  padding: 5px 12px;
-}
-
-/* Table container */
-.table {
-  background: white;
-  border-radius: 0 0 10px 10px;
-  overflow: hidden;
-  width: 100%;
-  margin: 0;
-}
-
-/* Gradient header — smooth green-blue */
-.table thead th {
-  background: linear-gradient(135deg, #00b09b, #0066ff);
-  color: #fff;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 12px;
-  border: none;
-}
-
-/* Smooth hover effect */
-.table-hover tbody tr:hover {
-  background: linear-gradient(135deg, rgba(0, 176, 155, 0.05), rgba(0, 102, 255, 0.07));
-  transition: background-color 0.3s ease;
-}
-
-/* Buttons — same green-blue gradient */
-.btn-success {
-  background: linear-gradient(135deg, #00b09b, #0066ff);
-  border: none;
-  color: #fff;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  border-radius: 6px;
-}
-
-.btn-success:hover {
-  transform: scale(1.05);
-  box-shadow: 0 3px 10px rgba(0, 102, 255, 0.3);
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, #ff4b1f, #ff9068);
-  border: none;
-  color: #fff;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  border-radius: 6px;
-}
-
-.btn-danger:hover {
-  transform: scale(1.05);
-  box-shadow: 0 3px 10px rgba(255, 75, 43, 0.3);
-}
-
-/* Badges */
-.badge.bg-success {
-  background: linear-gradient(135deg, #00b09b, #6492d7ff);
-}
-
-.badge.bg-warning {
-  background: linear-gradient(135deg, #f6d365, #fda085);
-  color: #222;
-}
-
-.badge.bg-danger {
-  background: linear-gradient(135deg, #ff416c, #ff4b2b);
-}
-
-
-
-
     </style>
 </head>
+<?php
+include 'db_connect.php'; // ✅ add this line
 
+session_start();
+if (!isset($_SESSION['faculty_id'])) {
+    header("Location: faculty_login.php");
+    exit();
+}
+
+$faculty_name = $_SESSION['faculty_name'];
+$department = $_SESSION['faculty_department'];
+?>
 <body>
     <!-- Sidebar -->
     <?php include 'sidebar.php'; ?>
-<div class="content" id="contentWrapper">
-  <div class="tab-pane p-20 active" id="faculty" role="tabpanel">
-    <div class="card shadow">
-      <!-- your table etc. -->
 
     <!-- Main Content -->
-   <?php
+    <div class="content">
+
+        <div class="loader-container" id="loaderContainer">
+            <div class="loader"></div>
+        </div>
+
+        <!-- Topbar -->
+        <?php include 'topbar.php'; ?>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-area custom-gradient">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="#">Students</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Leave Requests</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Content Area -->
+            <?php
 // fetch leaves for this faculty's department
 $sql = "SELECT l.leave_id,
                s.roll_number,
@@ -503,7 +354,7 @@ $leaves = $stmt->get_result();
   <div class="card shadow">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
       <h5 class="mb-0">Leave Requests — <?= htmlspecialchars($department) ?></h5>
-      <div>Welcome, <?= htmlspecialchars($faculty_name) ?> &nbsp; <a href="logout.php" class="btn btn-sm btn-light">Logout</a></div>
+      <div>Welcome, <?= htmlspecialchars($faculty_name) ?> &nbsp; </div>
     </div>
     <div class="card-body">
   <div class="table-responsive">
@@ -574,8 +425,7 @@ $leaves = $stmt->get_result();
   </div>
 </div>
 
-
-       
+        
         <!-- Footer -->
         <?php include 'footer.php'; ?>
     </div>
@@ -680,6 +530,32 @@ $leaves = $stmt->get_result();
             }
         });
     </script>
+<!-- ✅ DataTables Initialization -->
+<script>
+$(document).ready(function() {
+  $('#facultyTable').DataTable({
+    responsive: true,
+    pageLength: 6,                // number of rows per page
+    lengthChange: false,          // hide “Show X entries”
+    ordering: true,               // allow column sorting
+    autoWidth: false,
+    language: {
+      search: "_INPUT_",          // clean search box
+      searchPlaceholder: "Search by name, reg no, type, or reason...",
+      paginate: {
+        previous: "Previous",
+        next: "Next"
+      },
+      info: "Showing _START_ to _END_ of _TOTAL_ requests",
+      infoEmpty: "No requests available",
+      zeroRecords: "No matching records found"
+    },
+    columnDefs: [
+      { orderable: false, targets: [8, 9] } // disable sorting for Proof & Status
+    ]
+  });
+});
+</script>
 
 </body>
 
