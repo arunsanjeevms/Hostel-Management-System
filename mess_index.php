@@ -311,6 +311,7 @@
                                         <th>Student Name</th>
                                         <th>Roll Number</th>
                                         <th>Meal Type</th>
+                                        <th>Menu</th>
                                         <th>Date</th>
                                         <th>Token Type</th>
                                         <th>Special Fee</th>
