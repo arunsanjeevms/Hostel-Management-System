@@ -288,6 +288,7 @@
                                         <th>To Date</th>
                                         <th>To Time</th>
                                         <th>Token Date</th>
+                                        <th>Meal Type</th>
                                         <th>Items</th>
                                         <th>Fee</th>
                                         <th>Action</th>
@@ -507,6 +508,10 @@
                             <input type="date" class="form-control" id="tokenDate" name="date" required>
                         </div>
                         <!-- FIXED: Dedicated Menu Items field for Special Token -->
+                         <div class="mb-3">
+                            <label for="mealType" class="form-label">Meal Type</label>
+                            <textarea class="form-control" id="mealType" name="items" rows="3"></textarea>
+                        </div>
                         <div class="mb-3">
                             <label for="specialMenuItems" class="form-label">Menu Items *</label>
                             <textarea class="form-control" id="specialMenuItems" name="items" rows="3"
@@ -625,6 +630,11 @@
                         <div class="mb-3">
                             <label for="editSpecialTokenDate" class="form-label">Token Date</label>
                             <input type="date" id="editSpecialTokenDate" class="form-control" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="editSpecialMealType" class="form-label">Meal Type</label>
+                            <textarea id="editSpecialMealType" class="form-control" rows="3"></textarea>
                         </div>
 
                         <div class="mb-3">
@@ -954,6 +964,7 @@
             <td>${token.to_date || 'N/A'}</td>
             <td>${token.to_time || 'N/A'}</td>
             <td>${token.token_date || 'N/A'}</td>
+            <td>${token.meal_type || 'N/A'}</td>
             <td>${token.menu_items || 'N/A'}</td>
             <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td>
             <td>
@@ -983,6 +994,7 @@
             const toDate = $('#tokentoDate').val();
             const toTime = $('#tokentoTime').val();
             const tokenDate = $('#tokenDate').val(); // Token Date field
+            const mealType = $('#mealType').val();
             const menuItems = $('#specialMenuItems').val();
             const fee = $('#specialtokenFee').val();
 
@@ -992,6 +1004,7 @@
             console.log("- To Date:", toDate);
             console.log("- To Time:", toTime);
             console.log("- Token Date:", tokenDate);
+            console.log("- Meal Type:",mealType);
             console.log("- Menu Items:", menuItems);
             console.log("- Fee:", fee);
 
@@ -1002,6 +1015,7 @@
                 to_date: toDate,
                 to_time: toTime,
                 token_date: tokenDate,
+                meal_type: mealType,
                 menu_items: menuItems,
                 fee: fee
             };
@@ -1013,6 +1027,7 @@
             if (!data.to_date) missing.push('To Date');
             if (!data.to_time) missing.push('To Time');
             if (!data.token_date) missing.push('Token Date');
+            if (!data.meal_type) missing.push('Meal Type');
             if (!data.menu_items) missing.push('Menu Items');
             if (!data.fee) missing.push('Fee');
 
@@ -1040,6 +1055,7 @@
                         to_date: data.to_date,
                         to_time: data.to_time,
                         token_date: data.token_date,
+                        meal_type : data.meal_type,
                         menu_items: data.menu_items,
                         fee: data.fee
                     };
@@ -1058,7 +1074,7 @@
         }
 
         function clearSpecialTokenForm() {
-            $('#tokenfromDate, #tokenfromTime, #tokentoDate, #tokentoTime, #tokenDate, #specialMenuItems, #specialtokenFee').val('');
+            $('#tokenfromDate, #tokenfromTime, #tokentoDate, #tokentoTime, #tokenDate,#mealType #specialMenuItems, #specialtokenFee').val('');
         }
 
         // Edit special token modal pop-up with current data (including Token Date)
@@ -1075,6 +1091,7 @@
             $('#editSpecialToDate').val(token.to_date);
             $('#editSpecialToTime').val(token.to_time);
             $('#editSpecialTokenDate').val(token.token_date);
+            $('editSpecialMealType').val(token.meal_type);
             $('#editSpecialMenuItems').val(token.menu_items);
             $('#editSpecialFee').val(token.fee);
 
@@ -1091,6 +1108,7 @@
                 to_date: $('#editSpecialToDate').val(),
                 to_time: $('#editSpecialToTime').val(),
                 token_date: $('#editSpecialTokenDate').val(),
+                meal_type: $('#editSpecialMealType').val(),
                 menu_items: $('#editSpecialMenuItems').val(),
                 fee: $('#editSpecialFee').val()
             };

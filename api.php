@@ -553,6 +553,7 @@ function createSpecialToken($conn) {
     $to_date = $_POST['to_date'] ?? '';
     $to_time = $_POST['to_time'] ?? '';
     $token_date = $_POST['token_date'] ?? '';
+    $meal_type = $_POST['meal_type'] ?? '';
     $menu_items = $_POST['menu_items'] ?? '';
     $fee = floatval($_POST['fee'] ?? 0.00);
 
@@ -564,6 +565,7 @@ function createSpecialToken($conn) {
         if (empty($to_date)) $missing_fields[] = 'to_date';
         if (empty($to_time)) $missing_fields[] = 'to_time';
         if (empty($token_date)) $missing_fields[] = 'token_date';
+        if (empty($meal_type)) $missing_fields[] = 'meal_type';
         if (empty($menu_items)) $missing_fields[] = 'menu_items';
 
         if (!empty($missing_fields)) {
@@ -588,9 +590,9 @@ function createSpecialToken($conn) {
         }
 
         // Insert new special token
-        $sql = "INSERT INTO specialtokenenable (from_date, from_time, to_date, to_time, token_date, menu_items, fee) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO specialtokenenable (from_date, from_time, to_date, to_time, token_date, meal_type, menu_items, fee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssd", $from_date, $from_time, $to_date, $to_time,$token_date, $menu_items, $fee);
+        $stmt->bind_param("sssssssd", $from_date, $from_time, $to_date, $to_time,$token_date, $meal_type, $menu_items, $fee);
 
         if ($stmt->execute()) {
             error_log("Special token created successfully");
@@ -670,11 +672,12 @@ function updateSpecialToken($conn) {
         $to_date = $_POST['to_date'] ?? '';
         $to_time = $_POST['to_time'] ?? '';
         $token_date = $_POST['token_date'] ?? '';
+        $meal_type = $_POST['meal_type'] ?? '';
         $menu_items = $_POST['menu_items'] ?? '';
         $fee = floatval($_POST['fee'] ?? 0.00);
 
         // Validate required fields
-        if (empty($from_date) || empty($from_time) || empty($to_date) || empty($to_time) || empty($token_date) || empty($menu_items)) {
+        if (empty($from_date) || empty($from_time) || empty($to_date) || empty($to_time) || empty($token_date) || empty($meal_type) ||empty($menu_items)) {
             echo json_encode([
                 'success' => false,
                 'message' => 'All fields are required for special token'
@@ -711,9 +714,9 @@ function updateSpecialToken($conn) {
             return;
         }
 
-        $sql = "UPDATE specialtokenenable SET from_date = ?, from_time = ?, to_date = ?, to_time = ?,token_date = ?, menu_items = ?, fee = ? WHERE menu_id = ?";
+        $sql = "UPDATE specialtokenenable SET from_date = ?, from_time = ?, to_date = ?, to_time = ?,token_date = ?,meal_type = ?, menu_items = ?, fee = ? WHERE menu_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssdi", $from_date, $from_time, $to_date, $to_time,$token_date ,$menu_items, $fee, $menu_id);
+        $stmt->bind_param("sssssssdi", $from_date, $from_time, $to_date, $to_time,$token_date , $meal_type, $menu_items, $fee, $menu_id);
 
         if ($stmt->execute()) {
             echo json_encode([
