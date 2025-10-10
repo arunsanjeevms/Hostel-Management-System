@@ -742,7 +742,7 @@ ALTER TABLE `students`
   ADD CONSTRAINT `students_ibfk_2` FOREIGN KEY (`room_id`) REFERENCES `rooms` (`room_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
--- Constraints for table `student_parents`
+-- Constraints for table `student_parents`'t
 --
 ALTER TABLE `student_parents`
   ADD CONSTRAINT `student_parents_ibfk_1` FOREIGN KEY (`student_roll_number`) REFERENCES `students` (`roll_number`) ON DELETE CASCADE ON UPDATE CASCADE,
