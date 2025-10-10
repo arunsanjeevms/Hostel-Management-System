@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $email = trim($_POST['email']);
 $password = $_POST['password'];
 
-$stmt = $conn->prepare("SELECT faculty_id, name, password, department, role FROM faculty WHERE email = ? LIMIT 1");
+$stmt = $conn->prepare("SELECT faculty_id, name, password, department FROM faculty WHERE email = ? LIMIT 1");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -21,7 +21,6 @@ if ($res && $res->num_rows === 1) {
     $_SESSION['faculty_id'] = $row['faculty_id'];
     $_SESSION['faculty_name'] = $row['name'];
     $_SESSION['faculty_department'] = $row['department'];
-    $_SESSION['faculty_role'] = $row['role'];
     header("Location: index.php");
     exit;
 } else {
