@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'innodb';
+$dbname = 'hostel';
 $username = 'root'; // Default XAMPP username
 $password = ''; // Default XAMPP password
 
