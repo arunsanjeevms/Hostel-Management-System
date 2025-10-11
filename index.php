@@ -1,17 +1,31 @@
 <?php
-ob_start(); // start output buffering to prevent header warnings
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
 include 'db_connect.php';
 
-if (!isset($_SESSION['faculty_id'])) {
+// ✅ Ensure faculty is logged in
+if(!isset($_SESSION['faculty_id'])){
     header("Location: faculty_login.php");
-    exit();
+    exit;
 }
 
+$faculty_id = $_SESSION['faculty_id'];
 $faculty_name = $_SESSION['faculty_name'];
 $department = $_SESSION['faculty_department'];
+
+// ✅ SQL: fetch only Leave / Emergency Leave for this faculty's department
+$sql = "SELECT l.Leave_ID, s.roll_number, s.name AS student_name, s.department,
+               lt.LeaveType, l.from_date, l.to_date, l.reason, l.proof, l.faculty_status,
+               l.remarks, l.applied_date
+        FROM leave_applications l
+        JOIN students s ON l.student_roll_number = s.roll_number
+        JOIN leave_types lt ON l.LeaveType_ID = lt.LeaveType_ID
+        WHERE s.department = ?
+          AND lt.LeaveType IN ('Leave','Emergency Leave')
+        ORDER BY l.applied_date DESC";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $department);
+$stmt->execute();
+$leaves = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -293,21 +307,9 @@ $department = $_SESSION['faculty_department'];
         }
     </style>
 </head>
-<?php
-include 'db_connect.php'; // ✅ add this line
-
-session_start();
-if (!isset($_SESSION['faculty_id'])) {
-    header("Location: faculty_login.php");
-    exit();
-}
-
-$faculty_name = $_SESSION['faculty_name'];
-$department = $_SESSION['faculty_department'];
-?>
 <body>
     <!-- Sidebar -->
-    <?php include 'sidebar.php'; ?>
+    <?php include './assets/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="content">
@@ -317,7 +319,7 @@ $department = $_SESSION['faculty_department'];
         </div>
 
         <!-- Topbar -->
-        <?php include 'topbar.php'; ?>
+        <?php include './assets/topbar.php'; ?>
 
         <!-- Breadcrumb -->
         <div class="breadcrumb-area custom-gradient">
@@ -330,104 +332,65 @@ $department = $_SESSION['faculty_department'];
         </div>
 
         <!-- Content Area -->
-            <?php
-// fetch leaves for this faculty's department
-$sql = "SELECT l.leave_id,
-               s.roll_number,
-               s.name AS student_name,
-               s.department,
-               l.leave_type,
-               l.from_date,
-               l.to_date,
-               l.reason,
-               l.faculty_status
-        FROM leave_applications l
-        JOIN students s ON l.student_roll_number = s.roll_number
-        WHERE s.department = ?
-        ORDER BY l.applied_at DESC";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $department);
-$stmt->execute();
-$leaves = $stmt->get_result();
-?>
-<div class="tab-pane p-20 active" id="faculty" role="tabpanel">
-  <div class="card shadow">
-    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-      <h5 class="mb-0">Leave Requests — <?= htmlspecialchars($department) ?></h5>
-      <div>Welcome, <?= htmlspecialchars($faculty_name) ?> &nbsp; </div>
-    </div>
-    <div class="card-body">
-  <div class="table-responsive">
-    <table id="facultyTable" class="table table-bordered table-hover align-middle">
+           <div class="container mt-5">
+  <h3>Welcome, <?= htmlspecialchars($faculty_name) ?> (<?= htmlspecialchars($department) ?>)</h3>
+
+  <div class="table-responsive mt-4">
+    <table id="facultyTable" class="table table-bordered">
       <thead class="table-primary text-center">
         <tr>
           <th>S.No</th>
-          <th>Reg No</th>
+          <th>Roll No</th>
           <th>Name</th>
           <th>Leave Type</th>
-          <th>Applied Date</th>
           <th>From</th>
           <th>To</th>
           <th>Reason</th>
           <th>Proof</th>
+          <th>Action</th>
           <th>Status</th>
+          <th>Remarks</th>
         </tr>
       </thead>
       <tbody>
-        <?php 
-          $i = 1;
-          while ($row = $leaves->fetch_assoc()): 
-        ?>
+        <?php $i=1; while($row=$leaves->fetch_assoc()): ?>
         <tr>
-          <td class="text-center"><?= $i++ ?></td>
+          <td><?= $i++ ?></td>
           <td><?= htmlspecialchars($row['roll_number']) ?></td>
           <td><?= htmlspecialchars($row['student_name']) ?></td>
-          <td><?= htmlspecialchars($row['leave_type']) ?></td>
-          <td><?= date('d-m-Y h:i A', strtotime($row['applied_at'])) ?></td>
-          <td><?= date('d-m-Y h:i A', strtotime($row['from_date'])) ?></td>
-          <td><?= date('d-m-Y h:i A', strtotime($row['to_date'])) ?></td>
+          <td><?= htmlspecialchars($row['LeaveType']) ?></td>
+          <td><?= date('d-m-Y H:i', strtotime($row['from_date'])) ?></td>
+          <td><?= date('d-m-Y H:i', strtotime($row['to_date'])) ?></td>
           <td><?= htmlspecialchars($row['reason']) ?></td>
-          <td class="text-center">
-            <?php if (!empty($row['proof'])): ?>
-              <a href="uploads/<?= htmlspecialchars($row['proof']) ?>" target="_blank" class="btn btn-outline-primary btn-sm">View</a>
+          <td>
+            <?php if(!empty($row['proof'])): ?>
+              <a href="uploads/<?= htmlspecialchars($row['proof']) ?>" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
             <?php else: ?>
               <span class="text-muted">No Proof</span>
             <?php endif; ?>
           </td>
           <td class="text-center">
-            <?php if ($row['faculty_status'] === 'Pending'): ?>
-              <form method="post" action="faculty_action.php" style="display:inline;">
-                <input type="hidden" name="leave_id" value="<?= (int)$row['leave_id'] ?>">
-                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-              </form>
-              <form method="post" action="faculty_action.php" style="display:inline;">
-                <input type="hidden" name="leave_id" value="<?= (int)$row['leave_id'] ?>">
-                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">Reject</button>
-              </form>
+            <?php if($row['faculty_status']=='Pending'): ?>
+              <button class="btn btn-success btn-sm approve-btn" data-id="<?= $row['Leave_ID'] ?>">Approve</button>
+              <button class="btn btn-danger btn-sm reject-btn" data-id="<?= $row['Leave_ID'] ?>">Reject</button>
             <?php else: ?>
-              <?php 
-                $statusColor = ($row['faculty_status'] === 'Approved') ? 'success' :
-                               (($row['faculty_status'] === 'Rejected') ? 'danger' : 'secondary');
-              ?>
-              <span class="badge bg-<?= $statusColor ?>"><?= htmlspecialchars($row['faculty_status']) ?></span>
+              <span class="badge <?= $row['faculty_status']=='Forwarded to Admin'?'bg-primary':
+                                   ($row['faculty_status']=='Rejected by HOD'?'bg-danger':'bg-success') ?>">
+                <?= htmlspecialchars($row['faculty_status']) ?>
+              </span>
             <?php endif; ?>
           </td>
+          <td><?= htmlspecialchars($row['faculty_status']) ?></td>
+          <td><?= htmlspecialchars($row['remarks']) ?></td>
         </tr>
         <?php endwhile; ?>
       </tbody>
     </table>
   </div>
 </div>
-
-  </div>
-</div>
-</div>
-  </div>
-</div>
-
         
         <!-- Footer -->
-        <?php include 'footer.php'; ?>
+        <?php include './assets/footer.php'; ?>
     </div>
     <script>
         const loaderContainer = document.getElementById('loaderContainer');
@@ -530,32 +493,68 @@ $leaves = $stmt->get_result();
             }
         });
     </script>
-<!-- ✅ DataTables Initialization -->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-$(document).ready(function() {
-  $('#facultyTable').DataTable({
-    responsive: true,
-    pageLength: 6,                // number of rows per page
-    lengthChange: false,          // hide “Show X entries”
-    ordering: true,               // allow column sorting
-    autoWidth: false,
-    language: {
-      search: "_INPUT_",          // clean search box
-      searchPlaceholder: "Search by name, reg no, type, or reason...",
-      paginate: {
-        previous: "Previous",
-        next: "Next"
+$(document).on('click', '.action-btn', function () {
+  const leaveId = $(this).data('id');
+  const action = $(this).data('action');
+
+  if (action === 'approve') {
+    // ✅ Approve directly
+    Swal.fire({
+      title: "Approve Leave?",
+      text: "Are you sure you want to approve this leave?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, Approve"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $.post("faculty_action.php", { leave_id: leaveId, action: action }, function (response) {
+          Swal.fire("Approved!", "Leave forwarded to Admin.", "success")
+            .then(() => location.reload());
+        });
+      }
+    });
+  }
+
+  if (action === 'reject') {
+    // 🚫 Reject with reason
+    Swal.fire({
+      title: "Reject Leave?",
+      input: "textarea",
+      inputLabel: "Please provide a reason for rejection:",
+      inputPlaceholder: "Type your reason here...",
+      inputAttributes: {
+        'aria-label': 'Type your reason here'
       },
-      info: "Showing _START_ to _END_ of _TOTAL_ requests",
-      infoEmpty: "No requests available",
-      zeroRecords: "No matching records found"
-    },
-    columnDefs: [
-      { orderable: false, targets: [8, 9] } // disable sorting for Proof & Status
-    ]
-  });
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Reject Leave",
+      preConfirm: (reason) => {
+        if (!reason) {
+          Swal.showValidationMessage("You must enter a reason!");
+        }
+        return reason;
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const reason = result.value;
+        $.post("faculty_action.php", { leave_id: leaveId, action: action, remarks: reason }, function (response) {
+          Swal.fire("Rejected!", "Leave rejected successfully.", "success")
+            .then(() => location.reload());
+        });
+      }
+    });
+  }
 });
 </script>
+
+
+
 
 </body>
 
