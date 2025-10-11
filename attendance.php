@@ -30,6 +30,19 @@ if (isset($_SESSION['user_type'])) {
     exit();
 }
 
+// Fetch student_id for the roll_number
+$student_stmt = $conn->prepare("SELECT student_id FROM students WHERE roll_number = ?");
+$student_stmt->bind_param("s", $roll_number);
+$student_stmt->execute();
+$student_result = $student_stmt->get_result();
+
+if ($student_result->num_rows === 0) {
+    die("Student not found.");
+}
+
+$student_row = $student_result->fetch_assoc();
+$student_id = $student_row['student_id'];
+
 // Get month & year
 $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
@@ -41,20 +54,19 @@ if ($prev_month < 1) { $prev_month = 12; $prev_year--; }
 $next_month = $month + 1; $next_year = $year;
 if ($next_month > 12) { $next_month = 1; $next_year++; }
 
-// Fetch attendance
-$sql = "SELECT date, status 
-        FROM attendance 
-        WHERE roll_number = ? 
-          AND MONTH(date) = ? 
-          AND YEAR(date) = ? 
-        ORDER BY date";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $roll_number, $month, $year);
-$stmt->execute();
-$result = $stmt->get_result();
+// Fetch attendance for the student_id
+$att_stmt = $conn->prepare("SELECT date, status 
+                            FROM attendance 
+                            WHERE student_id = ? 
+                              AND MONTH(date) = ? 
+                              AND YEAR(date) = ? 
+                            ORDER BY date");
+$att_stmt->bind_param("iii", $student_id, $month, $year);
+$att_stmt->execute();
+$att_result = $att_stmt->get_result();
 
 $attendance = [];
-while ($row = $result->fetch_assoc()) {
+while ($row = $att_result->fetch_assoc()) {
     $attendance[$row['date']] = $row['status'];
 }
 
@@ -82,6 +94,7 @@ $today = date('Y-m-d');
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <style>
+
 :root {
     --sidebar-width: 250px;
     --sidebar-collapsed-width: 70px;
@@ -323,6 +336,7 @@ td {
     .content-nav ul::-webkit-scrollbar { height: 4px; }
     .content-nav ul::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
 }
+
 </style>
 </head>
 <body>
@@ -362,7 +376,7 @@ td {
     <div class="legend">
         <div><span style="background:#28a745;"></span> Present</div>
         <div><span style="background:#dc3545;"></span> Absent</div>
-        <div><span style="background:#e9ecef;"></span> Not Marked</div>
+        <div><span style="background:#e9ecef;"></span> Not Record</div>
     </div>
 </div>
 
