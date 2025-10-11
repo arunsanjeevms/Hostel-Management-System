@@ -1,40 +1,35 @@
 <?php
-session_start();
 include 'db_connect.php';
 
-if (!isset($_SESSION['faculty_id'])) {
-    header("Location: faculty_login.php");
-    exit;
-}
+if (isset($_POST['action']) && isset($_POST['id'])) {
+    $id = intval($_POST['id']);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['action'] ?? '';
-    $leave_id = (int)($_POST['leave_id'] ?? 0);
+    if ($_POST['action'] === 'approve') {
+        // Faculty forwards leave to admin
+        $sql = "UPDATE leave_applications 
+                SET faculty_status='Forwarded to Admin', admin_status='Pending'
+                WHERE Leave_ID=$id";
+        $conn->query($sql);
 
-    // ✅ Ensure valid input
-    if ($leave_id <= 0 || ($action !== 'approve' && $action !== 'reject')) {
-        echo "<script>alert('Invalid input'); window.location.href='index.php';</script>";
-        exit;
+        // ✅ Include the extra files after DB update
+        include 'leave_enable.php';   // whatever logic to enable the leave
+        include 'leave_approve.php';  // whatever logic to send notification / further processing
+
+        echo "Leave forwarded to Admin successfully.";
+    } 
+    elseif ($_POST['action'] === 'reject') {
+        // Faculty rejects with reason
+        $reason = $conn->real_escape_string($_POST['reason']);
+        $sql = "UPDATE leave_applications 
+                SET faculty_status='Rejected by HOD', Remarks='$reason', admin_status='Pending'
+                WHERE Leave_ID=$id";
+        $conn->query($sql);
+
+        // ✅ Include the extra files (optional if rejection also triggers something)
+        include 'leave_enable.php';
+        include 'leave_approve.php';
+
+        echo "Leave rejected with reason: $reason";
     }
-
-    // ✅ Update leave status
-    $status = ($action === 'approve') ? 'Approved' : 'Rejected';
-
-    $stmt = $conn->prepare("UPDATE leave_applications SET faculty_status = ? WHERE leave_id = ?");
-    $stmt->bind_param("si", $status, $leave_id);
-    if ($stmt->execute()) {
-        echo "<script>
-            alert('Leave has been $status successfully.');
-            window.location.href='index.php';
-        </script>";
-    } else {
-        echo "<script>
-            alert('Error updating leave status!');
-            window.location.href='index.php';
-        </script>";
-    }
-
-    $stmt->close();
 }
-$conn->close();
 ?>
