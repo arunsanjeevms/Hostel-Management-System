@@ -13,8 +13,8 @@ if ($conn->connect_error) {
 }
 
 // Get roll number from session, fallback to default
-$default_roll_number = '927623bit027';
-$student_roll_number = $_SESSION['luser'] ?? $default_roll_number;
+$default_roll_number = '927623';
+$roll_number = $_SESSION['luser'] ?? $default_roll_number;
 
 // Get month & year
 $month = $_GET['month'] ?? date('m');
@@ -41,13 +41,13 @@ if ($next_month > 12) {
 // Fetch attendance data
 $sql = "SELECT date, status 
         FROM attendance 
-        WHERE student_roll_number = ? 
+        WHERE roll_number = ? 
           AND MONTH(date) = ? 
           AND YEAR(date) = ? 
         ORDER BY date";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $student_roll_number, $month, $year);
+$stmt->bind_param("sii", $roll_number, $month, $year);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -395,9 +395,9 @@ td {
 
         <h2><center>Attendance</center></h2>
         <div class="nav-bar">
-            <a href="?student_roll_number=<?php echo urlencode($student_roll_number); ?>&month=<?php echo $prev_month; ?>&year=<?php echo $prev_year; ?>">⟵ Previous</a>
+            <a href="?roll_number=<?php echo urlencode($roll_number); ?>&month=<?php echo $prev_month; ?>&year=<?php echo $prev_year; ?>">⟵ Previous</a>
             <div class="nav-title"><?php echo date("F Y", strtotime("$year-$month-01")); ?></div>
-            <a href="?student_roll_number=<?php echo urlencode($student_roll_number); ?>&month=<?php echo $next_month; ?>&year=<?php echo $next_year; ?>">Next ⟶</a>
+            <a href="?roll_number=<?php echo urlencode($roll_number); ?>&month=<?php echo $next_month; ?>&year=<?php echo $next_year; ?>">Next ⟶</a>
         </div>
 
         <div class="calendar">
