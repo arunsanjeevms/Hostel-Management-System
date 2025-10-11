@@ -5,7 +5,7 @@ session_start();
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db = "innodb";
+$db = "hostel";
 
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
