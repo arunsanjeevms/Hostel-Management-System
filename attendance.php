@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// Database connection
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -11,52 +12,64 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if (isset($_GET['roll_number'])) {
-    $roll_number = $_GET['roll_number'];
-
-    // Get month & year
-    $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
-    $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
-
-    // Calculate previous and next months
-    $prev_month = $month - 1; $prev_year = $year;
-    if ($prev_month < 1) { $prev_month = 12; $prev_year--; }
-
-    $next_month = $month + 1; $next_year = $year;
-    if ($next_month > 12) { $next_month = 1; $next_year++; }
-
-    // Fetch attendance data
-    $sql = "SELECT date, status 
-            FROM attendance 
-            WHERE roll_number = ? 
-              AND MONTH(date) = ? 
-              AND YEAR(date) = ? 
-            ORDER BY date";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sii", $roll_number, $month, $year);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    $attendance = [];
-    while ($row = $result->fetch_assoc()) {
-        $attendance[$row['date']] = $row['status'];
-    }
-
-    // Color map function
-    function getColor($status) {
-        switch ($status) {
-            case 'Present': return '#28a745';
-            case 'Absent': return '#dc3545';
-            default: return '#e9ecef';
+// Determine roll_number
+if (isset($_SESSION['user_type'])) {
+    if ($_SESSION['user_type'] === 'student') {
+        $roll_number = $_SESSION['username']; // Student's own attendance
+    } elseif ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'faculty') {
+        if (isset($_GET['roll_number'])) {
+            $roll_number = $_GET['roll_number']; // Admin/faculty can view any student
+        } else {
+            die("Please provide a student's roll number to view attendance.");
         }
+    } else {
+        die("Invalid user type.");
     }
-
-    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-    $firstDayOfMonth = date("w", strtotime("$year-$month-01"));
-    $today = date('Y-m-d');
 } else {
-    die("Please provide a roll number.");
+    header("Location: login.php");
+    exit();
 }
+
+// Get month & year
+$month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
+$year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
+
+// Previous and next month
+$prev_month = $month - 1; $prev_year = $year;
+if ($prev_month < 1) { $prev_month = 12; $prev_year--; }
+
+$next_month = $month + 1; $next_year = $year;
+if ($next_month > 12) { $next_month = 1; $next_year++; }
+
+// Fetch attendance
+$sql = "SELECT date, status 
+        FROM attendance 
+        WHERE roll_number = ? 
+          AND MONTH(date) = ? 
+          AND YEAR(date) = ? 
+        ORDER BY date";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sii", $roll_number, $month, $year);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$attendance = [];
+while ($row = $result->fetch_assoc()) {
+    $attendance[$row['date']] = $row['status'];
+}
+
+// Color function
+function getColor($status) {
+    switch ($status) {
+        case 'Present': return '#28a745';
+        case 'Absent': return '#dc3545';
+        default: return '#e9ecef';
+    }
+}
+
+$daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+$firstDayOfMonth = date("w", strtotime("$year-$month-01"));
+$today = date('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -117,7 +130,6 @@ body {
     text-decoration: none;
     padding: 8px 15px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.1);
     transition: var(--transition);
     white-space: nowrap;
 }
@@ -350,10 +362,15 @@ td {
     <div class="legend">
         <div><span style="background:#28a745;"></span> Present</div>
         <div><span style="background:#dc3545;"></span> Absent</div>
-        <div><span style="background:#e9ecef;"></span> No Record</div>
+        <div><span style="background:#e9ecef;"></span> Not Marked</div>
     </div>
 </div>
 
-<?php include 'footer.php'; ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+$(window).on('load', function() {
+    $('#loaderContainer').fadeOut();
+});
+</script>
 </body>
 </html>

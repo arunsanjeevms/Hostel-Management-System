@@ -1,7 +1,7 @@
 <?php
 $servername = "localhost";
 $username = "root";
-$password = ""; // check this
+$password = ""; 
 $database = "innodb";
 
 $conn = new mysqli($servername, $username, $password, $database);
@@ -16,7 +16,7 @@ if ($conn->connect_error) {
 
 session_start();
 
-$student_roll_number = $_SESSION['student_roll_number'] ?? '22XX001';
+$roll_number = $_SESSION['roll_number'] ?? '22XX001';
 $today = date('Y-m-d');
 $now = date('Y-m-d H:i:s'); // Current datetime for enabling/disabling tokens
 
@@ -57,19 +57,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['menu_id'])) {
         $check_stmt = $conn->prepare("
             SELECT token_id 
             FROM mess_tokens 
-            WHERE student_roll_number = ? AND menu_id = ? AND token_type = 'Special'
+            WHERE roll_number = ? AND menu_id = ? AND token_type = 'Special'
         ");
-        $check_stmt->bind_param('si', $student_roll_number, $menu_id);
+        $check_stmt->bind_param('si', $roll_number, $menu_id);
         $check_stmt->execute();
         $check_result = $check_stmt->get_result();
 
         if ($check_result->num_rows == 0) {
             $stmt_insert = $conn->prepare("
                 INSERT INTO mess_tokens 
-                (student_roll_number, menu_id, token_type, from_date, to_date, special_fee, created_at) 
+                (roll_number, menu_id, token_type, from_date, to_date, special_fee, created_at) 
                 VALUES (?, ?, ?, ?, ?, ?, NOW())
             ");
-            $stmt_insert->bind_param("sisssd", $student_roll_number, $menu_id, $token_type, $from_datetime, $to_datetime, $special_fee);
+            $stmt_insert->bind_param("sisssd", $roll_number, $menu_id, $token_type, $from_datetime, $to_datetime, $special_fee);
             $stmt_insert->execute();
         }
     }
@@ -78,7 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['menu_id'])) {
     exit();
 }
 
-// ---------- FETCH ENABLED SPECIAL MEALS (CURRENTLY ACTIVE) ----------
 $sql_special_enabled = "
     SELECT s.*, m.menu_id, m.meal_type, m.items, m.date AS special_food_date
     FROM specialtokenenable s
@@ -98,11 +97,11 @@ $sql_hist = "
            m.items, t.special_fee, t.created_at
     FROM mess_tokens t
     JOIN mess_menu m ON t.menu_id = m.menu_id
-    WHERE t.student_roll_number = ? AND t.token_type = 'Special'
+    WHERE t.roll_number = ? AND t.token_type = 'Special'
     ORDER BY t.created_at DESC
 ";
 $stmt_hist = $conn->prepare($sql_hist);
-$stmt_hist->bind_param('s', $student_roll_number);
+$stmt_hist->bind_param('s', $roll_number);
 $stmt_hist->execute();
 $history = $stmt_hist->get_result();
 ?>
@@ -503,8 +502,8 @@ $history = $stmt_hist->get_result();
                                         <?php else: ?>
                                             <?php
                                             $requested_ids = [];
-                                            $req_sql = $conn->prepare("SELECT menu_id, token_id FROM mess_tokens WHERE student_roll_number = ? AND token_type='Special'");
-                                            $req_sql->bind_param("s", $student_roll_number);
+                                            $req_sql = $conn->prepare("SELECT menu_id, token_id FROM mess_tokens WHERE roll_number = ? AND token_type='Special'");
+                                            $req_sql->bind_param("s", $roll_number);
                                             $req_sql->execute();
                                             $req_res = $req_sql->get_result();
                                             while ($r = $req_res->fetch_assoc()) {

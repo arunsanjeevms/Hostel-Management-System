@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                             UPDATE parents p
                             JOIN student_parents sp ON p.parent_id = sp.parent_id
                             SET p.name = ?, p.phone = ?, p.email = ?
-                            WHERE sp.student_roll_number = ? AND p.parent_id = ?
+                            WHERE sp.roll_number = ? AND p.parent_id = ?
                         ");
 
                         $stmt->execute([
@@ -75,9 +75,8 @@ $parent_data = [];
 $attendance_stats = ['attendance_percentage' => 0, 'total_days' => 0, 'present_days' => 0];
 $leave_stats = ['active_leaves' => 0];
 
-
 try {
-    // Get student basic info
+
     $stmt = $pdo->prepare("
         SELECT s.*, r.room_number, r.room_type, r.capacity, r.occupied, 
                h.hostel_name, h.hostel_code, h.address,r.created_at
@@ -94,7 +93,7 @@ try {
             SELECT p.*, sp.relation_enum, sp.is_primary_contact
             FROM student_parents sp
             JOIN parents p ON sp.parent_id = p.parent_id
-            WHERE sp.student_roll_number = ?
+            WHERE sp.roll_number = ?
             ORDER BY sp.is_primary_contact DESC, sp.relation_enum
         ");
         $stmt->execute([$student_data['roll_number']]);
@@ -139,7 +138,7 @@ try {
                 SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present_days,
                 ROUND((SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) as attendance_percentage
             FROM attendance 
-            WHERE student_roll_number = ? 
+            WHERE roll_number = ? 
             AND date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         ");
         $stmt->execute([$student_data['roll_number']]);
@@ -148,24 +147,23 @@ try {
             $attendance_stats = $attendance_result;
         }
 
-        // Getting  leave count 
+        // Getting absent count instead of leave count
         $stmt = $pdo->prepare("
-            SELECT COUNT(*) as active_leaves 
-            FROM leave_applications 
-            WHERE student_roll_number = ? 
-            AND final_status IN ('Pending', 'Approved')
-            AND from_date <= CURDATE() 
-            AND to_date >= CURDATE()
+            SELECT 
+                SUM(CASE WHEN status = 'Absent' THEN 1 ELSE 0 END) as absent_days
+            FROM attendance 
+            WHERE roll_number = ? 
+            AND date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         ");
         $stmt->execute([$student_data['roll_number']]);
-        $leave_result = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($leave_result) {
-            $leave_stats = $leave_result;
+        $absent_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($absent_result) {
+            $leave_stats = ['active_leaves' => $absent_result['absent_days'] ?? 0];
         }
        
     } else if (isset($demo_mode)) {
-        $attendance_stats = ['attendance_percentage' => '', 'present_days' => '', 'total_days' => ''];
-        $leave_stats = ['active_leaves' => ''];
+        $attendance_stats = ['attendance_percentage' => '85.5', 'present_days' => '25', 'total_days' => '30'];
+        $leave_stats = ['active_leaves' => '3'];
         
     }
 
@@ -213,9 +211,7 @@ try {
             display: flex;
         }
 
-        .edit-mode {
-            display: none;
-        }
+   
 
         .view-mode {
             display: inline;
@@ -452,25 +448,7 @@ try {
             -webkit-text-fill-color: transparent;
         }
 
-        .edit-btn {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .edit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
-        }
-
+    
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -741,7 +719,6 @@ try {
             #hamburger,
             #mobileOverlay,
             .action-buttons,
-            .edit-btn,
             .btn {
                 display: none !important;
             }
@@ -882,19 +859,11 @@ try {
                     </div>
 
                     <div class="action-buttons">
-                        <button type="button" class="btn btn-primary" onclick="toggleEditMode()" id="editBtn">
-                            <i class="fas fa-edit"></i> Edit Profile
-                        </button>
-                        <button type="submit" class="btn btn-success" id="saveBtn" style="display: none;">
-                            <i class="fas fa-save"></i> Save Changes
-                        </button>
+                       
                         <button type="button" class="btn btn-secondary" onclick="window.print()">
                             <i class="fas fa-print"></i> Print
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="cancelEdit()" id="cancelBtn"
-                            style="display: none;">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
+                        
                     </div>
                 </div>
 
@@ -902,9 +871,7 @@ try {
                 <div class="details-card">
                     <div class="card-header">
                         <div class="card-title"><i class="fas fa-id-card"></i> Student Information</div>
-                        <button type="button" class="edit-btn" onclick="toggleEditMode()" id="editHeaderBtn">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
+                        
                     </div>
 <br>
                     <div class="info-grid">
@@ -916,12 +883,8 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Full Name:</div>
                                 <div class="info-value">
-                                    <span
-                                        class="view-mode"><?php echo htmlspecialchars($student_data['name'] ?? 'N/A'); ?></span>
-                                    <input type="text" name="name"
-                                        value="<?php echo htmlspecialchars($student_data['name'] ?? ''); ?>"
-                                        class="edit-mode"
-                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                            <?php echo htmlspecialchars($student_data['name'] ?? ''); ?>
+                
                                 </div>
                             </div>
                             <div class="info-item">
@@ -939,23 +902,15 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Email:</div>
                                 <div class="info-value">
-                                    <span
-                                        class="view-mode"><?php echo htmlspecialchars($student_data['email'] ?? 'N/A'); ?></span>
-                                    <input type="email" name="email"
-                                        value="<?php echo htmlspecialchars($student_data['email'] ?? ''); ?>"
-                                        class="edit-mode"
-                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                    <?php echo htmlspecialchars($student_data['email'] ?? ''); ?>
+                                    
                                 </div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Phone:</div>
                                 <div class="info-value">
-                                    <span
-                                        class="view-mode"><?php echo htmlspecialchars($student_data['student_phone'] ?? 'N/A'); ?></span>
-                                    <input type="text" name="student_phone"
-                                        value="<?php echo htmlspecialchars($student_data['student_phone'] ?? ''); ?>"
-                                        class="edit-mode"
-                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                    <?php echo htmlspecialchars($student_data['student_phone'] ?? ''); ?>
+                                       
                                 </div>
                             </div>
                         </div>
@@ -980,23 +935,15 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Academic Year:</div>
                                 <div class="info-value">
-                                    <span
-                                        class="view-mode"><?php echo htmlspecialchars($student_data['academic_year'] ?? 'N/A'); ?></span>
-                                    <input type="text" name="academic_year"
-                                        value="<?php echo htmlspecialchars($student_data['academic_year'] ?? ''); ?>"
-                                        class="edit-mode"
-                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                   <?php echo htmlspecialchars($student_data['academic_year'] ?? ''); ?>
+                            
                                 </div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Year of Study</div>
                                 <div class="info-value">
-                                     <span
-                                        class="view-mode"><?php echo htmlspecialchars($student_data['Year_of_study'] ?? 'N/A'); ?></span>
-                                    <input type="text" name="academic_year"
-                                        value="<?php echo htmlspecialchars($student_data['Year_of_study'] ?? ''); ?>"
-                                        class="edit-mode"
-                                        style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                    <?php echo htmlspecialchars($student_data['Year_of_study'] ?? ''); ?>
+                                    
                                 </div>
                             </div>
                             <div class="info-item">
@@ -1089,20 +1036,13 @@ try {
                                         <div class="info-item">
                                             <div class="info-label">Name:</div>
                                             <div class="info-value">
-                                                <span class="view-mode">
+                                                
                                                     <?php echo htmlspecialchars($parent['name']); ?>
                                                     <?php if ($parent['is_primary_contact']): ?>
                                                         <span class="primary-badge">Primary Contact</span>
                                                     <?php endif; ?>
-                                                </span>
-                                                <div class="edit-mode" style="display: none;">
-                                                    <input type="text" name="parent_name[<?php echo $parent['parent_id']; ?>]"
-                                                        value="<?php echo htmlspecialchars($parent['name']); ?>"
-                                                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 5px; font-size: 14px;">
-                                                    <?php if ($parent['is_primary_contact']): ?>
-                                                        <span class="primary-badge">Primary Contact</span>
-                                                    <?php endif; ?>
-                                                </div>
+                                              
+                                               
                                             </div>
                                         </div>
                                         <div class="info-item">
@@ -1114,23 +1054,16 @@ try {
                                         <div class="info-item">
                                             <div class="info-label">Phone:</div>
                                             <div class="info-value">
-                                                <span
-                                                    class="view-mode"><?php echo htmlspecialchars($parent['phone'] ?? 'N/A'); ?></span>
-                                                <input type="text" name="parent_phone[<?php echo $parent['parent_id']; ?>]"
-                                                    value="<?php echo htmlspecialchars($parent['phone'] ?? ''); ?>"
-                                                    class="edit-mode"
-                                                    style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                               
+                                                   <?php echo htmlspecialchars($parent['phone'] ?? 'N/A'); ?>
+                                            
                                             </div>
                                         </div>
                                         <div class="info-item">
                                             <div class="info-label">Email:</div>
                                             <div class="info-value">
-                                                <span
-                                                    class="view-mode"><?php echo htmlspecialchars($parent['email'] ?? 'N/A'); ?></span>
-                                                <input type="email" name="parent_email[<?php echo $parent['parent_id']; ?>]"
-                                                    value="<?php echo htmlspecialchars($parent['email'] ?? ''); ?>"
-                                                    class="edit-mode"
-                                                    style="display: none; width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                                               <?php echo htmlspecialchars($parent['email'] ?? 'N/A'); ?>
+                                            
                                             </div>
                                         </div>
                                     </div>
