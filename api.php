@@ -6,7 +6,7 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 // Database configuration
 $host = "localhost";
-$dbname = "innodb";
+$dbname = "hostel";
 $username = "root";
 $password = "";
 
@@ -356,7 +356,7 @@ function deleteMenu($conn) {
 
 // CREATE TOKEN - Issue new token (FIXED)
 function createToken($conn) {
-    $student_roll_number = $_POST['student_roll_number'] ?? '';
+    $roll_number = $_POST['roll_number'] ?? '';
     $menu_id = intval($_POST['menu_id'] ?? 0);
     $token_type = $_POST['token_type'] ?? 'Paid';
     $from_date = $_POST['from_date'] ?? null;
@@ -366,7 +366,7 @@ function createToken($conn) {
 
     try {
         // Validate required fields
-        if (empty($student_roll_number) || empty($menu_id)) {
+        if (empty($roll_number) || empty($menu_id)) {
             echo json_encode([
                 'success' => false,
                 'message' => 'Student roll number and menu ID are required fields'
@@ -416,10 +416,10 @@ function createToken($conn) {
         }
 
         // FIXED: Insert new token - corrected bind_param
-        $sql = "INSERT INTO mess_tokens (student_roll_number, menu_id, token_type, from_date, to_date, special_fee, supervisor_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO mess_tokens (roll_number, menu_id, token_type, from_date, to_date, special_fee, supervisor_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
         // FIXED: Removed the space and extra 'i' in bind_param
-        $stmt->bind_param("sisssdi", $student_roll_number, $menu_id, $token_type, $from_date, $to_date, $special_fee, $supervisor_id);
+        $stmt->bind_param("sisssdi", $roll_number, $menu_id, $token_type, $from_date, $to_date, $special_fee, $supervisor_id);
 
         if ($stmt->execute()) {
             echo json_encode([

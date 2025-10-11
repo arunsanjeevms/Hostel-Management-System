@@ -185,7 +185,7 @@
 
 <body>
     <!-- Sidebar -->
-    <?php include 'sidebar.php'; ?>
+    <?php include './assets/sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="content">
@@ -194,7 +194,7 @@
         </div>
 
         <!-- Topbar -->
-        <?php include 'topbar.php'; ?>
+        <?php include './assets/topbar.php'; ?>
 
         <!-- Breadcrumb -->
         <div class="breadcrumb-area custom-gradient">
@@ -659,7 +659,7 @@
 
 
     <!-- Footer -->
-    <?php include 'footer.php'; ?>
+    <?php include './assets/footer.php'; ?>
 
 
 
