@@ -7,84 +7,67 @@ $pass = "";
 $db = "innodb";
 
 $conn = new mysqli($host, $user, $pass, $db);
-
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get roll number from session, fallback to default
-$default_roll_number = '927623';
-$roll_number = $_SESSION['luser'] ?? $default_roll_number;
+if (isset($_GET['roll_number'])) {
+    $roll_number = $_GET['roll_number'];
 
-// Get month & year
-$month = $_GET['month'] ?? date('m');
-$year = $_GET['year'] ?? date('Y');
+    // Get month & year
+    $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
+    $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
 
-$month = (int)$month;
-$year = (int)$year;
+    // Calculate previous and next months
+    $prev_month = $month - 1; $prev_year = $year;
+    if ($prev_month < 1) { $prev_month = 12; $prev_year--; }
 
-// Calculate previous and next months
-$prev_month = $month - 1;
-$prev_year = $year;
-if ($prev_month < 1) {
-    $prev_month = 12;
-    $prev_year--;
-}
+    $next_month = $month + 1; $next_year = $year;
+    if ($next_month > 12) { $next_month = 1; $next_year++; }
 
-$next_month = $month + 1;
-$next_year = $year;
-if ($next_month > 12) {
-    $next_month = 1;
-    $next_year++;
-}
+    // Fetch attendance data
+    $sql = "SELECT date, status 
+            FROM attendance 
+            WHERE roll_number = ? 
+              AND MONTH(date) = ? 
+              AND YEAR(date) = ? 
+            ORDER BY date";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sii", $roll_number, $month, $year);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-// Fetch attendance data
-$sql = "SELECT date, status 
-        FROM attendance 
-        WHERE roll_number = ? 
-          AND MONTH(date) = ? 
-          AND YEAR(date) = ? 
-        ORDER BY date";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("sii", $roll_number, $month, $year);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$attendance = [];
-while ($row = $result->fetch_assoc()) {
-    $attendance[$row['date']] = $row['status'];
-}
-
-// Color map function
-function getColor($status)
-{
-    switch ($status) {
-        case 'Present':
-            return '#28a745';
-        case 'Absent':
-            return '#dc3545';
-        default:
-            return '#e9ecef';
+    $attendance = [];
+    while ($row = $result->fetch_assoc()) {
+        $attendance[$row['date']] = $row['status'];
     }
+
+    // Color map function
+    function getColor($status) {
+        switch ($status) {
+            case 'Present': return '#28a745';
+            case 'Absent': return '#dc3545';
+            default: return '#e9ecef';
+        }
+    }
+
+    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+    $firstDayOfMonth = date("w", strtotime("$year-$month-01"));
+    $today = date('Y-m-d');
+} else {
+    die("Please provide a roll number.");
 }
-
-$daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-$firstDayOfMonth = date("w", strtotime("$year-$month-01"));
-$today = date('Y-m-d');
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="image/icons/mkce_s.png">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance</title>
+<link rel="icon" type="image/png" sizes="32x32" href="image/icons/mkce_s.png">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <style>
 :root {
     --sidebar-width: 250px;
@@ -100,12 +83,10 @@ $today = date('Y-m-d');
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* General Styles */
 body {
     font-family: 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #ece9e6, #ffffff);
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
 }
 
 .content {
@@ -115,7 +96,6 @@ body {
     min-height: 100vh;
 }
 
-/* Content Navigation */
 .content-nav {
     background: linear-gradient(45deg, #4e73df, #1cc88a);
     padding: 15px;
@@ -150,7 +130,6 @@ body {
     margin-left: var(--sidebar-collapsed-width);
 }
 
-/* Breadcrumb */
 .breadcrumb-area {
     background-image: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
     border-radius: 10px;
@@ -169,7 +148,6 @@ body {
     color: #224abe;
 }
 
-/* Tables */
 .gradient-header {
     background: linear-gradient(135deg, #4CAF50, #2196F3) !important;
     text-align: center;
@@ -182,7 +160,6 @@ td {
     vertical-align: middle;
 }
 
-/* Navigation Bar */
 .nav-bar {
     display: flex;
     justify-content: space-between;
@@ -211,7 +188,6 @@ td {
     background: #2e59d9;
 }
 
-/* Calendar */
 .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -259,7 +235,6 @@ td {
     box-shadow: 0 0 12px #ff9800;
 }
 
-/* Legend */
 .legend {
     width: 95%;
     max-width: 900px;
@@ -283,7 +258,6 @@ td {
     border-radius: 4px;
 }
 
-/* Loader */
 .loader-container {
     position: fixed;
     left: var(--sidebar-width);
@@ -323,121 +297,63 @@ td {
     100% { transform: rotate(360deg); }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
-    .content {
-        margin-left: 0;
-        padding-top: 80px;
-    }
-
-    .sidebar {
-        transform: translateX(-100%);
-        width: var(--sidebar-width) !important;
-    }
-
-    .sidebar.mobile-show {
-        transform: translateX(0);
-    }
-
-    .topbar, .footer {
-        left: 0 !important;
-    }
-
-    body.sidebar-open {
-        overflow: hidden;
-    }
-
-    .day {
-        min-height: 60px;
-        font-size: 12px;
-    }
-
-    .day strong {
-        font-size: 14px;
-    }
-
-    .nav-title {
-        font-size: 16px;
-    }
-
-    .nav-bar a {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-
-    .content-nav ul {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding-bottom: 5px;
-    }
-
-    .content-nav ul::-webkit-scrollbar {
-        height: 4px;
-    }
-
-    .content-nav ul::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 2px;
-    }
+    .content { margin-left: 0; padding-top: 80px; }
+    .sidebar { transform: translateX(-100%); width: var(--sidebar-width) !important; }
+    .sidebar.mobile-show { transform: translateX(0); }
+    .topbar, .footer { left: 0 !important; }
+    body.sidebar-open { overflow: hidden; }
+    .day { min-height: 60px; font-size: 12px; }
+    .day strong { font-size: 14px; }
+    .nav-title { font-size: 16px; }
+    .nav-bar a { padding: 6px 10px; font-size: 13px; }
+    .content-nav ul { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; }
+    .content-nav ul::-webkit-scrollbar { height: 4px; }
+    .content-nav ul::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
 }
 </style>
-
 </head>
-
 <body>
-    <?php include 'sidebar.php'; ?>
-    <?php include 'topbar.php'; ?>
+<?php include 'sidebar.php'; ?>
+<?php include 'topbar.php'; ?>
 
-    <div class="content">
-        <div class="loader-container" id="loaderContainer">
-            <div class="loader"></div>
-        </div>
-
-        <h2><center>Attendance</center></h2>
-        <div class="nav-bar">
-            <a href="?roll_number=<?php echo urlencode($roll_number); ?>&month=<?php echo $prev_month; ?>&year=<?php echo $prev_year; ?>">⟵ Previous</a>
-            <div class="nav-title"><?php echo date("F Y", strtotime("$year-$month-01")); ?></div>
-            <a href="?roll_number=<?php echo urlencode($roll_number); ?>&month=<?php echo $next_month; ?>&year=<?php echo $next_year; ?>">Next ⟶</a>
-        </div>
-
-        <div class="calendar">
-            <div class="day-header">Sun</div>
-            <div class="day-header">Mon</div>
-            <div class="day-header">Tue</div>
-            <div class="day-header">Wed</div>
-            <div class="day-header">Thu</div>
-            <div class="day-header">Fri</div>
-            <div class="day-header">Sat</div>
-
-            <?php
-            // Empty cells before 1st day
-            for ($i = 0; $i < $firstDayOfMonth; $i++) {
-                echo "<div></div>";
-            }
-
-            // Calendar days
-            for ($day = 1; $day <= $daysInMonth; $day++) {
-                $date = "$year-" . str_pad($month, 2, "0", STR_PAD_LEFT) . "-" . str_pad($day, 2, "0", STR_PAD_LEFT);
-                $status = $attendance[$date] ?? "-";
-                $color = getColor($status);
-                $todayClass = ($date == $today) ? "today" : "";
-
-                echo "<div class='day $todayClass' style='background:$color;'>
-                        <strong>$day</strong>
-                        <small>$status</small>
-                      </div>";
-            }
-            ?>
-        </div>
-
-        <div class="legend">
-            <div><span style="background:#28a745;"></span> Present</div>
-            <div><span style="background:#dc3545;"></span> Absent</div>
-            <div><span style="background:#e9ecef;"></span> No Record</div>
-        </div>
+<div class="content">
+    <div class="loader-container" id="loaderContainer">
+        <div class="loader"></div>
     </div>
 
-    <?php include 'footer.php'; ?>
+    <h2 class="text-center my-3">Attendance</h2>
 
+    <div class="nav-bar mb-3">
+        <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $prev_month ?>&year=<?= $prev_year ?>">⟵ Previous</a>
+        <div class="nav-title"><?= date("F Y", strtotime("$year-$month-01")) ?></div>
+        <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $next_month ?>&year=<?= $next_year ?>">Next ⟶</a>
+    </div>
+
+    <div class="calendar">
+        <?php
+        $daysOfWeek = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+        foreach ($daysOfWeek as $dayHeader) echo "<div class='day-header'>$dayHeader</div>";
+
+        for ($i = 0; $i < $firstDayOfMonth; $i++) echo "<div></div>";
+
+        for ($day = 1; $day <= $daysInMonth; $day++) {
+            $date = "$year-" . str_pad($month,2,'0',STR_PAD_LEFT) . "-" . str_pad($day,2,'0',STR_PAD_LEFT);
+            $status = $attendance[$date] ?? "-";
+            $color = getColor($status);
+            $todayClass = ($date == $today) ? "today" : "";
+            echo "<div class='day $todayClass' style='background:$color;'><strong>$day</strong><small>$status</small></div>";
+        }
+        ?>
+    </div>
+
+    <div class="legend">
+        <div><span style="background:#28a745;"></span> Present</div>
+        <div><span style="background:#dc3545;"></span> Absent</div>
+        <div><span style="background:#e9ecef;"></span> No Record</div>
+    </div>
+</div>
+
+<?php include 'footer.php'; ?>
 </body>
 </html>
