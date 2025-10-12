@@ -1,12 +1,12 @@
 <?php
-include 'db.php';
+include 'dbconnect.php';
 session_start();
 
 // Set timezone
 date_default_timezone_set('Asia/Kolkata');
 
 // Get student roll number from session
-$roll_number = $_SESSION['student_roll_number'] ?? '22XX001';
+$roll_number = $_SESSION['student_roll_number'] ?? '927623bit027';
 $now = date('Y-m-d H:i:s');
 $today = date('Y-m-d');
 
