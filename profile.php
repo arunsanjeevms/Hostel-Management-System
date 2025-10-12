@@ -17,21 +17,23 @@ $user_id = $_SESSION['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     try {
-        $stmt = $pdo->prepare("SELECT roll_number FROM students WHERE user_id = ?");
-        $stmt->execute([$user_id]);
-        $student = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $conn->prepare("SELECT roll_number FROM students WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $student = $result->fetch_assoc();
+        $stmt->close();
 
         if ($student) {
             $roll_number = $student['roll_number'];
-            $stmt = $pdo->prepare("
+            $stmt = $conn->prepare("
                 UPDATE students SET 
                     name = ?, email = ?, student_phone = ?, 
                     department = ?, academic_year = ?, block = ?,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE roll_number = ?
             ");
-
-            $stmt->execute([
+            $stmt->bind_param("ssssssss", 
                 $_POST['name'] ?? '',
                 $_POST['email'] ?? '',
                 $_POST['student_phone'] ?? '',
@@ -39,25 +41,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                 $_POST['academic_year'] ?? '',
                 $_POST['block'] ?? '',
                 $roll_number
-            ]);
+            );
+            $stmt->execute();
+            $stmt->close();
 
             if (isset($_POST['parent_name']) && is_array($_POST['parent_name'])) {
                 foreach ($_POST['parent_name'] as $parent_id => $parent_name) {
                     if (isset($_POST['parent_phone'][$parent_id])) {
-                        $stmt = $pdo->prepare("
+                        $stmt = $conn->prepare("
                             UPDATE parents p
                             JOIN student_parents sp ON p.parent_id = sp.parent_id
                             SET p.name = ?, p.phone = ?, p.email = ?
                             WHERE sp.roll_number = ? AND p.parent_id = ?
                         ");
-
-                        $stmt->execute([
+                        $stmt->bind_param("ssssi",
                             $parent_name,
                             $_POST['parent_phone'][$parent_id] ?? '',
                             $_POST['parent_email'][$parent_id] ?? '',
                             $roll_number,
                             $parent_id
-                        ]);
+                        );
+                        $stmt->execute();
+                        $stmt->close();
                     }
                 }
             }
@@ -70,34 +75,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         $error = "Error updating profile: " . $e->getMessage();
     }
 }
+
 $student_data = [];
 $parent_data = [];
 $attendance_stats = ['attendance_percentage' => 0, 'total_days' => 0, 'present_days' => 0];
 $leave_stats = ['active_leaves' => 0];
 
 try {
-
-    $stmt = $pdo->prepare("
+    // Get student data
+    $stmt = $conn->prepare("
         SELECT s.*, r.room_number, r.room_type, r.capacity, r.occupied, 
-               h.hostel_name, h.hostel_code, h.address,r.created_at
+               h.hostel_name, h.hostel_code, h.address, r.created_at
         FROM students s 
         LEFT JOIN rooms r ON s.room_id = r.room_id 
         LEFT JOIN hostels h ON r.hostel_id = h.hostel_id 
         WHERE s.user_id = ?
     ");
-    $stmt->execute([$user_id]);
-    $student_data = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $student_data = $result->fetch_assoc();
+    $stmt->close();
+
     // Get parent info
     if ($student_data && !isset($demo_mode)) {
-        $stmt = $pdo->prepare("
+        $stmt = $conn->prepare("
             SELECT p.*, sp.relation_enum, sp.is_primary_contact
             FROM student_parents sp
             JOIN parents p ON sp.parent_id = p.parent_id
             WHERE sp.roll_number = ?
             ORDER BY sp.is_primary_contact DESC, sp.relation_enum
         ");
-        $stmt->execute([$student_data['roll_number']]);
-        $parent_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->bind_param("s", $student_data['roll_number']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $parent_data = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        
         foreach ($parent_data as &$parent) {
             if (!empty($parent['photo'])) {
                 $base64 = base64_encode($parent['photo']);
@@ -107,7 +121,6 @@ try {
             }
         }
         unset($parent);
-        //for error handling
     } else if (isset($demo_mode)) {
         $parent_data = [
             [
@@ -131,8 +144,9 @@ try {
         ];
     }
 
+    // Get attendance stats
     if ($student_data && !isset($demo_mode)) {
-        $stmt = $pdo->prepare("
+        $stmt = $conn->prepare("
             SELECT 
                 COUNT(*) as total_days,
                 SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) as present_days,
@@ -141,22 +155,30 @@ try {
             WHERE roll_number = ? 
             AND date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         ");
-        $stmt->execute([$student_data['roll_number']]);
-        $attendance_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->bind_param("s", $student_data['roll_number']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $attendance_result = $result->fetch_assoc();
+        $stmt->close();
+        
         if ($attendance_result) {
             $attendance_stats = $attendance_result;
         }
 
         // Getting absent count instead of leave count
-        $stmt = $pdo->prepare("
+        $stmt = $conn->prepare("
             SELECT 
                 SUM(CASE WHEN status = 'Absent' THEN 1 ELSE 0 END) as absent_days
             FROM attendance 
             WHERE roll_number = ? 
             AND date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
         ");
-        $stmt->execute([$student_data['roll_number']]);
-        $absent_result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->bind_param("s", $student_data['roll_number']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $absent_result = $result->fetch_assoc();
+        $stmt->close();
+        
         if ($absent_result) {
             $leave_stats = ['active_leaves' => $absent_result['absent_days'] ?? 0];
         }
@@ -164,22 +186,22 @@ try {
     } else if (isset($demo_mode)) {
         $attendance_stats = ['attendance_percentage' => '85.5', 'present_days' => '25', 'total_days' => '30'];
         $leave_stats = ['active_leaves' => '3'];
-        
     }
 
 } catch (Exception $e) {
     $error = "Error loading profile data: " . $e->getMessage();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Profile - Hostel Management System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Keep all existing CSS styles exactly the same */
         :root {
             --sidebar-width: 250px;
             --sidebar-collapsed-width: 70px;
@@ -210,8 +232,6 @@ try {
             min-height: 100vh;
             display: flex;
         }
-
-   
 
         .view-mode {
             display: inline;
@@ -378,7 +398,6 @@ try {
             color: var(--warning);
         }
 
-
         .stat-label {
             font-size: 12px;
             color: var(--text-light);
@@ -448,7 +467,6 @@ try {
             -webkit-text-fill-color: transparent;
         }
 
-    
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -754,7 +772,6 @@ try {
             }
         }
         
-
         .profile-card,
         .details-card {
             box-shadow: none !important;
@@ -766,7 +783,6 @@ try {
             background: white !important;
             box-shadow: none !important;
             border: 2px solid #000 !important;
-        }
         }
     </style>
 </head>
@@ -890,7 +906,7 @@ try {
                             <div class="info-item">
                                 <div class="info-label">Date of Birth</div>
                                 <div class="info-value">
-                                    <?php echo htmlspecialchars($student_data['DOB'] ?? 'N/A'); ?>
+                                    <?php echo htmlspecialchars($student_data['date_of_birth'] ?? 'N/A'); ?>
                                 </div>
                             </div>
                             <div class="info-item">
@@ -1081,7 +1097,7 @@ try {
         </form>
     </div>
 
-    <script>
+ <script>
         //  to toggle edit mode
         function toggleEditMode() {
             const isEditMode = document.getElementById('saveBtn').style.display !== 'none';
@@ -1199,5 +1215,4 @@ try {
         });
     </script>
 </body>
-
 </html>

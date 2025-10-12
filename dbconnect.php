@@ -1,14 +1,21 @@
 <?php
 $host = 'localhost';
 $dbname = 'hostel';
-$username = 'root'; // Default XAMPP username
-$password = ''; // Default XAMPP password
+$username = 'root';
+$password = '';
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
+    $conn = new mysqli($host, $username, $password, $dbname);
+    
+    // Check connection
+    if ($conn->connect_error) {
+        die("Database connection failed: " . $conn->connect_error);
+    }
+    
+    // Set charset
+    $conn->set_charset("utf8mb4");
+    
+} catch (Exception $e) {
     die("Database connection failed: " . $e->getMessage());
 }
 ?>

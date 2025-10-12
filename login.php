@@ -11,10 +11,8 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
- 
     if (isset($_POST['type'])) {
         $user_type = $_POST['type'];
-       
         $username = isset($_POST['email']) ? trim($_POST['email']) : '';
         $password = isset($_POST['pass']) ? trim($_POST['pass']) : '';
 
@@ -22,17 +20,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = "Please enter both username and password!";
         } else {
             try {
-                $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
-                $stmt->execute([$username]);
-                $user = $stmt->fetch();
+                // Using mysqli instead of PDO
+                $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+                $stmt->bind_param("s", $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
                 
                 if ($user) {
+                    // Simple password comparison (you might want to use password_verify() if passwords are hashed)
                     if ($password === $user['password']) {
                         $_SESSION['user_id'] = $user['user_id'];
                         $_SESSION['username'] = $user['username'];
                         $_SESSION['user_type'] = $user['role'];
 
-            
                         error_log("Login successful for user: " . $username . " with role: " . $user['role']);
                 
                         if ($user['role'] === 'student') {
@@ -47,7 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     $error = "User not found!";
                 }
-            } catch (PDOException $e) {
+                
+                $stmt->close();
+            } catch (Exception $e) {
                 $error = "Database error: " . $e->getMessage();
             }
         }
