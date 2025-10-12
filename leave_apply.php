@@ -1,8 +1,54 @@
 <?php
-include 'dbconnect.php';
 session_start();
-$roll_no = $_SESSION['roll_number'] ?? '927623bit027';
+include 'db.php';
+$roll_no = $_SESSION['roll_number'] ?? '2025CS001';
 $errors = [];
+// ========== LOGIN HANDLER ==========
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['type'])) {
+        $user_type = $_POST['type'];
+        $username = isset($_POST['email']) ? trim($_POST['email']) : '';
+        $password = isset($_POST['pass']) ? trim($_POST['pass']) : '';
+
+        if (empty($username) || empty($password)) {
+            $errors[] = "Please enter both username and password!";
+        } else {
+            try {
+                $stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+                $stmt->bind_param("s", $username);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $user = $result->fetch_assoc();
+
+                if ($user) {
+                    // Use password_verify if passwords are hashed
+                    if ($password === $user['password']) {
+                        $_SESSION['user_id'] = $user['user_id'];
+                        $_SESSION['username'] = $user['username'];
+                        $_SESSION['user_type'] = $user['role'];
+
+                        // Redirect based on role
+                        if ($user['role'] === 'student') {
+                            header("Location: index.php");
+                        } else {
+                            header("Location: a_index.php");
+                        }
+                        exit;
+                    } else {
+                        $errors[] = "Invalid password!";
+                    }
+                } else {
+                    $errors[] = "User not found!";
+                }
+
+                $stmt->close();
+            } catch (Exception $e) {
+                $errors[] = "Database error: " . $e->getMessage();
+            }
+        }
+    }
+}
+
 
 // ================= APPLY / EDIT LEAVE =================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply_leave'])) {
