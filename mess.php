@@ -1,5 +1,5 @@
 <?php
-include 'dbconnect.php';
+include 'db.php';
 session_start();
 
 // Set timezone
