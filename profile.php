@@ -1,7 +1,7 @@
 <?php
 session_start();
 try {
-    require_once 'dbconnect.php';
+    require_once 'db.php';
 } catch (Exception $e) {
     die("Database configuration error: " . $e->getMessage());
 }
@@ -1214,4 +1214,5 @@ try {
         });
     </script>
 </body>
+
 </html>
