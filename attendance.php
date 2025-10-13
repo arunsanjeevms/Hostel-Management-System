@@ -30,7 +30,7 @@ if (isset($_SESSION['user_type'])) {
     exit();
 }
 
-// Fetch student_id for the roll_number
+// Fetch student_id
 $student_stmt = $conn->prepare("SELECT student_id FROM students WHERE roll_number = ?");
 $student_stmt->bind_param("s", $roll_number);
 $student_stmt->execute();
@@ -47,20 +47,14 @@ $student_id = $student_row['student_id'];
 $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
 
-// Previous and next month
+// Prev/Next
 $prev_month = $month - 1; $prev_year = $year;
 if ($prev_month < 1) { $prev_month = 12; $prev_year--; }
-
 $next_month = $month + 1; $next_year = $year;
 if ($next_month > 12) { $next_month = 1; $next_year++; }
 
-// Fetch attendance for the student_id
-$att_stmt = $conn->prepare("SELECT date, status 
-                            FROM attendance 
-                            WHERE student_id = ? 
-                              AND MONTH(date) = ? 
-                              AND YEAR(date) = ? 
-                            ORDER BY date");
+// Fetch attendance
+$att_stmt = $conn->prepare("SELECT date, status FROM attendance WHERE student_id = ? AND MONTH(date)=? AND YEAR(date)=? ORDER BY date");
 $att_stmt->bind_param("iii", $student_id, $month, $year);
 $att_stmt->execute();
 $att_result = $att_stmt->get_result();
@@ -68,6 +62,32 @@ $att_result = $att_stmt->get_result();
 $attendance = [];
 while ($row = $att_result->fetch_assoc()) {
     $attendance[$row['date']] = $row['status'];
+}
+
+// Handle AJAX request
+if (isset($_POST['ajax_mark'])) {
+    $today = date('Y-m-d');
+    $check_stmt = $conn->prepare("SELECT * FROM attendance WHERE student_id=? AND date=?");
+    $check_stmt->bind_param("is", $student_id, $today);
+    $check_stmt->execute();
+    $check_res = $check_stmt->get_result();
+
+    if ($check_res->num_rows > 0) {
+        echo json_encode(['status' => 'exists']);
+    } else {
+        $insert_stmt = $conn->prepare("
+            INSERT INTO attendance (student_id, roll_number, date, status, marked_by)
+            VALUES (?, ?, ?, 'Present', ?)
+        ");
+        $marked_by = $_SESSION['user_id'] ?? null;
+        $insert_stmt->bind_param("issi", $student_id, $roll_number, $today, $marked_by);
+        if ($insert_stmt->execute()) {
+            echo json_encode(['status' => 'success', 'date' => $today]);
+        } else {
+            echo json_encode(['status' => 'error']);
+        }
+    }
+    exit();
 }
 
 // Color function
@@ -344,11 +364,16 @@ td {
 <?php include 'topbar.php'; ?>
 
 <div class="content">
-    <div class="loader-container" id="loaderContainer">
-        <div class="loader"></div>
-    </div>
+    <div class="text-center my-3">
+        <h2>Attendance</h2>
 
-    <h2 class="text-center my-3">Attendance</h2>
+        <?php if ($_SESSION['user_type'] === 'student'): ?>
+        <button id="markBtn" class="btn btn-success mt-3">
+            <i class="fa-solid fa-check"></i> Mark My Attendance
+        </button>
+        <div id="markMsg" class="mt-3"></div>
+        <?php endif; ?>
+    </div>
 
     <div class="nav-bar mb-3">
         <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $prev_month ?>&year=<?= $prev_year ?>">⟵ Previous</a>
@@ -356,7 +381,7 @@ td {
         <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $next_month ?>&year=<?= $next_year ?>">Next ⟶</a>
     </div>
 
-    <div class="calendar">
+    <div class="calendar" id="calendar">
         <?php
         $daysOfWeek = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
         foreach ($daysOfWeek as $dayHeader) echo "<div class='day-header'>$dayHeader</div>";
@@ -368,7 +393,9 @@ td {
             $status = $attendance[$date] ?? "-";
             $color = getColor($status);
             $todayClass = ($date == $today) ? "today" : "";
-            echo "<div class='day $todayClass' style='background:$color;'><strong>$day</strong><small>$status</small></div>";
+            echo "<div class='day $todayClass' data-date='$date' style='background:$color;'>
+                    <strong>$day</strong><small>$status</small>
+                  </div>";
         }
         ?>
     </div>
@@ -382,8 +409,28 @@ td {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script>
-$(window).on('load', function() {
-    $('#loaderContainer').fadeOut();
+$(document).ready(function() {
+    $("#markBtn").click(function() {
+        $("#markBtn").prop("disabled", true).text("Marking...");
+        $.post("attendance.php", { ajax_mark: 1 }, function(response) {
+            try {
+                let data = JSON.parse(response);
+                if (data.status === 'success') {
+                    $("#markMsg").html('<div class="alert alert-success">Attendance marked as Present!</div>');
+                    let today = data.date;
+                    let cell = $(".day[data-date='"+today+"']");
+                    cell.css("background","#28a745").find("small").text("Present");
+                } else if (data.status === 'exists') {
+                    $("#markMsg").html('<div class="alert alert-info">Already marked today.</div>');
+                } else {
+                    $("#markMsg").html('<div class="alert alert-danger">Error marking attendance.</div>');
+                }
+            } catch (e) {
+                $("#markMsg").html('<div class="alert alert-danger">Unexpected response.</div>');
+            }
+            $("#markBtn").prop("disabled", false).html('<i class="fa-solid fa-check"></i> Mark My Attendance');
+        });
+    });
 });
 </script>
 </body>
