@@ -1,72 +1,107 @@
 <?php
 session_start();
-
-// Database connection
-$host = "localhost";
-$user = "root";
-$pass = "";
-$db = "hostel";
-
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+try {
+    require_once 'db.php';
+} catch (Exception $e) {
+    die("Database configuration error: " . $e->getMessage());
 }
 
-// Determine roll_number
-if (isset($_SESSION['user_type'])) {
-    if ($_SESSION['user_type'] === 'student') {
-        $roll_number = $_SESSION['username']; // Student's own attendance
-    } elseif ($_SESSION['user_type'] === 'admin' || $_SESSION['user_type'] === 'faculty') {
-        if (isset($_GET['roll_number'])) {
-            $roll_number = $_GET['roll_number']; // Admin/faculty can view any student
+// DEMO mode fallback if user is not logged in
+if (!isset($_SESSION['user_id'])) {
+    $demo_mode = true;
+    $_SESSION['user_id'] = 1;
+    $_SESSION['username'] = 'S1001';  // Demo roll number
+    $_SESSION['user_type'] = 'student';
+}
+
+$user_id = $_SESSION['user_id'];
+$user_type = $_SESSION['user_type'] ?? 'student';
+$roll_number = null;
+
+// ✅ Get roll_number based on user type
+try {
+    if ($user_type === 'student') {
+        $stmt = $conn->prepare("SELECT roll_number FROM students WHERE user_id = ?");
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $student = $result->fetch_assoc();
+        $stmt->close();
+
+        if ($student) {
+            $roll_number = $student['roll_number'];
+        } elseif (isset($demo_mode)) {
+            $roll_number = 'S1001'; // demo fallback
+        } else {
+            die("Student not found.");
+        }
+
+    } elseif ($user_type === 'admin' || $user_type === 'faculty') {
+        if (isset($_GET['roll_number']) && $_GET['roll_number'] !== '') {
+            $roll_number = $_GET['roll_number'];
         } else {
             die("Please provide a student's roll number to view attendance.");
         }
     } else {
         die("Invalid user type.");
     }
-} else {
-    header("Location: login.php");
-    exit();
+} catch (Exception $e) {
+    die("Error fetching student roll number: " . $e->getMessage());
 }
 
-// Fetch student_id
-$student_stmt = $conn->prepare("SELECT student_id FROM students WHERE roll_number = ?");
-$student_stmt->bind_param("s", $roll_number);
-$student_stmt->execute();
-$student_result = $student_stmt->get_result();
-
-if ($student_result->num_rows === 0) {
-    die("Student not found.");
+// ✅ Fetch student_id using roll_number
+$student_id = null;
+try {
+    $stmt = $conn->prepare("SELECT student_id FROM students WHERE roll_number = ?");
+    $stmt->bind_param("s", $roll_number);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if ($row = $res->fetch_assoc()) {
+        $student_id = $row['student_id'];
+    } elseif (isset($demo_mode)) {
+        $student_id = 1;
+    } else {
+        die("Student not found in records.");
+    }
+    $stmt->close();
+} catch (Exception $e) {
+    die("Error fetching student_id: " . $e->getMessage());
 }
 
-$student_row = $student_result->fetch_assoc();
-$student_id = $student_row['student_id'];
-
-// Get month & year
+// ✅ Month navigation
 $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
-
-// Prev/Next
 $prev_month = $month - 1; $prev_year = $year;
 if ($prev_month < 1) { $prev_month = 12; $prev_year--; }
 $next_month = $month + 1; $next_year = $year;
 if ($next_month > 12) { $next_month = 1; $next_year++; }
 
-// Fetch attendance
-$att_stmt = $conn->prepare("SELECT date, status FROM attendance WHERE student_id = ? AND MONTH(date)=? AND YEAR(date)=? ORDER BY date");
-$att_stmt->bind_param("iii", $student_id, $month, $year);
-$att_stmt->execute();
-$att_result = $att_stmt->get_result();
-
+// ✅ Fetch attendance records
 $attendance = [];
-while ($row = $att_result->fetch_assoc()) {
-    $attendance[$row['date']] = $row['status'];
+try {
+    $stmt = $conn->prepare("
+        SELECT date, status 
+        FROM attendance 
+        WHERE student_id = ? 
+        AND MONTH(date) = ? AND YEAR(date) = ?
+        ORDER BY date
+    ");
+    $stmt->bind_param("iii", $student_id, $month, $year);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $attendance[$row['date']] = $row['status'];
+    }
+    $stmt->close();
+} catch (Exception $e) {
+    die("Error fetching attendance records: " . $e->getMessage());
 }
 
-// Handle AJAX request
+// ✅ Handle AJAX mark attendance
 if (isset($_POST['ajax_mark'])) {
     $today = date('Y-m-d');
+    $marked_by = $_SESSION['user_id'] ?? null;
+
     $check_stmt = $conn->prepare("SELECT * FROM attendance WHERE student_id=? AND date=?");
     $check_stmt->bind_param("is", $student_id, $today);
     $check_stmt->execute();
@@ -76,10 +111,9 @@ if (isset($_POST['ajax_mark'])) {
         echo json_encode(['status' => 'exists']);
     } else {
         $insert_stmt = $conn->prepare("
-            INSERT INTO attendance (student_id, roll_number, date, status, marked_by)
+            INSERT INTO attendance (student_id, roll_number, date, status, marked_by) 
             VALUES (?, ?, ?, 'Present', ?)
         ");
-        $marked_by = $_SESSION['user_id'] ?? null;
         $insert_stmt->bind_param("issi", $student_id, $roll_number, $today, $marked_by);
         if ($insert_stmt->execute()) {
             echo json_encode(['status' => 'success', 'date' => $today]);
@@ -90,7 +124,7 @@ if (isset($_POST['ajax_mark'])) {
     exit();
 }
 
-// Color function
+// ✅ Color function
 function getColor($status) {
     switch ($status) {
         case 'Present': return '#28a745';
