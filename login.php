@@ -54,7 +54,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Set success message for SweetAlert
                         $_SESSION['login_success'] = true;
                         $_SESSION['login_message'] = "Login successful! Welcome, " . $user['username'];
-                        $_SESSION['redirect_to'] = ($user['role'] === 'student') ? 'index.php' : 'a_index.php';
+                        switch($user['role']) {
+    case 'student':
+        $_SESSION['redirect_to'] = 'index.php';
+        break;
+    case 'faculty':
+        $_SESSION['redirect_to'] = 'f_index.php';
+        break;
+    case 'admin':
+        $_SESSION['redirect_to'] = 'a_index.php';
+        break;
+    case 'mess_supervisor':
+        $_SESSION['redirect_to'] = 'm_index.php';
+        break;
+    default:
+        $_SESSION['redirect_to'] = 'default.php';
+        break;
+}
                         
                         // Don't redirect immediately, let JavaScript handle it after SweetAlert
                         $login_success = true;
