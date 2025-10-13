@@ -1,5 +1,7 @@
 <?php
 session_start();
+date_default_timezone_set('Asia/Kolkata'); // ✅ Set timezone for India
+
 try {
     require_once 'db.php';
 } catch (Exception $e) {
@@ -18,7 +20,7 @@ $user_id = $_SESSION['user_id'];
 $user_type = $_SESSION['user_type'] ?? 'student';
 $roll_number = null;
 
-// ✅ Get roll_number based on user type
+//  Get roll_number based on user type
 try {
     if ($user_type === 'student') {
         $stmt = $conn->prepare("SELECT roll_number FROM students WHERE user_id = ?");
@@ -49,7 +51,7 @@ try {
     die("Error fetching student roll number: " . $e->getMessage());
 }
 
-// ✅ Fetch student_id using roll_number
+// Fetch student_id using roll_number
 $student_id = null;
 try {
     $stmt = $conn->prepare("SELECT student_id FROM students WHERE roll_number = ?");
@@ -68,7 +70,7 @@ try {
     die("Error fetching student_id: " . $e->getMessage());
 }
 
-// ✅ Month navigation
+//  Month navigation
 $month = isset($_GET['month']) ? (int)$_GET['month'] : (int)date('m');
 $year = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
 $prev_month = $month - 1; $prev_year = $year;
@@ -76,7 +78,29 @@ if ($prev_month < 1) { $prev_month = 12; $prev_year--; }
 $next_month = $month + 1; $next_year = $year;
 if ($next_month > 12) { $next_month = 1; $next_year++; }
 
-// ✅ Fetch attendance records
+//  Time window setup
+$start_time = "08:00";
+$end_time   = "17:00";
+$current_time = date('H:i');
+$today = date('Y-m-d');
+
+//  Auto-mark absent after 5 PM if not marked
+if ($user_type === 'student' && $current_time > $end_time) {
+    $check_stmt = $conn->prepare("SELECT * FROM attendance WHERE student_id=? AND date=?");
+    $check_stmt->bind_param("is", $student_id, $today);
+    $check_stmt->execute();
+    $check_res = $check_stmt->get_result();
+    if ($check_res->num_rows === 0) {
+        $absent_stmt = $conn->prepare("
+            INSERT INTO attendance (student_id, roll_number, date, status) 
+            VALUES (?, ?, ?, 'Absent')
+        ");
+        $absent_stmt->bind_param("iss", $student_id, $roll_number, $today);
+        $absent_stmt->execute();
+    }
+}
+
+//  Fetch attendance records
 $attendance = [];
 try {
     $stmt = $conn->prepare("
@@ -97,10 +121,21 @@ try {
     die("Error fetching attendance records: " . $e->getMessage());
 }
 
-// ✅ Handle AJAX mark attendance
+//  Handle AJAX mark attendance
 if (isset($_POST['ajax_mark'])) {
     $today = date('Y-m-d');
+    $current_time = date('H:i');
+    $start_time = "08:00";
+    $end_time   = "17:00";
     $marked_by = $_SESSION['user_id'] ?? null;
+
+    if ($current_time < $start_time || $current_time > $end_time) {
+        echo json_encode([
+            'status' => 'time_closed',
+            'message' => "Attendance can only be marked between $start_time and $end_time."
+        ]);
+        exit();
+    }
 
     $check_stmt = $conn->prepare("SELECT * FROM attendance WHERE student_id=? AND date=?");
     $check_stmt->bind_param("is", $student_id, $today);
@@ -124,7 +159,7 @@ if (isset($_POST['ajax_mark'])) {
     exit();
 }
 
-// ✅ Color function
+//  Color function
 function getColor($status) {
     switch ($status) {
         case 'Present': return '#28a745';
@@ -135,7 +170,6 @@ function getColor($status) {
 
 $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
 $firstDayOfMonth = date("w", strtotime("$year-$month-01"));
-$today = date('Y-m-d');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -146,7 +180,6 @@ $today = date('Y-m-d');
 <link rel="icon" type="image/png" sizes="32x32" href="image/icons/mkce_s.png">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
 <style>
 
 :root {
@@ -390,7 +423,6 @@ td {
     .content-nav ul::-webkit-scrollbar { height: 4px; }
     .content-nav ul::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
 }
-
 </style>
 </head>
 <body>
@@ -398,11 +430,22 @@ td {
 <?php include 'topbar.php'; ?>
 
 <div class="content">
-    <div class="text-center my-3">
+    <div class="text-center my-2">
         <h2>Attendance</h2>
 
+        <!--  Show current server time + status -->
+        <?php 
+            $is_open = ($current_time >= $start_time && $current_time <= $end_time);
+            $status_color = $is_open ? "text-success" : "text-danger";
+            $status_label = $is_open ? "🟢 Attendance Open" : "🔴 Closed";
+        ?>
+        <div id="serverTime" class="mt-2 text-muted" style="font-size:16px;">
+            Server Time (IST): <strong><?php echo date('h:i:s A'); ?></strong> <br>
+            <span class="<?php echo $status_color; ?>"><?php echo $status_label; ?></span>
+        </div>
+
         <?php if ($_SESSION['user_type'] === 'student'): ?>
-        <button id="markBtn" class="btn btn-success mt-3">
+        <button id="markBtn" class="btn btn-success mt-3" <?php if(!$is_open) echo 'disabled'; ?>>
             <i class="fa-solid fa-check"></i> Mark My Attendance
         </button>
         <div id="markMsg" class="mt-3"></div>
@@ -422,7 +465,7 @@ td {
 
         for ($i = 0; $i < $firstDayOfMonth; $i++) echo "<div></div>";
 
-        for ($day = 1; $day <= $daysInMonth; $day++) {
+        for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
             $date = "$year-" . str_pad($month,2,'0',STR_PAD_LEFT) . "-" . str_pad($day,2,'0',STR_PAD_LEFT);
             $status = $attendance[$date] ?? "-";
             $color = getColor($status);
@@ -439,33 +482,58 @@ td {
         <div><span style="background:#dc3545;"></span> Absent</div>
         <div><span style="background:#e9ecef;"></span> Not Record</div>
     </div>
+    <?php include 'footer.php'; ?>
 </div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script>
 $(document).ready(function() {
     $("#markBtn").click(function() {
         $("#markBtn").prop("disabled", true).text("Marking...");
-        $.post("attendance.php", { ajax_mark: 1 }, function(response) {
-            try {
-                let data = JSON.parse(response);
+
+        $.ajax({
+            url: "attendance.php",
+            type: "POST",
+            dataType: "json",
+            data: { ajax_mark: 1 },
+            success: function(data) {
                 if (data.status === 'success') {
                     $("#markMsg").html('<div class="alert alert-success">Attendance marked as Present!</div>');
                     let today = data.date;
-                    let cell = $(".day[data-date='"+today+"']");
-                    cell.css("background","#28a745").find("small").text("Present");
+                    $(".day[data-date='"+today+"']").css("background","#28a745").find("small").text("Present");
                 } else if (data.status === 'exists') {
                     $("#markMsg").html('<div class="alert alert-info">Already marked today.</div>');
+                } else if (data.status === 'time_closed') {
+                    $("#markMsg").html('<div class="alert alert-warning">' + data.message + '</div>');
                 } else {
                     $("#markMsg").html('<div class="alert alert-danger">Error marking attendance.</div>');
                 }
-            } catch (e) {
+            },
+            error: function(xhr, status, error) {
+                console.log("Unexpected:", xhr.responseText);
                 $("#markMsg").html('<div class="alert alert-danger">Unexpected response.</div>');
+            },
+            complete: function() {
+                $("#markBtn").prop("disabled", false).html('<i class="fa-solid fa-check"></i> Mark My Attendance');
             }
-            $("#markBtn").prop("disabled", false).html('<i class="fa-solid fa-check"></i> Mark My Attendance');
         });
     });
+
+    //  Live Clock
+    setInterval(() => {
+        const now = new Date();
+        const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' };
+        document.getElementById('serverTime').innerHTML =
+            `Server Time (IST): <strong>${now.toLocaleTimeString('en-IN', options)}</strong><br>
+            <span class='${checkAttendanceWindow() ? "text-success" : "text-danger"}'>
+            ${checkAttendanceWindow() ? "🟢 Attendance Open" : "🔴 Closed"}
+            </span>`;
+    }, 1000);
 });
+
+function checkAttendanceWindow() {
+    const now = new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Asia/Kolkata' });
+    return now >= "08:00:00" && now <= "17:00:00";
+}
 </script>
 </body>
 </html>
