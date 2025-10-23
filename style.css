@@ -27,7 +27,7 @@ body {
     border: none;
     gap: 10px;
     padding: 6px;
-    background: #f8fdf8;
+    background: #f8f9fd;
     border-radius: 12px;
 }
 
@@ -67,23 +67,23 @@ body {
 }
 
 /* Add Bus Tab Styling */
-#breakfast,#thead {
-background: linear-gradient(135deg, #5604a7, #9f53ea);
+#family-tab {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
     color: #fff;
 }
 
-#family-tab,#breakfast,#thead:not(.active) {
-background: linear-gradient(135deg, #5604a7, #9f53ea);
-    color: #fff;
+#family-tab:not(.active) {
+    background: #fff;
+    color: #FF6B6B;
 }
 
-#family-tab,#breakfast,#thead:hover:not(.active) {
-background: linear-gradient(135deg, #5604a7, #9f53ea);
+#family-tab:hover:not(.active) {
+    background: linear-gradient(135deg, #FF6B6B, #FFE66D);
     color: #fff;
 }
 
 /* Edit Bus Tab Styling */
-#dailymenu-main-tab,#specialtoken-main-tab,#tokens-main-tab,#viewmenu-main-tab {
+#family-main-tab {
     background: linear-gradient(135deg, #4E65FF, #92EFFD);
     color: #fff;
 }
