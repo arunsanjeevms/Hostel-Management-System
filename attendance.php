@@ -1,6 +1,6 @@
 <?php
 session_start();
-date_default_timezone_set('Asia/Kolkata'); // ✅ Set timezone for India
+date_default_timezone_set('Asia/Kolkata'); 
 
 try {
     require_once 'db.php';
@@ -176,319 +176,389 @@ $firstDayOfMonth = date("w", strtotime("$year-$month-01"));
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Attendance</title>
-<link rel="icon" type="image/png" sizes="32x32" href="image/icons/mkce_s.png">
+    <title>Hostel Management</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="image/icons/mkce_s.png">
+  <link rel="stylesheet" href="style.css">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-5/bootstrap-5.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
 
-:root {
-    --sidebar-width: 250px;
-    --sidebar-collapsed-width: 70px;
-    --topbar-height: 60px;
-    --footer-height: 60px;
-    --primary-color: #4e73df;
-    --secondary-color: #858796;
-    --success-color: #1cc88a;
-    --dark-bg: #1a1c23;
-    --light-bg: #f8f9fc;
-    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    /* Merged Styles from leave_apply.php and attendance.php */
+    :root {
+        --sidebar-width: 250px;
+        --sidebar-collapsed-width: 70px;
+        --topbar-height: 60px;
+        --footer-height: 60px;
+        --primary-color: #4e73df;
+        --secondary-color: #858796;
+        --success-color: #1cc88a;
+        --dark-bg: #1a1c23;
+        --light-bg: #f8f9fc;
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #ece9e6, #ffffff);
-    margin: 0; padding: 0;
-}
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #e7e9f3ff 0%, #f9f9faff 100%);
+        margin: 0;
+        padding: 0;
+    }
 
-.content {
-    margin-left: var(--sidebar-width);
-    padding-top: var(--topbar-height);
-    transition: var(--transition);
-    min-height: 100vh;
-}
+    /* Content Area Styles */
+    .content {
+        margin-left: var(--sidebar-width);
+        padding-top: var(--topbar-height);
+        transition: all 0.3s ease;
+        min-height: 100vh;
+    }
 
-.content-nav {
-    background: linear-gradient(45deg, #4e73df, #1cc88a);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
+    /* Content Navigation */
+    .content-nav {
+        background: linear-gradient(45deg, #4e73df, #1cc88a);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
 
-.content-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-}
+    .content-nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+    }
 
-.content-nav li a {
-    color: white;
-    text-decoration: none;
-    padding: 8px 15px;
-    border-radius: 20px;
-    transition: var(--transition);
-    white-space: nowrap;
-}
+    .content-nav li a {
+        color: white;
+        text-decoration: none;
+        padding: 8px 15px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
 
-.content-nav li a:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
+    .content-nav li a:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
 
-.sidebar.collapsed + .content {
-    margin-left: var(--sidebar-collapsed-width);
-}
+    .sidebar.collapsed+.content {
+        margin-left: var(--sidebar-collapsed-width);
+    }
 
-.breadcrumb-area {
-    background-image: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
-    border-radius: 10px;
-    box-shadow: var(--card-shadow);
-    margin: 20px;
-    padding: 15px 20px;
-}
+    /* Breadcrumb Area - Styled like leave_apply.php's card base */
+    .breadcrumb-area {
+        background: white; /* Cleaner white background */
+        border-radius: 10px;
+        box-shadow: var(--card-shadow);
+        margin: 20px;
+        padding: 15px 20px;
+    }
 
-.breadcrumb-item a {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: var(--transition);
-}
+    /* Use the custom gradient background for the breadcrumb as a highlight */
+    .breadcrumb-area.custom-gradient {
+        background-image: linear-gradient(to top, #fff1eb 0%, #ace0f9 100%);
+        border-radius: 10px;
+        box-shadow: var(--card-shadow);
+    }
 
-.breadcrumb-item a:hover {
-    color: #224abe;
-}
 
-.gradient-header {
-    background: linear-gradient(135deg, #4CAF50, #2196F3) !important;
-    text-align: center;
-    font-size: 0.9em;
-}
+    .breadcrumb-item a {
+        color: var(--primary-color);
+        text-decoration: none;
+        transition: var(--transition);
+    }
 
-td {
-    text-align: left;
-    font-size: 0.9em;
-    vertical-align: middle;
-}
+    .breadcrumb-item a:hover {
+        color: #224abe;
+    }
 
-.nav-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 90%;
-    max-width: 900px;
-    margin: 0 auto 10px auto;
-}
+    /* Loader Styles (from leave_apply.php) */
+    .loader-container {
+        position: fixed;
+        left: var(--sidebar-width);
+        right: 0;
+        top: var(--topbar-height);
+        bottom: var(--footer-height);
+        background: rgba(255, 255, 255, 0.95);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        transition: left 0.3s ease;
+    }
+    
+    .sidebar.collapsed + .content .loader-container {
+        left: var(--sidebar-collapsed-width);
+    }
+    
+    .loader-container.hide {
+        display: none;
+    }
+    
+    .loader {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 5px solid var(--primary-color);
+        border-right: 5px solid var(--success-color);
+        border-bottom: 5px solid var(--primary-color);
+        border-left: 5px solid var(--success-color);
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 
-.nav-title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #343a40;
-}
+    /* Attendance-Specific Styles (Retained) */
 
-.nav-bar a {
-    text-decoration: none;
-    padding: 8px 15px;
-    background: var(--primary-color);
-    color: white;
-    border-radius: 6px;
-    transition: 0.3s;
-}
+    .nav-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 90%;
+        max-width: 900px;
+        margin: 0 auto 10px auto;
+    }
 
-.nav-bar a:hover {
-    background: #2e59d9;
-}
+    .nav-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #343a40;
+    }
 
-.calendar {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-    width: 95%;
-    max-width: 900px;
-    margin: auto;
-}
+    .nav-bar a {
+        text-decoration: none;
+        padding: 8px 15px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 6px;
+        transition: 0.3s;
+    }
 
-.day-header {
-    background: #343a40;
-    color: white;
-    padding: 8px;
-    text-align: center;
-    font-weight: bold;
-    border-radius: 6px;
-}
+    .nav-bar a:hover {
+        background: #2e59d9;
+    }
 
-.day {
-    min-height: 80px;
-    padding: 5px;
-    border-radius: 8px;
-    text-align: center;
-    font-size: 14px;
-    color: #000;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease-in-out;
-}
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        width: 95%;
+        max-width: 900px;
+        margin: auto;
+    }
 
-.day strong {
-    font-size: 16px;
-}
+    .day-header {
+        background: #343a40;
+        color: white;
+        padding: 8px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 6px;
+    }
 
-.day:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 10;
-}
+    .day {
+        min-height: 80px;
+        padding: 5px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 14px;
+        color: #000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease-in-out;
+    }
 
-.today {
-    border: 3px solid #ff9800;
-    box-shadow: 0 0 12px #ff9800;
-}
+    .day strong {
+        font-size: 18px; /* Enhanced font size */
+    }
 
-.legend {
-    width: 95%;
-    max-width: 900px;
-    margin: 20px auto;
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-}
+    .day:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+    }
 
-.legend div {
-    display: flex;
-    align-items: center;
-    margin: 5px 10px;
-}
+    .today {
+        border: 3px solid #ff9800;
+        box-shadow: 0 0 12px #ff9800;
+    }
 
-.legend span {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    margin-right: 6px;
-    border-radius: 4px;
-}
+    .legend {
+        width: 95%;
+        max-width: 900px;
+        margin: 20px auto;
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
 
-.loader-container {
-    position: fixed;
-    left: var(--sidebar-width);
-    right: 0;
-    top: var(--topbar-height);
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.95);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    transition: left 0.3s ease;
-}
+    .legend div {
+        display: flex;
+        align-items: center;
+        margin: 5px 10px;
+    }
 
-.sidebar.collapsed + .content .loader-container {
-    left: var(--sidebar-collapsed-width);
-}
+    .legend span {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 6px;
+        border-radius: 4px;
+    }
+    
+    /* Button styles (Retained) */
+    #markBtn {
+        transition: all 0.3s ease; 
+    }
 
-.loader-container.hide {
-    display: none;
-}
+    #markBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(40, 167, 69, 0.5);
+    }
 
-.loader {
-    width: 50px;
-    height: 50px;
-    border: 5px solid #f3f3f3;
-    border-radius: 50%;
-    border-top: 5px solid var(--primary-color);
-    border-right: 5px solid var(--success-color);
-    border-bottom: 5px solid var(--primary-color);
-    border-left: 5px solid var(--success-color);
-    animation: spin 1s linear infinite;
-}
+    #markBtn:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Responsive Styles (Adjusted for consistency) */
+    @media (max-width: 768px) {
+        .sidebar { transform: translateX(-100%); width: var(--sidebar-width) !important; }
+        .sidebar.mobile-show { transform: translateX(0); }
+        .topbar, .footer { left: 0 !important; }
+        body.sidebar-open { overflow: hidden; }
+        .day { min-height: 60px; font-size: 12px; }
+        .day strong { font-size: 14px; }
+        .nav-title { font-size: 16px; }
+        .nav-bar a { padding: 6px 10px; font-size: 13px; }
+        .content-nav ul { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; }
+        .content-nav ul::-webkit-scrollbar { height: 4px; }
+        .content-nav ul::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
+        .content { margin-left: 0 !important; padding-top: 80px; }
+        .loader-container { left: 0; }
+    }
+    .container-fluid {
+        padding: 20px;
+    }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@media (max-width: 768px) {
-    .content { margin-left: 0; padding-top: 80px; }
-    .sidebar { transform: translateX(-100%); width: var(--sidebar-width) !important; }
-    .sidebar.mobile-show { transform: translateX(0); }
-    .topbar, .footer { left: 0 !important; }
-    body.sidebar-open { overflow: hidden; }
-    .day { min-height: 60px; font-size: 12px; }
-    .day strong { font-size: 14px; }
-    .nav-title { font-size: 16px; }
-    .nav-bar a { padding: 6px 10px; font-size: 13px; }
-    .content-nav ul { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; }
-    .content-nav ul::-webkit-scrollbar { height: 4px; }
-    .content-nav ul::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 2px; }
-}
 </style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
-<?php include 'topbar.php'; ?>
+<div class="content"> 
+    
+    <div class="loader-container" id="loaderContainer" style="display: none;">
+        <div class="loader"></div>
+    </div>
 
-<div class="content">
-    <div class="text-center my-2">
-        <h2>Attendance</h2>
+    <?php include 'topbar.php'; ?>
+    
+    <div class="breadcrumb-area custom-gradient">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="index.php">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Attendance View</li>
+            </ol>
+        </nav>
+    </div>
 
-        <!--  Show current server time + status -->
-        <?php 
-            $is_open = ($current_time >= $start_time && $current_time <= $end_time);
-            $status_color = $is_open ? "text-success" : "text-danger";
-            $status_label = $is_open ? "🟢 Attendance Open" : "🔴 Closed";
-        ?>
-        <div id="serverTime" class="mt-2 text-muted" style="font-size:16px;">
-            Server Time (IST): <strong><?php echo date('h:i:s A'); ?></strong> <br>
-            <span class="<?php echo $status_color; ?>"><?php echo $status_label; ?></span>
+    <div class="container-fluid">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between" 
+                style="background-color: #f8f9fc; border-bottom: 1px solid #e3e6f0;">
+                
+                <h6 class="m-0 font-weight-bold text-black">
+                    <i class="fas fa-calendar-alt me-2"></i> Monthly Attendance Record
+                    <?php if ($user_type !== 'student'): ?>
+                        <small class="ms-3 text-secondary" style="font-size: 0.8em;">(Roll No: <?= htmlspecialchars($roll_number) ?>)</small>
+                    <?php endif; ?>
+                </h6>
+            </div>
+            
+            <div class="card-body">
+                <div class="text-center my-2">
+
+                    <?php 
+                        $is_open = ($current_time >= $start_time && $current_time <= $end_time);
+                        $status_color = $is_open ? "text-success" : "text-danger";
+                        $status_label = $is_open ? "🟢 Attendance Open" : "🔴 Closed";
+                    ?>
+                    <div id="serverTime" class="mt-2 text-muted" style="font-size:16px;">
+                        Server Time (IST): <strong><?php echo date('h:i:s A'); ?></strong> <br>
+                        <span class="<?php echo $status_color; ?>"><?php echo $status_label; ?></span>
+                    </div>
+
+                    <?php if ($_SESSION['user_type'] === 'student'): ?>
+                    <button id="markBtn" class="btn btn-success mt-3 mb-4 shadow-sm" <?php if(!$is_open) echo 'disabled'; ?>>
+                        <i class="fa-solid fa-check"></i> Mark My Attendance
+                    </button>
+                    <div id="markMsg" class="mt-3"></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="nav-bar mb-3">
+                    <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $prev_month ?>&year=<?= $prev_year ?>"><i class="fas fa-chevron-left"></i> Previous</a>
+                    <div class="nav-title"><?= date("F Y", strtotime("$year-$month-01")) ?></div>
+                    <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $next_month ?>&year=<?= $next_year ?>">Next <i class="fas fa-chevron-right"></i></a>
+                </div>
+
+                <div class="calendar" id="calendar">
+                    <?php
+                    $daysOfWeek = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+                    foreach ($daysOfWeek as $dayHeader) echo "<div class='day-header'>$dayHeader</div>";
+
+                    for ($i = 0; $i < $firstDayOfMonth; $i++) echo "<div></div>";
+
+                    for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
+                        $date = "$year-" . str_pad($month,2,'0',STR_PAD_LEFT) . "-" . str_pad($day,2,'0',STR_PAD_LEFT);
+                        $status = $attendance[$date] ?? "-";
+                        $color = getColor($status);
+                        $todayClass = ($date == $today) ? "today" : "";
+                        echo "<div class='day $todayClass' data-date='$date' style='background:$color;'>
+                                <strong>$day</strong><small>$status</small>
+                            </div>";
+                    }
+                    ?>
+                </div>
+                <div class="legend">
+                    <div><span style="background:#28a745;"></span> Present</div>
+                    <div><span style="background:#dc3545;"></span> Absent</div>
+                    <div><span style="background:#e9ecef;"></span> Not Recorded</div>
+                </div>
+            </div>
         </div>
-
-        <?php if ($_SESSION['user_type'] === 'student'): ?>
-        <button id="markBtn" class="btn btn-success mt-3" <?php if(!$is_open) echo 'disabled'; ?>>
-            <i class="fa-solid fa-check"></i> Mark My Attendance
-        </button>
-        <div id="markMsg" class="mt-3"></div>
-        <?php endif; ?>
     </div>
-
-    <div class="nav-bar mb-3">
-        <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $prev_month ?>&year=<?= $prev_year ?>">⟵ Previous</a>
-        <div class="nav-title"><?= date("F Y", strtotime("$year-$month-01")) ?></div>
-        <a href="?roll_number=<?= urlencode($roll_number) ?>&month=<?= $next_month ?>&year=<?= $next_year ?>">Next ⟶</a>
-    </div>
-
-    <div class="calendar" id="calendar">
-        <?php
-        $daysOfWeek = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        foreach ($daysOfWeek as $dayHeader) echo "<div class='day-header'>$dayHeader</div>";
-
-        for ($i = 0; $i < $firstDayOfMonth; $i++) echo "<div></div>";
-
-        for ($day = 1; $day <= cal_days_in_month(CAL_GREGORIAN, $month, $year); $day++) {
-            $date = "$year-" . str_pad($month,2,'0',STR_PAD_LEFT) . "-" . str_pad($day,2,'0',STR_PAD_LEFT);
-            $status = $attendance[$date] ?? "-";
-            $color = getColor($status);
-            $todayClass = ($date == $today) ? "today" : "";
-            echo "<div class='day $todayClass' data-date='$date' style='background:$color;'>
-                    <strong>$day</strong><small>$status</small>
-                  </div>";
-        }
-        ?>
-    </div>
-
-    <div class="legend">
-        <div><span style="background:#28a745;"></span> Present</div>
-        <div><span style="background:#dc3545;"></span> Absent</div>
-        <div><span style="background:#e9ecef;"></span> Not Record</div>
-    </div>
+    
     <?php include 'footer.php'; ?>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
 <script>
 $(document).ready(function() {
-    $("#markBtn").click(function() {
-        $("#markBtn").prop("disabled", true).text("Marking...");
+    const markBtn = $("#markBtn");
+    
+    // Check initial state (Important if page loads during open time)
+    if (checkAttendanceWindow() && markBtn.length) {
+         markBtn.prop("disabled", false);
+    }
+
+    markBtn.click(function() {
+        markBtn.prop("disabled", true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Marking...');
+        $("#markMsg").empty(); // Clear previous message
 
         $.ajax({
             url: "attendance.php",
@@ -497,40 +567,85 @@ $(document).ready(function() {
             data: { ajax_mark: 1 },
             success: function(data) {
                 if (data.status === 'success') {
-                    $("#markMsg").html('<div class="alert alert-success">Attendance marked as Present!</div>');
                     let today = data.date;
+                    // Update calendar day visually
                     $(".day[data-date='"+today+"']").css("background","#28a745").find("small").text("Present");
+                    
+                    // Show SweetAlert
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Attendance Marked!',
+                        html: `
+                            <p>You have been successfully marked as <strong>Present</strong> for today.</p>
+                            <p>Date: <strong>${today}</strong></p>
+                            <p>Time: <strong>${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' })} (IST)</strong></p>
+                        `,
+                        confirmButtonText: 'OK'
+                    });
+
                 } else if (data.status === 'exists') {
-                    $("#markMsg").html('<div class="alert alert-info">Already marked today.</div>');
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Already Marked',
+                        text: 'Your attendance for today has already been recorded.',
+                        confirmButtonColor: '#17a2b8' // Info color
+                    });
                 } else if (data.status === 'time_closed') {
-                    $("#markMsg").html('<div class="alert alert-warning">' + data.message + '</div>');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Window Closed',
+                        text: data.message,
+                        confirmButtonColor: '#ffc107' // Warning color
+                    });
                 } else {
-                    $("#markMsg").html('<div class="alert alert-danger">Error marking attendance.</div>');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'There was an error while trying to mark attendance.',
+                        confirmButtonColor: '#dc3545' // Danger color
+                    });
                 }
             },
             error: function(xhr, status, error) {
                 console.log("Unexpected:", xhr.responseText);
-                $("#markMsg").html('<div class="alert alert-danger">Unexpected response.</div>');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'System Error',
+                    text: 'An unexpected error occurred. Please check the console.',
+                    confirmButtonColor: '#dc3545'
+                });
             },
             complete: function() {
-                $("#markBtn").prop("disabled", false).html('<i class="fa-solid fa-check"></i> Mark My Attendance');
+                // Re-enable button after operation, but respect the time window
+                markBtn.prop("disabled", !checkAttendanceWindow()).html('<i class="fa-solid fa-check"></i> Mark My Attendance');
             }
         });
     });
 
-    //  Live Clock
+    // Live Clock 
     setInterval(() => {
         const now = new Date();
         const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' };
-        document.getElementById('serverTime').innerHTML =
-            `Server Time (IST): <strong>${now.toLocaleTimeString('en-IN', options)}</strong><br>
-            <span class='${checkAttendanceWindow() ? "text-success" : "text-danger"}'>
-            ${checkAttendanceWindow() ? "🟢 Attendance Open" : "🔴 Closed"}
-            </span>`;
+        
+        const serverTimeElement = document.getElementById('serverTime');
+        if (serverTimeElement) {
+            serverTimeElement.innerHTML =
+                `Server Time (IST): <strong>${now.toLocaleTimeString('en-IN', options)}</strong><br>
+                <span class='${checkAttendanceWindow() ? "text-success" : "text-danger"}'>
+                ${checkAttendanceWindow() ? "🟢 Attendance Open" : "🔴 Closed"}
+                </span>`;
+
+            // Enable/Disable button based on time window
+            const markBtn = $("#markBtn");
+            if (markBtn.length) {
+                 markBtn.prop("disabled", !checkAttendanceWindow());
+            }
+        }
     }, 1000);
 });
 
 function checkAttendanceWindow() {
+    // Note: This client-side check is approximate and subject to client time, but matches the original logic.
     const now = new Date().toLocaleTimeString('en-GB', { hour12: false, timeZone: 'Asia/Kolkata' });
     return now >= "08:00:00" && now <= "17:00:00";
 }
