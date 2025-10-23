@@ -759,6 +759,7 @@ $js_general_leave_setting = json_encode($general_leave_setting ?: ['Is_Enabled' 
                                             'Approved' => 'bg-success',
                                             'Rejected by parents', 'Rejected by Admin', 'Rejected by HOD' => 'bg-danger',
                                             'Cancelled' => 'bg-secondary',
+                                            'forwarded to admin' => 'bg-info',
                                             default => 'bg-warning',
                                         };
                                         ?>

@@ -181,7 +181,7 @@
     }
 </style>
 
-<<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-overlay" id="mobileOverlay"></div>
 
 <div class="sidebar" id="sidebar">
     <div class="logo">
