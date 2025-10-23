@@ -11,80 +11,81 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
- 
     if (isset($_POST['type'])) {
         $user_type = $_POST['type'];
-       
-        $username = isset($_POST['email']) ? trim($_POST['email']) : '';
+        $email = isset($_POST['email']) ? trim($_POST['email']) : '';
         $password = isset($_POST['pass']) ? trim($_POST['pass']) : '';
 
-        if (empty($username) || empty($password)) {
-            $error = "Please enter both username and password!";
-        } else {
-            // For faculty login, also check if department is selected
-            if ($user_type === 'faculty' && (!isset($_POST['selected_dept']) || empty(trim($_POST['selected_dept'])))) {
-                $error = "Please select a department before logging in!";
-            } else {
-                // Query based on user type
-                if ($user_type === 'student') {
-                    $sql = "SELECT * FROM users WHERE username = ? AND role = 'student'";
-                } else {
-                    $sql = "SELECT * FROM users WHERE username = ? AND role = 'faculty'";
-                }
-                
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("s", $username);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $user = $result->fetch_assoc();
-                
-                if ($user) {
-                    if ($password === $user['password']) {
-                        $_SESSION['user_id'] = $user['user_id'];
-                        $_SESSION['username'] = $user['username'];
-                        $_SESSION['user_type'] = $user['role'];
-                        
-                        // Store department for faculty
-                        if ($user_type === 'faculty' && isset($_POST['selected_dept'])) {
-                            $_SESSION['department'] = $_POST['selected_dept'];
-                        }
+        if (empty($email) || empty($password)) {
+            echo "<script>alert('Please enter both email and password!'); window.location='login.php';</script>";
+            exit;
+        }
 
-                        error_log("Login successful for user: " . $username . " with role: " . $user['role']);
-                        
-                        // Set success message for SweetAlert
-                        $_SESSION['login_success'] = true;
-                        $_SESSION['login_message'] = "Login successful! Welcome, " . $user['username'];
-                        switch($user['role']) {
-    case 'student':
-        $_SESSION['redirect_to'] = 'index.php';
-        break;
-    case 'faculty':
-        $_SESSION['redirect_to'] = 'f_index.php';
-        break;
-    case 'admin':
-        $_SESSION['redirect_to'] = 'a_index.php';
-        break;
-    case 'mess_supervisor':
-        $_SESSION['redirect_to'] = 'm_index.php';
-        break;
-    default:
-        $_SESSION['redirect_to'] = 'default.php';
-        break;
-}
-                        
-                        // Don't redirect immediately, let JavaScript handle it after SweetAlert
-                        $login_success = true;
-                    } else {
-                        $error = "Invalid credentials! Please check your password.";
-                    }
-                } else {
-                    $error = "Invalid credentials! User not found or invalid user type.";
+        switch ($user_type) {
+            case 'student':
+                $sql = "SELECT * FROM users WHERE username = ? AND role = 'student'";
+                break;
+            case 'faculty':
+                $sql = "SELECT * FROM faculty WHERE email = ?";
+                break;
+            case 'admin':
+                $sql = "SELECT * FROM users WHERE username = ? AND role = 'admin'";
+                break;
+            case 'mess_supervisor':
+                $sql = "SELECT * FROM users WHERE username = ? AND role = 'mess_supervisor'";
+                break;
+            default:
+                echo "<script>alert('Invalid user type!'); window.location='login.php';</script>";
+                exit;
+        }
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        if ($user) {
+            $enteredPassword = $password;
+            $storedPassword = $user['password'];
+
+            // ✅ Verify password (support both hashed and plain)
+            $isValid = password_verify($enteredPassword, $storedPassword) || $enteredPassword === $storedPassword;
+
+            if ($isValid) {
+                $_SESSION['user_type'] = $user_type;
+
+                if ($user_type === 'faculty') {
+                    $_SESSION['faculty_id'] = $user['faculty_id'];
+                    $_SESSION['faculty_name'] = $user['name'];
+                    $_SESSION['faculty_department'] = $user['department'];
+
+                    header("Location: faculty.php");
+                    exit;
+                } elseif ($user_type === 'student') {
+                    $_SESSION['user_id'] = $user['user_id'];
+                    header("Location: index.php");
+                    exit;
+                } elseif ($user_type === 'admin') {
+                    header("Location: dash_attend/dashboard.php");
+                    exit;
+                } elseif ($user_type === 'mess_supervisor') {
+                    header("Location: Hostel-Management-System-mess/mess_index.php");
+                    exit;
                 }
+            } else {
+                echo "<script>alert('Invalid password!'); window.location='login.php';</script>";
+                exit;
             }
+        } else {
+            echo "<script>alert('No user found with this email/ID.'); window.location='login.php';</script>";
+            exit;
         }
     }
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="css/all.min.css" rel="stylesheet">
     <link href="css/bootstrap-5.css" rel="stylesheet">
     <style>
+        /* Your existing CSS remains exactly the same */
         .split-screen {
             display: flex;
             min-height: 100vh;
@@ -290,6 +292,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: linear-gradient(135deg, #1fb5ac, #23c5bb);
         }
 
+        .ka {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        }
+
+        .km {
+            background: linear-gradient(135deg, #4ecdc4, #66d6cd);
+        }
+
         .form-control {
             height: 50px;
             font-size: 1.1rem;
@@ -328,6 +338,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .btn-student,
         .btn-faculty,
+        .btn-admin,
+        .btn-mess,
         .btn-lostfaculty {
             height: 50px;
             font-size: 1.1rem;
@@ -346,6 +358,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: white;
         }
 
+        .btn-admin {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+        }
+
+        .btn-mess {
+            background: linear-gradient(135deg, #4ecdc4, #66d6cd);
+            color: white;
+        }
+
         .btn-lostfaculty {
             background: linear-gradient(135deg, #1e4d92, #1fb5ac);
             color: white;
@@ -353,6 +375,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .btn-student:hover,
         .btn-faculty:hover,
+        .btn-admin:hover,
+        .btn-mess:hover,
         .btn-lostfaculty:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
@@ -543,9 +567,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <li class="nav-item flex-fill" role="presentation">
                                     <button class="nav-link w-100 btn-faculty" data-bs-toggle="pill" data-bs-target="#faculty" type="button">Faculty</button>
                                 </li>
+                                <li class="nav-item flex-fill" role="presentation">
+                                    <button class="nav-link w-100 btn-admin" data-bs-toggle="pill" data-bs-target="#admin" type="button">Admin</button>
+                                </li>
+                                <li class="nav-item flex-fill" role="presentation">
+                                    <button class="nav-link w-100 btn-mess" data-bs-toggle="pill" data-bs-target="#mess" type="button">Mess Supervisor</button>
+                                </li>
                             </ul>
 
                             <div class="tab-content">
+                                <!-- Student Tab -->
                                 <div class="tab-pane fade show active" id="student">
                                     <form action="login.php" method="post">
                                         <input type="hidden" name="type" value="student">
@@ -561,6 +592,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </form>
                                 </div>
 
+                                <!-- Faculty Tab -->
                                 <div class="tab-pane fade" id="faculty">
                                     <form action="login.php" method="post">
                                         <input type="hidden" name="type" value="faculty">
@@ -572,12 +604,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <span class="input-group-text kf"><i class="fas fa-lock"></i></span>
                                             <input type="password" class="form-control" name="pass" placeholder="Password" required>
                                         </div>
-                                        <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-building"></i></span>
-                                            <select class="form-control" name="selected_dept" id="deptDropdown">
-                                                <option value="">Select Department</option>
-                                            </select>
-                                        </div>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <button type="submit" class="btn btn-faculty w-100">Login as Faculty</button>
@@ -588,9 +614,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </div>
                                     </form>
                                 </div>
+
+                                <!-- Admin Tab -->
+                                <div class="tab-pane fade" id="admin">
+                                    <form action="login.php" method="post">
+                                        <input type="hidden" name="type" value="admin">
+                                        <div class="input-group">
+                                            <span class="input-group-text ka"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" name="email" placeholder="Admin ID" required>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text ka"><i class="fas fa-lock"></i></span>
+                                            <input type="password" class="form-control" name="pass" placeholder="Password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-admin w-100">Login as Admin</button>
+                                    </form>
+                                </div>
+
+                                <!-- Mess Supervisor Tab -->
+                                <div class="tab-pane fade" id="mess">
+                                    <form action="login.php" method="post">
+                                        <input type="hidden" name="type" value="mess_supervisor">
+                                        <div class="input-group">
+                                            <span class="input-group-text km"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" name="email" placeholder="Mess Supervisor ID" required>
+                                        </div>
+                                        <div class="input-group">
+                                            <span class="input-group-text km"><i class="fas fa-lock"></i></span>
+                                            <input type="password" class="form-control" name="pass" placeholder="Password" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-mess w-100">Login as Mess Supervisor</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Password Recovery Form -->
                         <div class="recover-form">
                             <h3 class="recover-title">Password Recovery</h3>
                             <p class="recover-description">Enter your Faculty ID and email address below to recover your password.</p>
@@ -626,7 +685,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/particles.min.js"></script>
     <script>
-        // Particles configurations
+        // Particles configurations (same as your existing code)
         particlesJS('particles-left', {
             particles: {
                 number: {
@@ -760,6 +819,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
     <script>
         $(document).ready(function () {
+            // Department dropdown functionality for faculty
             $("input[name='email']").on("input", function () {
                 var facultyID = $(this).val();
                 if (facultyID.length >= 2) {
@@ -774,9 +834,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 deptDropdown.empty();
 
                                 if (res.status === 200) {
-                                    deptDropdown.append(`<option value="">Select Department</option>`);
+                                    deptDropdown.append('<option value="">Select Department</option>');
                                     res.data.forEach(function (dept) {
-                                        deptDropdown.append(`<option value="${dept}">${dept}</option>`);
+                                        deptDropdown.append('<option value="' + dept + '">' + dept + '</option>');
                                     });
 
                                     // Add required attribute and show dropdown
@@ -900,8 +960,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     </script>
     <?php endif; ?>
-
-<!-- Cloudflare scripts removed to prevent interference with SweetAlert -->
 
 </body>
 </html>
