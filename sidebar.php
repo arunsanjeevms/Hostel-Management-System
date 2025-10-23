@@ -181,38 +181,42 @@
     }
 </style>
 
-<div class="mobile-overlay" id="mobileOverlay"></div>
+<<div class="mobile-overlay" id="mobileOverlay"></div>
+
 <div class="sidebar" id="sidebar">
     <div class="logo">
         <img src="icons/mkce.png" alt="College Logo">
-        <img class='s_logo' src="icons/mkce_s.png" alt="College Logo">
+        <img class="s_logo" src="icons/mkce_s.png" alt="College Logo">
+    </div>
+
+    <div class="menu">
+        <a href="profile.php" class="menu-item">
+            <i class="fa-solid fa-user" style="color: #FFC107;"></i>
+            <span>Profile</span>
+        </a>
+    </div>
+
+    <div class="menu">
+        <a href="attendance.php" class="menu-item">
+            <i class="fa-solid fa-calendar-days" style="color: #34C4FE;"></i>
+            <span>Hostel Attendance</span>
+        </a>
     </div>
 
     <div class="menu">
         <a href="leave_apply.php" class="menu-item">
-            <i class="fas fa-calendar-days"></i>
+            <i class="fa-solid fa-calendar-plus" style="color: #28EAA3;"></i>
             <span>Leave Apply</span>
         </a>
     </div>
-    <div class="menu">
-        <a href="attendance.php" class="menu-item">
-            <i class="fas fa-check-circle"></i> <!-- Icon for attendance -->
-            <span>Attendance</span>
-        </a>
-    </div>
-    <div class="menu">
-        <a href="profile.php" class="menu-item">
-            <i class="fas fa-user"></i> <!-- Icon for profile -->
-            <span>Profile</span>
-        </a>
-    </div>
+
     <div class="menu">
         <a href="mess.php" class="menu-item">
-            <i class="fas fa-utensils"></i> <!-- Icon for mess -->
+            <i class="fas fa-utensils" style="color: red;"></i>
             <span>Mess</span>
         </a>
     </div>
-
+</div>
 
 </div>
 </div>
