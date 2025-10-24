@@ -20,30 +20,65 @@ $conn->set_charset("utf8mb4");
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 
 switch ($action) {
-    case 'create_menu': createMenu($conn); break;
-    case 'read_menus': readMenus($conn); break;
-    case 'update_menu': updateMenu($conn); break;
-    case 'delete_menu': deleteMenu($conn); break;
-    case 'create_token': createToken($conn); break;
-    case 'read_tokens': readTokens($conn); break;
-    case 'delete_token': deleteToken($conn); break;
-    case 'create_special_token': createSpecialToken($conn); break;
-    case 'read_special_tokens': readSpecialTokens($conn); break;
-    case 'update_special_token': updateSpecialToken($conn); break;
-    case 'delete_special_token': deleteSpecialToken($conn); break;
-    case 'get_statistics': getStatistics($conn); break;
-    case 'get_menu_history': getMenuHistory($conn); break;
-    case 'get_token_history': getTokenHistory($conn); break;
-    case 'get_special_token_history': getSpecialTokenHistory($conn); break;
-    case 'get_all_history': getAllHistory($conn); break;
-    default: echo json_encode(['success' => false, 'message' => 'Invalid action']); break;
+    case 'create_menu':
+        createMenu($conn);
+        break;
+    case 'read_menus':
+        readMenus($conn);
+        break;
+    case 'update_menu':
+        updateMenu($conn);
+        break;
+    case 'delete_menu':
+        deleteMenu($conn);
+        break;
+    case 'create_token':
+        createToken($conn);
+        break;
+    case 'read_tokens':
+        readTokens($conn);
+        break;
+    case 'delete_token':
+        deleteToken($conn);
+        break;
+    case 'create_special_token':
+        createSpecialToken($conn);
+        break;
+    case 'read_special_tokens':
+        readSpecialTokens($conn);
+        break;
+    case 'update_special_token':
+        updateSpecialToken($conn);
+        break;
+    case 'delete_special_token':
+        deleteSpecialToken($conn);
+        break;
+    case 'get_statistics':
+        getStatistics($conn);
+        break;
+    case 'get_menu_history':
+        getMenuHistory($conn);
+        break;
+    case 'get_token_history':
+        getTokenHistory($conn);
+        break;
+    case 'get_special_token_history':
+        getSpecialTokenHistory($conn);
+        break;
+    case 'get_all_history':
+        getAllHistory($conn);
+        break;
+    default:
+        echo json_encode(['success' => false, 'message' => 'Invalid action']);
+        break;
 }
 
 // ========== STATISTICS FUNCTION ==========
-function getStatistics($conn) {
+function getStatistics($conn)
+{
     try {
         $stats = [];
-        
+
         $result = $conn->query("SELECT COUNT(*) as count FROM specialtokenenable");
         $stats['total_special_tokens'] = $result->fetch_assoc()['count'];
 
@@ -63,7 +98,8 @@ function getStatistics($conn) {
 }
 
 // ========== MENU HISTORY FUNCTION ==========
-function getMenuHistory($conn) {
+function getMenuHistory($conn)
+{
     try {
         $sql = "SELECT 
                     'Menu' as type,
@@ -75,16 +111,16 @@ function getMenuHistory($conn) {
                     created_at as timestamp
                 FROM mess_menu 
                 ORDER BY created_at DESC";
-        
+
         $result = $conn->query($sql);
         $history = [];
-        
+
         if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $history[] = $row;
             }
         }
-        
+
         echo json_encode(['success' => true, 'data' => $history, 'count' => count($history)]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -92,7 +128,8 @@ function getMenuHistory($conn) {
 }
 
 // ========== TOKEN HISTORY FUNCTION ==========
-function getTokenHistory($conn) {
+function getTokenHistory($conn)
+{
     try {
         $sql = "SELECT 
                     'Token' as type,
@@ -104,28 +141,28 @@ function getTokenHistory($conn) {
                     t.created_at as timestamp
                 FROM mess_tokens t
                 ORDER BY t.created_at DESC";
-        
+
         $result = $conn->query($sql);
         $history = [];
-        
+
         if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $history[] = $row;
             }
         }
-        
+
         echo json_encode(['success' => true, 'data' => $history, 'count' => count($history)]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
 
-// ========== SPECIAL TOKEN HISTORY FUNCTION ==========
-function getSpecialTokenHistory($conn) {
+function getSpecialTokenHistory($conn)
+{
     try {
         $sql = "SELECT 
                     'Special Token' as type,
-                    special_id as id,
+                    menu_id as id,
                     COALESCE(token_date, 'N/A') as date,
                     COALESCE(meal_type, 'N/A') as details,
                     COALESCE(menu_items, 'No items') as description,
@@ -133,16 +170,16 @@ function getSpecialTokenHistory($conn) {
                     created_at as timestamp
                 FROM specialtokenenable 
                 ORDER BY created_at DESC";
-        
+
         $result = $conn->query($sql);
         $history = [];
-        
+
         if ($result && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $history[] = $row;
             }
         }
-        
+
         echo json_encode(['success' => true, 'data' => $history, 'count' => count($history)]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -150,10 +187,11 @@ function getSpecialTokenHistory($conn) {
 }
 
 // ========== ALL HISTORY FUNCTION (COMBINED) ==========
-function getAllHistory($conn) {
+function getAllHistory($conn)
+{
     try {
         $allHistory = [];
-        
+
         // Get Menu History
         $sql = "SELECT 
                     'Menu' as type,
@@ -164,14 +202,14 @@ function getAllHistory($conn) {
                     COALESCE(fee, 0) as amount,
                     created_at as timestamp
                 FROM mess_menu";
-        
+
         $result = $conn->query($sql);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
                 $allHistory[] = $row;
             }
         }
-        
+
         // Get Token History
         $sql = "SELECT 
                     'Token' as type,
@@ -182,14 +220,14 @@ function getAllHistory($conn) {
                     0 as amount,
                     created_at as timestamp
                 FROM mess_tokens";
-        
+
         $result = $conn->query($sql);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
                 $allHistory[] = $row;
             }
         }
-        
+
         // Get Special Token History
         $sql = "SELECT 
                     'Special Token' as type,
@@ -200,19 +238,19 @@ function getAllHistory($conn) {
                     COALESCE(fee, 0) as amount,
                     created_at as timestamp
                 FROM specialtokenenable";
-        
+
         $result = $conn->query($sql);
         if ($result) {
             while ($row = $result->fetch_assoc()) {
                 $allHistory[] = $row;
             }
         }
-        
+
         // Sort by timestamp descending
-        usort($allHistory, function($a, $b) {
+        usort($allHistory, function ($a, $b) {
             return strtotime($b['timestamp']) - strtotime($a['timestamp']);
         });
-        
+
         echo json_encode(['success' => true, 'data' => $allHistory, 'count' => count($allHistory)]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -220,7 +258,8 @@ function getAllHistory($conn) {
 }
 
 // ========== YOUR OTHER EXISTING FUNCTIONS ==========
-function createMenu($conn) {
+function createMenu($conn)
+{
     $date = $_POST['date'] ?? '';
     $meal_type = $_POST['meal_type'] ?? '';
     $items = $_POST['items'] ?? '';
@@ -232,10 +271,10 @@ function createMenu($conn) {
             echo json_encode(['success' => false, 'message' => 'Required fields missing']);
             return;
         }
-        
+
         $stmt = $conn->prepare("INSERT INTO mess_menu (date, meal_type, items, category, fee) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("ssssd", $date, $meal_type, $items, $category, $fee);
-        
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Menu created', 'id' => $conn->insert_id]);
         } else {
@@ -247,7 +286,8 @@ function createMenu($conn) {
     }
 }
 
-function readMenus($conn) {
+function readMenus($conn)
+{
     try {
         $result = $conn->query("SELECT * FROM mess_menu ORDER BY created_at DESC");
         $menus = [];
@@ -258,7 +298,8 @@ function readMenus($conn) {
     }
 }
 
-function updateMenu($conn) {
+function updateMenu($conn)
+{
     try {
         $menu_id = intval($_POST['menu_id']);
         $date = $_POST['date'];
@@ -266,10 +307,10 @@ function updateMenu($conn) {
         $items = $_POST['items'];
         $category = $_POST['category'] ?? null;
         $fee = floatval($_POST['fee']);
-        
+
         $stmt = $conn->prepare("UPDATE mess_menu SET date=?, meal_type=?, items=?, category=?, fee=? WHERE menu_id=?");
         $stmt->bind_param("ssssdi", $date, $meal_type, $items, $category, $fee, $menu_id);
-        
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Menu updated']);
         } else {
@@ -281,12 +322,13 @@ function updateMenu($conn) {
     }
 }
 
-function deleteMenu($conn) {
+function deleteMenu($conn)
+{
     try {
         $menu_id = intval($_POST['menu_id']);
         $stmt = $conn->prepare("DELETE FROM mess_menu WHERE menu_id=?");
         $stmt->bind_param("i", $menu_id);
-        
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Menu deleted']);
         } else {
@@ -298,7 +340,8 @@ function deleteMenu($conn) {
     }
 }
 
-function createSpecialToken($conn) {
+function createSpecialToken($conn)
+{
     $from_date = $_POST['from_date'] ?? '';
     $from_time = $_POST['from_time'] ?? '';
     $to_date = $_POST['to_date'] ?? '';
@@ -307,11 +350,11 @@ function createSpecialToken($conn) {
     $meal_type = $_POST['meal_type'] ?? '';
     $menu_items = $_POST['menu_items'] ?? '';
     $fee = floatval($_POST['fee'] ?? 0.00);
-    
+
     try {
         $stmt = $conn->prepare("INSERT INTO specialtokenenable (from_date, from_time, to_date, to_time, token_date, meal_type, menu_items, fee) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("sssssssd", $from_date, $from_time, $to_date, $to_time, $token_date, $meal_type, $menu_items, $fee);
-        
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Special token created', 'id' => $conn->insert_id]);
         } else {
@@ -322,21 +365,24 @@ function createSpecialToken($conn) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
-
-function readSpecialTokens($conn) {
+function readSpecialTokens($conn)
+{
     try {
         $result = $conn->query("SELECT * FROM specialtokenenable ORDER BY created_at DESC");
         $tokens = [];
-        while ($row = $result->fetch_assoc()) $tokens[] = $row;
+        while ($row = $result->fetch_assoc()) {
+            $tokens[] = $row;
+        }
         echo json_encode(['success' => true, 'data' => $tokens]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
 
-function updateSpecialToken($conn) {
+function updateSpecialToken($conn)
+{
     try {
-        $special_id = intval($_POST['special_id']);
+        $menu_id = intval($_POST['menu_id']);
         $from_date = $_POST['from_date'];
         $from_time = $_POST['from_time'];
         $to_date = $_POST['to_date'];
@@ -345,10 +391,10 @@ function updateSpecialToken($conn) {
         $meal_type = $_POST['meal_type'];
         $menu_items = $_POST['menu_items'];
         $fee = floatval($_POST['fee']);
-        
-        $stmt = $conn->prepare("UPDATE specialtokenenable SET from_date=?, from_time=?, to_date=?, to_time=?, token_date=?, meal_type=?, menu_items=?, fee=? WHERE special_id=?");
-        $stmt->bind_param("sssssssdi", $from_date, $from_time, $to_date, $to_time, $token_date, $meal_type, $menu_items, $fee, $special_id);
-        
+
+        $stmt = $conn->prepare("UPDATE specialtokenenable SET from_date=?, from_time=?, to_date=?, to_time=?, token_date=?, meal_type=?, menu_items=?, fee=? WHERE menu_id=?");
+        $stmt->bind_param("sssssssdi", $from_date, $from_time, $to_date, $to_time, $token_date, $meal_type, $menu_items, $fee, $menu_id);
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Special token updated']);
         } else {
@@ -360,12 +406,13 @@ function updateSpecialToken($conn) {
     }
 }
 
-function deleteSpecialToken($conn) {
+function deleteSpecialToken($conn)
+{
     try {
-        $special_id = intval($_POST['special_id']);
-        $stmt = $conn->prepare("DELETE FROM specialtokenenable WHERE special_id=?");
-        $stmt->bind_param("i", $special_id);
-        
+        $menu_id = intval($_POST['menu_id']);
+        $stmt = $conn->prepare("DELETE FROM specialtokenenable WHERE menu_id=?");
+        $stmt->bind_param("i", $menu_id);
+
         if ($stmt->execute()) {
             echo json_encode(['success' => true, 'message' => 'Special token deleted']);
         } else {
@@ -377,7 +424,10 @@ function deleteSpecialToken($conn) {
     }
 }
 
-function createToken($conn) {  $roll_number = $_POST['roll_number'] ?? '';
+
+function createToken($conn)
+{
+    $roll_number = $_POST['roll_number'] ?? '';
     $menu_id = intval($_POST['menu_id'] ?? 0);
     $token_type = $_POST['token_type'] ?? 'Paid';
     $from_date = $_POST['from_date'] ?? null;
@@ -455,7 +505,6 @@ function createToken($conn) {  $roll_number = $_POST['roll_number'] ?? '';
             ]);
         }
         $stmt->close();
-
     } catch (Exception $e) {
         echo json_encode([
             'success' => false,
@@ -463,7 +512,8 @@ function createToken($conn) {  $roll_number = $_POST['roll_number'] ?? '';
         ]);
     }
 }
-function readTokens($conn) {
+function readTokens($conn)
+{
     try {
         // Check if created_at column exists in mess_tokens
         $checkColumnSql = "SHOW COLUMNS FROM mess_tokens LIKE 'created_at'";
@@ -502,7 +552,9 @@ function readTokens($conn) {
             'message' => 'Database error: ' . $e->getMessage()
         ]);
     }
-}function deleteToken($conn) {
+}
+function deleteToken($conn)
+{
     try {
         // Validate required field
         if (empty($_POST['token_id'])) {
@@ -549,7 +601,6 @@ function readTokens($conn) {
             ]);
         }
         $stmt->close();
-
     } catch (Exception $e) {
         echo json_encode([
             'success' => false,
@@ -558,4 +609,3 @@ function readTokens($conn) {
     }
 }
 $conn->close();
-?>

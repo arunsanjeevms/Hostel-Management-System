@@ -554,7 +554,7 @@
                                 </button>
                             </h4>
 
-                            <h4><button type ="button" class ="btn btn-secondary style-hbJUz" data-bs-toggle="modal" data-bs-target="#snacksModal" id="style-hbJUz">
+                            <h4><button type="button" class="btn btn-secondary style-hbJUz" data-bs-toggle="modal" data-bs-target="#snacksModal" id="style-hbJUz">
                                     <i class="fas fa-plus"></i> Snacks
                                 </button>
                             </h4>
@@ -879,7 +879,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="button" class="btn btn-primary" onclick="updateMenu()">
-                             Save Changes
+                            Save Changes
                         </button>
                     </div>
                 </div>
@@ -1215,10 +1215,10 @@
                 <td>${token.menu_items || 'N/A'}</td>
                 <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm" onclick="editSpecialToken(${token.special_id})">
+                    <button class="btn btn-warning btn-sm" onclick="editSpecialToken(${token.menu_id})">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteSpecialToken(${token.special_id})">
+                    <button class="btn btn-danger btn-sm" onclick="deleteSpecialToken(${token.menu_id})">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -1227,6 +1227,7 @@
                     tableBody.innerHTML += row;
                 });
             }
+
 
             function saveSpecialToken() {
                 const data = {
@@ -1292,10 +1293,31 @@
                 modal.show();
             }
 
+            function editSpecialToken(menuId) {
+                const token = allSpecialTokens.find(t => t.menu_id == menuId);
+                if (!token) {
+                    showMessage('error', 'Special Token not found');
+                    return;
+                }
+
+                $('#editSpecialMenuId').val(token.menu_id);
+                $('#editSpecialFromDate').val(token.from_date);
+                $('#editSpecialFromTime').val(token.from_time);
+                $('#editSpecialToDate').val(token.to_date);
+                $('#editSpecialToTime').val(token.to_time);
+                $('#editSpecialTokenDate').val(token.token_date);
+                $('#editSpecialMealType').val(token.meal_type);
+                $('#editSpecialMenuItems').val(token.menu_items);
+                $('#editSpecialFee').val(token.fee);
+
+                const modal = new bootstrap.Modal(document.getElementById('editSpecialTokenModal'));
+                modal.show();
+            }
+
             function updateSpecialToken() {
                 const data = {
                     action: 'update_special_token',
-                    special_id: $('#editSpecialMenuId').val(),
+                    menu_id: $('#editSpecialMenuId').val(),
                     from_date: $('#editSpecialFromDate').val(),
                     from_time: $('#editSpecialFromTime').val(),
                     to_date: $('#editSpecialToDate').val(),
@@ -1316,12 +1338,12 @@
                 }, 'json');
             }
 
-            function deleteSpecialToken(specialId) {
+            function deleteSpecialToken(menuId) {
                 if (!confirm('Delete this special token?')) return;
 
                 $.post('api.php', {
                     action: 'delete_special_token',
-                    special_id: specialId
+                    menu_id: menuId
                 }, function(response) {
                     if (response && response.success) {
                         showMessage('success', 'Special token deleted');
