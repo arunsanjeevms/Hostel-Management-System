@@ -1,4 +1,0 @@
-config.php
-
-# Ignore PHPMailer library if you don't want to push it
-PHPMailer-master/
