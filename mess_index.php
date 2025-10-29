@@ -418,6 +418,40 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
+        .custom-tabs .nav-item:nth-child(5) .nav-link {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #f50000ff;
+            background: white;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+
+        .custom-tabs .nav-item:nth-child(6) .nav-link {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #d800f5ff;
+            background: white;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+
         /* Icon Styling - Inactive */
         .custom-tabs .nav-item:nth-child(1) .nav-link i {
             font-size: 1.1rem;
@@ -439,6 +473,16 @@
             color: #F57C00;
         }
 
+        .custom-tabs .nav-item:nth-child(5) .nav-link i {
+            font-size: 1.1rem;
+            color: #f50000ff;
+        }
+
+        .custom-tabs .nav-item:nth-child(6) .nav-link i {
+            font-size: 1.1rem;
+            color: #d800f5ff;
+        }
+
         .custom-tabs .nav-item:nth-child(1) .nav-link i:hover {
             font-size: 1.1rem;
             color: white;
@@ -458,6 +502,17 @@
             font-size: 1.1rem;
             color: white;
         }
+
+        .custom-tabs .nav-item:nth-child(5) .nav-link.hover i {
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .custom-tabs .nav-item:nth-child(6) .nav-link.hover i {
+            font-size: 1.1rem;
+            color: white;
+        }
+
 
         /* Hover Effect for Inactive Tabs */
         .custom-tabs .nav-item:nth-child(1) .nav-link:hover,
@@ -487,6 +542,22 @@
         .custom-tabs .nav-item:nth-child(4) .nav-link:hover,
         .custom-tabs .nav-item:nth-child(4) .nav-link:hover i {
             background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-tabs .nav-item:nth-child(5) .nav-link:hover,
+        .custom-tabs .nav-item:nth-child(5) .nav-link:hover i {
+            background: linear-gradient(135deg, #eb454aff 0%, #f50000ff 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .custom-tabs .nav-item:nth-child(6) .nav-link:hover,
+        .custom-tabs .nav-item:nth-child(6) .nav-link:hover i {
+            background: linear-gradient(135deg, #da59f0ff 0%, #d800f5ff 100%);
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -543,6 +614,31 @@
         }
 
         .custom-tabs .nav-item:nth-child(4) .nav-link.active i {
+            color: white;
+        }
+
+
+        .custom-tabs .nav-item:nth-child(5) .nav-link.active {
+            background: linear-gradient(135deg, #eb454aff 0%, #f50000ff 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .custom-tabs .nav-item:nth-child(5) .nav-link.active i {
+            color: white;
+        }
+
+        .custom-tabs .nav-item:nth-child(6) .nav-link.active {
+            background: linear-gradient(135deg, #da59f0ff 0%, #d800f5ff 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .custom-tabs .nav-item:nth-child(6) .nav-link.active i {
             color: white;
         }
 
@@ -639,6 +735,11 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#inactivetokens" type="button" role="tab">
+                            <i class="fas fa-clock"></i> Inactive Tokens
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
                         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
                             <i class="fas fa-history"></i> History
                         </button>
@@ -665,9 +766,9 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="table-responsive ">
+                        <div class="table-responsive">
                             <table id="messMenuTable" class="table table-bordered table-hover">
-                                <thead class="gradient-header" style="text-align: center;">
+                                <thead>
                                     <tr>
                                         <th>S.No</th>
                                         <th>Date</th>
@@ -678,24 +779,21 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="7" class="text-center">Loading...</td>
-                                    </tr>
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
 
                     <!-- Tokens Tab -->
                     <div class="tab-pane fade" id="tokens" role="tabpanel">
-                        <h5 class="mb-3"><i class="fas fa-ticket-alt"></i> Token Management</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-ticket-alt"></i> Token Management</h5>
+                        </div>
                         <div class="table-responsive">
                             <table id="messTokensTable" class="table table-bordered table-hover">
-
-
-                                <thead class="gradient-header">
+                                <thead>
                                     <tr>
+                                        <th>S.No</th>
                                         <th>Student Name</th>
                                         <th>Roll Number</th>
                                         <th>Meal Type</th>
@@ -703,14 +801,9 @@
                                         <th>Date</th>
                                         <th>Token Type</th>
                                         <th>Special Fee</th>
-                                        <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td colspan="8" class="text-center">Loading...</td>
-                                    </tr>
-                                </tbody>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -725,19 +818,7 @@
                         </div>
                         <div class="table-responsive">
                             <table id="specialtokenEnableTable" class="table table-bordered table-hover">
-                                  <colgroup>
-                                    <col style="width:1%;"> 
-                                    <col style="width:8%;"> 
-                                    <col style="width:5%;"> 
-                                    <col style="width:9%;"> 
-                                    <col style="width:5%;">
-                                    <col style="width:9%;"> 
-                                    <col style="width:5%;"> 
-                                    <col style="width:5%;"> 
-                                    <col style="width:3%;"> 
-                                    <col style="width:17%;"> 
-                                </colgroup>
-                                <thead class="gradient-header">
+                                <thead>
                                     <tr>
                                         <th>S.No</th>
                                         <th>From Date</th>
@@ -751,11 +832,34 @@
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Inactive Tokens Tab -->
+                    <div class="tab-pane fade" id="inactivetokens" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-clock"></i> Inactive Special Tokens</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="inactiveTokensTable" class="table table-bordered table-hover">
+                                <thead>
                                     <tr>
-                                        <td colspan="10" class="text-center">Loading...</td>
+                                        <th>S.No</th>
+                                        <th>From Date</th>
+                                        <th>From Time</th>
+                                        <th>To Date</th>
+                                        <th>To Time</th>
+                                        <th>Token Date</th>
+                                        <th>Meal Type</th>
+                                        <th>Items</th>
+                                        <th>Fee</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
-                                </tbody>
+                                </thead>
+                                <tbody></tbody>
                             </table>
                         </div>
                     </div>
@@ -770,10 +874,8 @@
                             </div>
                         </div>
                         <div class="table-responsive">
-                            <table id="historyTable" class="table table-bordered table-hover" width="100%" cellspacing="0">
-                              
-
-                                <thead class="gradient-header">
+                            <table id="historyTable" class="table table-bordered table-hover">
+                                <thead>
                                     <tr>
                                         <th>Type</th>
                                         <th>Date</th>
@@ -794,19 +896,16 @@
                 </div>
             </div>
 
-            <!-- MODALS (Breakfast, Lunch, Snacks, Dinner, Edit Menu, Special Token, Edit Special Token) -->
-            <!-- Add your existing modal code here - keeping them the same as in your original file -->
             <!-- MODALS START -->
 
             <!-- Breakfast Modal -->
-            <div class="modal fade" id="breakfastModal" tabindex="-1">
+            <div class="modal fade" id="breakfastModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">Add Breakfast</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label">Date</label>
@@ -819,7 +918,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Category</label>
                                 <select id="breakfastCategory" class="form-control" required>
-                                    <option value="">Select Meal Type</option>
+                                    <option value="">Select Category</option>
                                     <option value="Regular">Regular</option>
                                     <option value="Special">Special</option>
                                 </select>
@@ -838,7 +937,7 @@
             </div>
 
             <!-- Lunch Modal -->
-            <div class="modal fade" id="lunchModal" tabindex="-1">
+            <div class="modal fade" id="lunchModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -857,7 +956,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Category</label>
                                 <select id="lunchCategory" class="form-control" required>
-                                    <option value="">Select Meal Type</option>
+                                    <option value="">Select Category</option>
                                     <option value="Regular">Regular</option>
                                     <option value="Special">Special</option>
                                 </select>
@@ -876,7 +975,7 @@
             </div>
 
             <!-- Snacks Modal -->
-            <div class="modal fade" id="snacksModal" tabindex="-1">
+            <div class="modal fade" id="snacksModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -895,7 +994,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Category</label>
                                 <select id="snacksCategory" class="form-control" required>
-                                    <option value="">Select Meal Type</option>
+                                    <option value="">Select Category</option>
                                     <option value="Regular">Regular</option>
                                     <option value="Special">Special</option>
                                 </select>
@@ -914,7 +1013,7 @@
             </div>
 
             <!-- Dinner Modal -->
-            <div class="modal fade" id="dinnerModal" tabindex="-1">
+            <div class="modal fade" id="dinnerModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -933,7 +1032,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Category</label>
                                 <select id="dinnerCategory" class="form-control" required>
-                                    <option value="">Select Meal Type</option>
+                                    <option value="">Select Category</option>
                                     <option value="Regular">Regular</option>
                                     <option value="Special">Special</option>
                                 </select>
@@ -951,12 +1050,12 @@
                 </div>
             </div>
 
-            <!-- ============= EDIT MENU MODAL (NEW) ============= -->
-            <div class="modal fade" id="editMenuModal" tabindex="-1">
+            <!-- Edit Menu Modal -->
+            <div class="modal fade" id="editMenuModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title"> Edit Menu</h5>
+                            <h5 class="modal-title">Edit Menu</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
@@ -981,7 +1080,7 @@
                             <div class="mb-3">
                                 <label class="form-label">Category</label>
                                 <select id="editMenuCategory" class="form-control" required>
-                                    <option value="">Select Meal Type</option>
+                                    <option value="">Select Category</option>
                                     <option value="Regular">Regular</option>
                                     <option value="Special">Special</option>
                                 </select>
@@ -993,20 +1092,18 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" onclick="updateMenu()">
-                                Save Changes
-                            </button>
+                            <button type="button" class="btn btn-primary" onclick="updateMenu()">Save Changes</button>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Special Token Modal -->
-            <div class="modal fade" id="specialtokenModal" tabindex="-1">
+            <div class="modal fade" id="specialtokenModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Add Special Token</h5>
+                            <h5 class="modal-title">Enable Special Token</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
@@ -1058,7 +1155,7 @@
             </div>
 
             <!-- Edit Special Token Modal -->
-            <div class="modal fade" id="editSpecialTokenModal" tabindex="-1">
+            <div class="modal fade" id="editSpecialTokenModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -1113,518 +1210,525 @@
                 </div>
             </div>
 
-            <?php include './assets/footer.php'; ?>
+            <!-- Activate Token Modal -->
+            <div class="modal fade" id="activateTokenModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Activate Token - Extend Duration</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" id="activateMenuId">
+                            <div class="mb-3">
+                                <label class="form-label">New To Date</label>
+                                <input type="date" id="activateToDate" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">New To Time</label>
+                                <input type="time" id="activateToTime" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-success" onclick="saveActivateToken()">Activate Token</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- JAVASCRIPT START -->
-        <script>
-            let allMenus = [];
-            let allSpecialTokens = [];
-            let menuTable = null;
-            let specialTokenTable = null;
-            let historyTable = null;
+        <!-- Footer -->
+        <?php include './assets/footer.php'; ?>
+    </div>
 
-            $(document).ready(function() {
-                console.log("=== MESS MANAGEMENT SYSTEM ===");
-                loadStatistics();
-                loadMenus();
-                loadSpecialTokens();
-                setInterval(loadStatistics, 30000);
-            });
+    <script>
+        let allMenus = [],
+            allTokens = [],
+            allSpecialTokens = [],
+            allInactiveSpecialTokens = [];
+        let menuTable = null,
+            tokensTable = null,
+            specialTokenTable = null,
+            inactiveTokenTable = null,
+            historyTable = null;
 
-            // ========== STATISTICS ==========
-            function loadStatistics() {
-                $.post('api.php', {
-                    action: 'get_statistics'
-                }, function(response) {
-                    if (response && response.success) {
-                        const stats = response.data;
-                        $('#totalSpecialTokens').text(stats.total_special_tokens || 0);
-                        $('#totalMenus').text(stats.total_menus || 0);
-                        $('#totalTokens').text(stats.total_tokens || 0);
-                    }
-                }, 'json');
-            }
+        $(document).ready(function() {
+            loadStatistics();
+            loadMenus();
+            loadTokens();
+            loadSpecialTokens();
+            loadInactiveSpecialTokens();
+            setInterval(loadStatistics, 30000);
+        });
 
-            // ========== MENU FUNCTIONS WITH DATATABLE ==========
-            function loadMenus() {
-                $.ajax({
-                    url: 'api.php',
-                    type: 'POST',
-                    data: {
-                        action: 'read_menus'
-                    },
-                    dataType: 'json'
-                }).done(function(response) {
-                    if (response && response.success && Array.isArray(response.data)) {
-                        allMenus = response.data;
-                    } else {
-                        allMenus = [];
-                    }
-                    displayMenus();
-                }).fail(function(error) {
-                    allMenus = [];
-                    displayMenus();
-                });
-            }
-
-            function displayMenus() {
-                // Destroy existing DataTable if it exists
-                if (menuTable) {
-                    menuTable.destroy();
+        function loadStatistics() {
+            $.post('api.php', {
+                action: 'get_statistics'
+            }, function(response) {
+                if (response && response.success) {
+                    $('#totalSpecialTokens').text(response.data.total_special_tokens || 0);
+                    $('#totalMenus').text(response.data.total_menus || 0);
+                    $('#totalTokens').text(response.data.total_tokens || 0);
                 }
+            }, 'json');
+        }
 
-                const tableBody = $('#messMenuTable tbody');
-                tableBody.empty();
-
-                if (allMenus.length === 0) {
-                    tableBody.html('<tr><td colspan="7" class="text-center">No menu items found</td></tr>');
-                    return;
-                }
-
-                allMenus.forEach(function(menu, index) {
-                    const badge = getBadgeClass(menu.meal_type);
-                    const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${menu.date || 'N/A'}</td>
-                        <td><span class="badge ${badge}">${menu.meal_type}</span></td>
-                        <td>${menu.items}</td>
-                        <td>${menu.category || 'N/A'}</td>
-                        <td>₹${parseFloat(menu.fee || 0).toFixed(2)}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editMenu(${menu.menu_id})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteMenu(${menu.menu_id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                    tableBody.append(row);
-                });
-
-                // Initialize DataTable
-                menuTable = $('#messMenuTable').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    info: true,
-                    pageLength: 10,
-                    order: [
-                        [1, 'desc']
-                    ], // Sort by date descending
-                    language: {
-                        search: "Search Menu:",
-                        lengthMenu: "Show _MENU_ entries",
-                        info: "Showing _START_ to _END_ of _TOTAL_ menus"
-                    }
-                });
-            }
-
-            function saveMenuForm(mealType) {
-                const prefix = mealType.toLowerCase();
-                const data = {
-                    action: 'create_menu',
-                    date: $(`#${prefix}Date`).val(),
-                    meal_type: mealType,
-                    items: $(`#${prefix}Items`).val(),
-                    category: $(`#${prefix}Category`).val(),
-                    fee: $(`#${prefix}Fee`).val()
-                };
-
-                if (!data.date || !data.items || !data.fee) {
-                    showMessage('error', 'Please fill all required fields');
-                    return;
-                }
-
-                $.post('api.php', data, function(response) {
-                    if (response && response.success) {
-                        showMessage('success', response.message);
-                        $(`#${prefix}Modal`).modal('hide');
-                        clearMenuForm(prefix);
-                        loadMenus();
-                        loadStatistics();
-                    } else {
-                        showMessage('error', response.message || 'Save failed');
-                    }
-                }, 'json');
-            }
-
-            function clearMenuForm(prefix) {
-                $(`#${prefix}Date, #${prefix}Items, #${prefix}Category, #${prefix}Fee`).val('');
-            }
-
-            function editMenu(menuId) {
-                const menu = allMenus.find(m => m.menu_id == menuId);
-                if (!menu) {
-                    showMessage('error', 'Menu item not found');
-                    return;
-                }
-
-                $('#editMenuId').val(menu.menu_id);
-                $('#editMenuDate').val(menu.date);
-                $('#editMenuMealType').val(menu.meal_type);
-                $('#editMenuItems').val(menu.items);
-                $('#editMenuCategory').val(menu.category || '');
-                $('#editMenuFee').val(menu.fee);
-
-                const modal = new bootstrap.Modal(document.getElementById('editMenuModal'));
-                modal.show();
-            }
-
-            function updateMenu() {
-                const data = {
-                    action: 'update_menu',
-                    menu_id: $('#editMenuId').val(),
-                    date: $('#editMenuDate').val(),
-                    meal_type: $('#editMenuMealType').val(),
-                    items: $('#editMenuItems').val(),
-                    category: $('#editMenuCategory').val(),
-                    fee: $('#editMenuFee').val()
-                };
-
-                if (!data.date || !data.meal_type || !data.items || !data.fee) {
-                    showMessage('error', 'Please fill all required fields');
-                    return;
-                }
-
-                $.post('api.php', data, function(response) {
-                    if (response && response.success) {
-                        showMessage('success', 'Menu updated successfully');
-                        $('#editMenuModal').modal('hide');
-                        loadMenus();
-                        loadStatistics();
-                    } else {
-                        showMessage('error', response.message || 'Update failed');
-                    }
-                }, 'json');
-            }
-
-            function deleteMenu(menuId) {
-                if (!confirm('Delete this menu item?')) return;
-                $.post('api.php', {
-                    action: 'delete_menu',
-                    menu_id: menuId
-                }, function(response) {
-                    if (response && response.success) {
-                        showMessage('success', 'Menu deleted');
-                        loadMenus();
-                        loadStatistics();
-                    }
-                }, 'json');
-            }
-
-            // ========== SPECIAL TOKEN FUNCTIONS WITH DATATABLE ==========
-            function loadSpecialTokens() {
-                $.post('api.php', {
-                    action: 'read_special_tokens'
-                }, function(response) {
-                    if (response && response.success && Array.isArray(response.data)) {
-                        allSpecialTokens = response.data;
-                    } else {
-                        allSpecialTokens = [];
-                    }
-                    displaySpecialTokens();
-                }, 'json');
-            }
-
-            function displaySpecialTokens() {
-                // Destroy existing DataTable if it exists
-                if (specialTokenTable) {
-                    specialTokenTable.destroy();
-                }
-
-                const tableBody = $('#specialtokenEnableTable tbody');
-                tableBody.empty();
-
-                if (allSpecialTokens.length === 0) {
-                    tableBody.html('<tr><td colspan="10" class="text-center">No special tokens found</td></tr>');
-                    return;
-                }
-
-                allSpecialTokens.forEach(function(token, index) {
-                    const row = `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${token.from_date || 'N/A'}</td>
-                        <td>${formatTime12Hour(token.from_time)}</td>
-                        <td>${token.to_date || 'N/A'}</td>
-                        <td>${formatTime12Hour(token.to_time)}</td>
-                        <td>${token.token_date || 'N/A'}</td>
-                        <td>${token.meal_type || 'N/A'}</td>
-                        <td>${token.menu_items || 'N/A'}</td>
-                        <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td>
-                        <td>
-                            <button class="btn btn-warning btn-sm" onclick="editSpecialToken(${token.menu_id})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteSpecialToken(${token.menu_id})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <button class="btn btn-success btn-sm" onclick="deleteSpecialToken(${token.menu_id})">
-                                <i class="fas fa-pause"></i>
-                            </button>
-                             <button class="btn btn-secondary btn-sm" onclick="deleteSpecialToken(${token.menu_id})">
-                                <i class="fas fa-play"></i>
-                            </button>
-                             <button class="btn btn-primary btn-sm" onclick="deleteSpecialToken(${token.menu_id})">
-                                <i class="fas fa-check"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                    tableBody.append(row);
-                });
-
-                // Initialize DataTable
-                specialTokenTable = $('#specialtokenEnableTable').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    info: true,
-                    pageLength: 10,
-                    order: [
-                        [5, 'desc']
-                    ], // Sort by token date descending
-                    language: {
-                        search: "Search Tokens:",
-                        lengthMenu: "Show _MENU_ entries",
-                        info: "Showing _START_ to _END_ of _TOTAL_ tokens"
-                    }
-                });
-            }
-
-            function saveSpecialToken() {
-                const data = {
-                    action: 'create_special_token',
-                    from_date: $('#tokenfromDate').val(),
-                    from_time: $('#tokenfromTime').val(),
-                    to_date: $('#tokentoDate').val(),
-                    to_time: $('#tokentoTime').val(),
-                    token_date: $('#tokenDate').val(),
-                    meal_type: $('#specialMealType').val(),
-                    menu_items: $('#specialMenuItems').val(),
-                    fee: $('#specialtokenFee').val()
-                };
-
-                const missing = [];
-                if (!data.from_date) missing.push('From Date');
-                if (!data.from_time) missing.push('From Time');
-                if (!data.to_date) missing.push('To Date');
-                if (!data.to_time) missing.push('To Time');
-                if (!data.token_date) missing.push('Token Date');
-                if (!data.meal_type) missing.push('Meal Type');
-                if (!data.menu_items) missing.push('Menu Items');
-                if (!data.fee) missing.push('Fee');
-
-                if (missing.length > 0) {
-                    showMessage('error', `Please fill: ${missing.join(', ')}`);
-                    return;
-                }
-
-                $.post('api.php', data, function(response) {
-                    if (response && response.success) {
-                        showMessage('success', response.message);
-                        $('#specialtokenModal').modal('hide');
-                        clearSpecialTokenForm();
-                        loadSpecialTokens();
-                        loadStatistics();
-                    }
-                }, 'json');
-            }
-
-            function clearSpecialTokenForm() {
-                $('#tokenfromDate, #tokenfromTime, #tokentoDate, #tokentoTime, #tokenDate, #specialMealType, #specialMenuItems, #specialtokenFee').val('');
-            }
-
-            function editSpecialToken(menuId) {
-                const token = allSpecialTokens.find(t => t.menu_id == menuId);
-                if (!token) {
-                    showMessage('error', 'Special Token not found');
-                    return;
-                }
-
-                $('#editSpecialMenuId').val(token.menu_id);
-                $('#editSpecialFromDate').val(token.from_date);
-                $('#editSpecialFromTime').val(token.from_time);
-                $('#editSpecialToDate').val(token.to_date);
-                $('#editSpecialToTime').val(token.to_time);
-                $('#editSpecialTokenDate').val(token.token_date);
-                $('#editSpecialMealType').val(token.meal_type);
-                $('#editSpecialMenuItems').val(token.menu_items);
-                $('#editSpecialFee').val(token.fee);
-
-                const modal = new bootstrap.Modal(document.getElementById('editSpecialTokenModal'));
-                modal.show();
-            }
-
-            function updateSpecialToken() {
-                const data = {
-                    action: 'update_special_token',
-                    menu_id: $('#editSpecialMenuId').val(),
-                    from_date: $('#editSpecialFromDate').val(),
-                    from_time: $('#editSpecialFromTime').val(),
-                    to_date: $('#editSpecialToDate').val(),
-                    to_time: $('#editSpecialToTime').val(),
-                    token_date: $('#editSpecialTokenDate').val(),
-                    meal_type: $('#editSpecialMealType').val(),
-                    menu_items: $('#editSpecialMenuItems').val(),
-                    fee: $('#editSpecialFee').val()
-                };
-
-                $.post('api.php', data, function(response) {
-                    if (response && response.success) {
-                        showMessage('success', response.message);
-                        $('#editSpecialTokenModal').modal('hide');
-                        loadSpecialTokens();
-                        loadStatistics();
-                    }
-                }, 'json');
-            }
-
-            function deleteSpecialToken(menuId) {
-                if (!confirm('Delete this special token?')) return;
-                $.post('api.php', {
-                    action: 'delete_special_token',
-                    menu_id: menuId
-                }, function(response) {
-                    if (response && response.success) {
-                        showMessage('success', 'Special token deleted');
-                        loadSpecialTokens();
-                        loadStatistics();
-                    }
-                }, 'json');
-            }
-
-            // ========== HISTORY FUNCTIONS ==========
-            function viewHistory(type) {
-                let action = '';
-                switch (type) {
-                    case 'menu':
-                        action = 'get_menu_history';
-                        break;
-                    case 'special':
-                        action = 'get_special_token_history';
-                        break;
-                    default:
-                        action = 'get_all_history';
-                }
-
-                $.post('api.php', {
-                    action: action
-                }, function(response) {
-                    if (response && response.success) {
-                        displayHistory(response.data);
-                    }
-                }, 'json');
-            }
-
-            function displayHistory(historyData) {
-                // Destroy existing DataTable if it exists
-                if (historyTable) {
-                    historyTable.destroy();
-                }
-
-                const tableBody = $('#historyTable tbody');
-                tableBody.empty();
-
-                if (!historyData || historyData.length === 0) {
-                    tableBody.html('<tr><td colspan="6" class="text-center">No history found</td></tr>');
-                    return;
-                }
-
-                historyData.forEach(function(item) {
-                    const type = item.type || 'Unknown';
-                    const date = item.date || 'N/A';
-                    const details = item.details || 'N/A';
-                    const description = item.description || 'No description';
-                    const amount = (item.amount !== null && item.amount !== undefined) ? parseFloat(item.amount).toFixed(2) : '0.00';
-
-                    let formattedTime = 'N/A';
-                    if (item.timestamp) {
-                        try {
-                            const dateObj = new Date(item.timestamp);
-                            if (!isNaN(dateObj.getTime())) {
-                                formattedTime = dateObj.toLocaleString('en-IN', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
-                            }
-                        } catch (e) {
-                            formattedTime = item.timestamp;
-                        }
-                    }
-
-                    const row = `
-                    <tr>
-                        <td><span class="badge bg-primary">${type}</span></td>
-                        <td>${date}</td>
-                        <td>${details}</td>
-                        <td>${description}</td>
-                        <td>₹${amount}</td>
-                        <td>${formattedTime}</td>
-                    </tr>
-                `;
-                    tableBody.append(row);
-                });
-
-                // Initialize DataTable for history
-                historyTable = $('#historyTable').DataTable({
-                    paging: true,
-                    searching: true,
-                    ordering: true,
-                    info: true,
-                    pageLength: 10,
-                    order: [
-                        [5, 'desc']
-                    ]
-                });
-            }
-
-            // ========== UTILITY FUNCTIONS ==========
-            function formatTime12Hour(time24) {
-                if (!time24) return 'N/A';
-                const [hours, minutes] = time24.split(':');
-                const hour = parseInt(hours);
-                const ampm = hour >= 12 ? 'PM' : 'AM';
-                const hour12 = hour % 12 || 12;
-                return `${hour12}:${minutes} ${ampm}`;
-            }
-
-            function getBadgeClass(mealType) {
-                switch (mealType) {
-                    case 'Breakfast':
-                        return 'bg-warning text-dark';
-                    case 'Lunch':
-                        return 'bg-success';
-                    case 'Snacks':
-                        return 'bg-info text-dark';
-                    case 'Dinner':
-                        return 'bg-danger';
-                    default:
-                        return 'bg-secondary';
-                }
-            }
-
-            function showMessage(type, message) {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: type,
-                        title: type.charAt(0).toUpperCase() + type.slice(1),
-                        text: message,
-                        timer: type === 'success' ? 1500 : 0,
-                        showConfirmButton: type !== 'success'
-                    });
+        function loadMenus() {
+            $.post('api.php', {
+                action: 'read_menus'
+            }, function(response) {
+                if (response && response.success && Array.isArray(response.data)) {
+                    allMenus = response.data;
                 } else {
-                    alert(`${type.toUpperCase()}: ${message}`);
+                    allMenus = [];
                 }
+                displayMenus();
+            }, 'json');
+        }
+
+        function displayMenus() {
+            if (menuTable) menuTable.destroy();
+            const tableBody = $('#messMenuTable tbody');
+            tableBody.empty();
+            if (allMenus.length === 0) {
+                tableBody.html('<tr><td colspan="7" class="text-center">No menu items found</td></tr>');
+                return;
             }
-        </script>
+            allMenus.forEach(function(menu, index) {
+                const row = `<tr><td>${index + 1}</td><td>${menu.date || 'N/A'}</td><td><span class="badge bg-primary">${menu.meal_type}</span></td><td>${menu.items}</td><td>${menu.category || 'N/A'}</td><td>₹${parseFloat(menu.fee || 0).toFixed(2)}</td><td><button class="btn btn-warning btn-sm" onclick="editMenu(${menu.menu_id})"><i class="fas fa-edit"></i></button> <button class="btn btn-danger btn-sm" onclick="deleteMenu(${menu.menu_id})"><i class="fas fa-trash"></i></button></td></tr>`;
+                tableBody.append(row);
+            });
+            menuTable = $('#messMenuTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                pageLength: 10,
+                order: [
+                    [1, 'desc']
+                ]
+            });
+        }
+
+        function saveMenuForm(mealType) {
+            const prefix = mealType.toLowerCase();
+            const data = {
+                action: 'create_menu',
+                date: $(`#${prefix}Date`).val(),
+                meal_type: mealType,
+                items: $(`#${prefix}Items`).val(),
+                category: $(`#${prefix}Category`).val(),
+                fee: $(`#${prefix}Fee`).val()
+            };
+            if (!data.date || !data.items || !data.fee) {
+                Swal.fire('Error', 'Please fill all required fields', 'error');
+                return;
+            }
+            $.post('api.php', data, function(response) {
+                if (response && response.success) {
+                    Swal.fire('Success', response.message, 'success');
+                    $(`#${prefix}Modal`).modal('hide');
+                    loadMenus();
+                    loadStatistics();
+                } else {
+                    Swal.fire('Error', response.message || 'Save failed', 'error');
+                }
+            }, 'json');
+        }
+
+        function editMenu(menuId) {
+            const menu = allMenus.find(m => m.menu_id == menuId);
+            if (!menu) {
+                Swal.fire('Error', 'Menu item not found', 'error');
+                return;
+            }
+            $('#editMenuId').val(menu.menu_id);
+            $('#editMenuDate').val(menu.date);
+            $('#editMenuMealType').val(menu.meal_type);
+            $('#editMenuItems').val(menu.items);
+            $('#editMenuCategory').val(menu.category || '');
+            $('#editMenuFee').val(menu.fee);
+            new bootstrap.Modal(document.getElementById('editMenuModal')).show();
+        }
+
+        function updateMenu() {
+            const data = {
+                action: 'update_menu',
+                menu_id: $('#editMenuId').val(),
+                date: $('#editMenuDate').val(),
+                meal_type: $('#editMenuMealType').val(),
+                items: $('#editMenuItems').val(),
+                category: $('#editMenuCategory').val(),
+                fee: $('#editMenuFee').val()
+            };
+            $.post('api.php', data, function(response) {
+                if (response && response.success) {
+                    Swal.fire('Success', 'Menu updated successfully', 'success');
+                    $('#editMenuModal').modal('hide');
+                    loadMenus();
+                    loadStatistics();
+                }
+            }, 'json');
+        }
+
+        function deleteMenu(menuId) {
+            Swal.fire({
+                title: 'Delete Menu?',
+                text: 'This action cannot be undone',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('api.php', {
+                        action: 'delete_menu',
+                        menu_id: menuId
+                    }, function(response) {
+                        if (response && response.success) {
+                            Swal.fire('Deleted!', 'Menu has been deleted.', 'success');
+                            loadMenus();
+                            loadStatistics();
+                        }
+                    }, 'json');
+                }
+            });
+        }
+
+        function loadTokens() {
+            $.ajax({
+                url: 'api.php',
+                type: 'POST',
+                data: {
+                    action: 'read_tokens'
+                },
+                dataType: 'json'
+            }).done(function(response) {
+                if (response && response.success && Array.isArray(response.data)) {
+                    allTokens = response.data;
+                } else {
+                    allTokens = [];
+                }
+                displayTokens();
+            }).fail(function() {
+                allTokens = [];
+                displayTokens();
+            });
+        }
+
+        function displayTokens() {
+            if (tokensTable) tokensTable.destroy();
+            const tableBody = $('#messTokensTable tbody');
+            tableBody.empty();
+            if (allTokens.length === 0) {
+                tableBody.html('<tr><td colspan="9" class="text-center">No tokens found</td></tr>');
+                return;
+            }
+            allTokens.forEach(function(token, index) {
+                const row = `<tr><td>${index + 1}</td>
+                <td>${token.student_name || 'N/A'}</td><td>${token.roll_number}</td>
+                <td>${token.meal_type || 'N/A'}</td>
+                <td>${token.menu_items || token.menu || 'N/A'}</td>
+                <td>${token.token_date || 'N/A'}</td><td><span class="badge bg-danger">${token.token_type || 'Regular'}</span></td><td>₹${parseFloat(token.special_fee || 0).toFixed(2)}</td>
+                </tr>`;
+                tableBody.append(row);
+            });
+            tokensTable = $('#messTokensTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                pageLength: 10,
+                order: [
+                    [5, 'desc']
+                ]
+            });
+        }
+
+        function deleteToken(tokenId) {
+            Swal.fire({
+                title: 'Delete Token?',
+                text: 'This action cannot be undone',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('api.php', {
+                        action: 'delete_token',
+                        token_id: tokenId
+                    }, function(response) {
+                        if (response && response.success) {
+                            Swal.fire('Deleted!', 'Token has been deleted.', 'success');
+                            loadTokens();
+                            loadStatistics();
+                        }
+                    }, 'json');
+                }
+            });
+        }
+
+        function loadSpecialTokens() {
+            $.post('api.php', {
+                action: 'read_special_tokens'
+            }, function(response) {
+                if (response && response.success && Array.isArray(response.data)) {
+                    allSpecialTokens = response.data;
+                } else {
+                    allSpecialTokens = [];
+                }
+                displaySpecialTokens();
+            }, 'json');
+        }
+
+        function displaySpecialTokens() {
+            if (specialTokenTable) specialTokenTable.destroy();
+            const tableBody = $('#specialtokenEnableTable tbody');
+            tableBody.empty();
+            if (allSpecialTokens.length === 0) {
+                tableBody.html('<tr><td colspan="10" class="text-center">No special tokens found</td></tr>');
+                return;
+            }
+            allSpecialTokens.forEach(function(token, index) {
+                const row = `<tr><td>${index + 1}</td><td>${token.from_date || 'N/A'}</td><td>${token.from_time ? token.from_time.substring(0, 5) : 'N/A'}</td><td>${token.to_date || 'N/A'}</td><td>${token.to_time ? token.to_time.substring(0, 5) : 'N/A'}</td><td>${token.token_date || 'N/A'}</td><td>${token.meal_type || 'N/A'}</td><td>${token.menu_items || 'N/A'}</td><td>₹${parseFloat(token.fee || 0).toFixed(2)}</td><td><button class="btn btn-warning btn-sm" onclick="editSpecialToken(${token.menu_id})"><i class="fas fa-edit"></i></button> <button class="btn btn-danger btn-sm" onclick="deleteSpecialToken(${token.menu_id})"><i class="fas fa-trash"></i></button></td></tr>`;
+                tableBody.append(row);
+            });
+            specialTokenTable = $('#specialtokenEnableTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                pageLength: 10,
+                order: [
+                    [5, 'desc']
+                ]
+            });
+        }
+
+        function saveSpecialToken() {
+            const data = {
+                action: 'create_special_token',
+                from_date: $('#tokenfromDate').val(),
+                from_time: $('#tokenfromTime').val(),
+                to_date: $('#tokentoDate').val(),
+                to_time: $('#tokentoTime').val(),
+                token_date: $('#tokenDate').val(),
+                meal_type: $('#specialMealType').val(),
+                menu_items: $('#specialMenuItems').val(),
+                fee: $('#specialtokenFee').val()
+            };
+            $.post('api.php', data, function(response) {
+                if (response && response.success) {
+                    Swal.fire('Success', response.message, 'success');
+                    $('#specialtokenModal').modal('hide');
+                    loadSpecialTokens();
+                    loadStatistics();
+                }
+            }, 'json');
+        }
+
+        function editSpecialToken(menuId) {
+            const token = allSpecialTokens.find(t => t.menu_id == menuId);
+            if (!token) {
+                Swal.fire('Error', 'Special Token not found', 'error');
+                return;
+            }
+            $('#editSpecialMenuId').val(token.menu_id);
+            $('#editSpecialFromDate').val(token.from_date);
+            $('#editSpecialFromTime').val(token.from_time);
+            $('#editSpecialToDate').val(token.to_date);
+            $('#editSpecialToTime').val(token.to_time);
+            $('#editSpecialTokenDate').val(token.token_date);
+            $('#editSpecialMealType').val(token.meal_type);
+            $('#editSpecialMenuItems').val(token.menu_items);
+            $('#editSpecialFee').val(token.fee);
+            new bootstrap.Modal(document.getElementById('editSpecialTokenModal')).show();
+        }
+
+        function updateSpecialToken() {
+            const data = {
+                action: 'update_special_token',
+                menu_id: $('#editSpecialMenuId').val(),
+                from_date: $('#editSpecialFromDate').val(),
+                from_time: $('#editSpecialFromTime').val(),
+                to_date: $('#editSpecialToDate').val(),
+                to_time: $('#editSpecialToTime').val(),
+                token_date: $('#editSpecialTokenDate').val(),
+                meal_type: $('#editSpecialMealType').val(),
+                menu_items: $('#editSpecialMenuItems').val(),
+                fee: $('#editSpecialFee').val()
+            };
+            $.post('api.php', data, function(response) {
+                if (response && response.success) {
+                    Swal.fire('Success', 'Special token updated successfully', 'success');
+                    $('#editSpecialTokenModal').modal('hide');
+                    loadSpecialTokens();
+                    loadInactiveSpecialTokens();
+                }
+            }, 'json');
+        }
+
+        function deleteSpecialToken(menuId) {
+            Swal.fire({
+                title: 'Delete Special Token?',
+                text: 'This action cannot be undone',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('api.php', {
+                        action: 'delete_special_token',
+                        menu_id: menuId
+                    }, function(response) {
+                        if (response && response.success) {
+                            Swal.fire('Deleted!', 'Special token has been deleted.', 'success');
+                            loadSpecialTokens();
+                            loadStatistics();
+                        }
+                    }, 'json');
+                }
+            });
+        }
+
+        function loadInactiveSpecialTokens() {
+            $.ajax({
+                url: 'api.php',
+                type: 'POST',
+                data: {
+                    action: 'read_inactive_special_tokens'
+                },
+                dataType: 'json'
+            }).done(function(response) {
+                if (response && response.success && Array.isArray(response.data)) {
+                    allInactiveSpecialTokens = response.data;
+                } else {
+                    allInactiveSpecialTokens = [];
+                }
+                displayInactiveSpecialTokens();
+            }).fail(function() {
+                allInactiveSpecialTokens = [];
+                displayInactiveSpecialTokens();
+            });
+        }
+
+        function displayInactiveSpecialTokens() {
+            if (inactiveTokenTable) inactiveTokenTable.destroy();
+            const tableBody = $('#inactiveTokensTable tbody');
+            tableBody.empty();
+            if (allInactiveSpecialTokens.length === 0) {
+                tableBody.html('<tr><td colspan="11" class="text-center">No inactive tokens found</td></tr>');
+                return;
+            }
+            allInactiveSpecialTokens.forEach(function(token, index) {
+                const row = `<tr><td>${index + 1}</td><td>${token.from_date}</td>
+                <td>${token.from_time ? token.from_time.substring(0, 5) : 'N/A'}</td>
+                <td>${token.to_date}</td><td>${token.to_time ? token.to_time.substring(0, 5) : 'N/A'}</td>
+                <td>${token.token_date}</td><td>${token.meal_type}</td><td>${token.menu_items}</td>
+                <td>₹${parseFloat(token.fee || 0).toFixed(2)}</td><td><span class="badge bg-danger">Inactive</span></td>
+                <td><button class="btn btn-success btn-sm" onclick="activateToken(${token.menu_id})"><i class="fas fa-play"></i></button> <button class="btn btn-danger btn-sm" onclick="endToken(${token.menu_id})"><i class="fas fa-stop"></i></button></td>
+                </tr>`;
+                tableBody.append(row);
+            });
+            inactiveTokenTable = $('#inactiveTokensTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                pageLength: 10,
+                order: [
+                    [5, 'desc']
+                ]
+            });
+        }
+
+        function activateToken(menuId) {
+            const token = allInactiveSpecialTokens.find(t => t.menu_id == menuId);
+            if (!token) return;
+            $('#activateMenuId').val(token.menu_id);
+            $('#activateToDate').val(token.to_date);
+            $('#activateToTime').val(token.to_time);
+            new bootstrap.Modal(document.getElementById('activateTokenModal')).show();
+        }
+
+        function saveActivateToken() {
+            const data = {
+                action: 'update_special_token',
+                menu_id: $('#activateMenuId').val(),
+                to_date: $('#activateToDate').val(),
+                to_time: $('#activateToTime').val()
+            };
+            $.post('api.php', data, function(response) {
+                if (response && response.success) {
+                    Swal.fire('Success', 'Token activated with new duration', 'success');
+                    $('#activateTokenModal').modal('hide');
+                    loadInactiveSpecialTokens();
+                    loadSpecialTokens();
+                }
+            }, 'json');
+        }
+
+        function endToken(menuId) {
+            Swal.fire({
+                title: 'End Token?',
+                text: 'This will move the token to history',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, end it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('api.php', {
+                        action: 'end_special_token',
+                        menu_id: menuId
+                    }, function(response) {
+                        if (response && response.success) {
+                            Swal.fire('Success', 'Token moved to history', 'success');
+                            loadInactiveSpecialTokens();
+                            loadSpecialTokens();
+                        }
+                    }, 'json');
+                }
+            });
+        }
+
+        function viewHistory(type) {
+            const action = type === 'menu' ? 'get_menu_history' : 'get_special_token_history';
+            $.post('api.php', {
+                action: action
+            }, function(response) {
+                if (response && response.success) {
+                    displayHistory(response.data);
+                }
+            }, 'json');
+        }
+
+        function displayHistory(historyData) {
+            if (historyTable) historyTable.destroy();
+            const tableBody = $('#historyTable tbody');
+            tableBody.empty();
+            if (!historyData || historyData.length === 0) {
+                tableBody.html('<tr><td colspan="6" class="text-center">No history found</td></tr>');
+                return;
+            }
+            historyData.forEach(function(item) {
+                const row = `<tr><td><span class="badge bg-primary">${item.type}</span></td><td>${item.date || 'N/A'}</td><td>${item.details || 'N/A'}</td><td>${item.description || 'No description'}</td><td>₹${parseFloat(item.amount || 0).toFixed(2)}</td><td>${item.timestamp || 'N/A'}</td></tr>`;
+                tableBody.append(row);
+            });
+            historyTable = $('#historyTable').DataTable({
+                paging: true,
+                searching: true,
+                ordering: true,
+                pageLength: 10,
+                order: [
+                    [5, 'desc']
+                ]
+            });
+        }
+    </script>
 </body>
 
 </html>
